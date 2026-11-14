@@ -4,11 +4,14 @@ $assetRoot = Join-Path $projectRoot 'dist/assets/tiles'
 New-Item -ItemType Directory -Path $assetRoot -Force | Out-Null
 $sources = @(
   @{ key='context'; product='Mars_Viking_MDIM21_ClrMosaic_global_232m'; level=7; label='Viking - Context'; resolution=232 },
-  @{ key='optical'; product='CTX_beta01_uncontrolled_5m_Caltech'; level=11; label='MRO - CTX'; resolution=5 },
   @{ key='topography'; product='Mars_MGS_MOLA_ClrShade_merge_global_463m'; level=7; label='MGS - MOLA'; resolution=463 },
   @{ key='thermal'; product='Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly'; level=8; label='Odyssey - THEMIS'; resolution=100 }
 )
 $manifest = @{ retrievedAt=[DateTime]::UtcNow.ToString('o'); layers=@{} }
+if(Test-Path -LiteralPath (Join-Path $projectRoot 'dist/assets/data-manifest.json')) {
+  $previous = Get-Content -LiteralPath (Join-Path $projectRoot 'dist/assets/data-manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+  foreach($property in $previous.layers.PSObject.Properties) { $manifest.layers[$property.Name] = $property.Value }
+}
 foreach ($source in $sources) {
   $capUrl = "https://trek.nasa.gov/tiles/Mars/EQ/$($source.product)/1.0.0/WMTSCapabilities.xml"
   try {
@@ -26,7 +29,7 @@ foreach ($source in $sources) {
     $style = $xml.SelectSingleNode("//*[local-name()='Style']/*[local-name()='Identifier']").InnerText
     $centerCol = [int][Math]::Floor((77.4298+180)/360*$width)
     $centerRow = [int][Math]::Floor((90-18.4663)/180*$height)
-    $radius = if ($source.key -eq 'optical') { 2 } else { 1 }
+    $radius = if ($source.key -eq 'context') { 1 } else { 2 }
     $layer = @{ product=$source.product; capabilities=$capUrl; label=$source.label; sourceResolutionMeters=$source.resolution; level=$source.level; matrixWidth=$width; matrixHeight=$height; tileSize=$tileSize; tiles=@() }
     for ($row=$centerRow-$radius; $row -le $centerRow+$radius; $row++) {
       for ($col=$centerCol-$radius; $col -le $centerCol+$radius; $col++) {
@@ -46,3 +49,4 @@ foreach ($source in $sources) {
     $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $projectRoot 'dist/assets/data-manifest.json') -Encoding UTF8
   } catch { Write-Output "Falha na camada $($source.key): $($_.Exception.Message)" }
 }
+& (Join-Path $projectRoot 'fetch-optical.ps1')

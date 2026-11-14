@@ -16,9 +16,10 @@ Também é possível dar dois cliques em `iniciar.cmd`. Mantenha o terminal aber
 
 ## O que funciona
 
-- Mapa com deslocamento, zoom, destinos selecionáveis e centralização da missão.
-- Três camadas reais do NASA/JPL Mars Trek: CTX óptico, MOLA relevo e THEMIS infravermelho diurno.
-- 52 tiles de Jezero armazenados localmente, incluindo contexto Viking sob as lacunas CTX, com URLs de origem e data de download em `dist/assets/data-manifest.json`.
+- Mapa com deslocamento limitado à cobertura disponível, zoom compatível com a resolução, destinos selecionáveis, tela cheia e controle para ocultar marcações.
+- Três camadas reais: CTX óptico do projeto NASA Mars 2020 / Caltech, MOLA relevo e THEMIS infravermelho diurno do NASA/JPL Mars Trek.
+- Mosaico óptico local com 49 tiles de Jezero, substituindo a cobertura incompleta do mosaico global beta. As camadas regionais têm 25 tiles cada, para permitir visualização em tela cheia. URLs de origem e datas de download em `dist/assets/data-manifest.json`.
+- Enquadramento regional para relevo e infravermelho, com retorno ao detalhe da missão na camada óptica; imagens sem filtros de cor ou escurecimento.
 - A* com desvio de zonas de exclusão de demonstração e comparação com linha direta.
 - Distância de ida e volta, pesquisa, velocidade ajustável, autonomia disponível e reserva.
 - Avisos de reserva insuficiente e de passagem por zona simulada.
@@ -32,19 +33,19 @@ Os dados do mapa funcionam sem internet depois de baixar/copiar o projeto. As fo
 Desafio informado pela equipe:
 https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources
 
-A aba oficial foi acessada no navegador em 14/11/2026. O **NASA/JPL Mars Trek está explicitamente listado em NASA DATA & RESOURCES** e é a origem das camadas integradas. O registro das referências está em `dist/assets/challenge-resources.json`.
+A aba oficial foi acessada no navegador em 14/11/2026. O **NASA/JPL Mars Trek está explicitamente listado em NASA DATA & RESOURCES** e é a origem das camadas de relevo e infravermelho. O mosaico óptico local foi preparado pelo Murray Lab / Caltech com financiamento do projeto NASA Mars 2020. O registro das referências está em `dist/assets/challenge-resources.json`.
 
 Os outros recursos oficiais são os mapas geológicos USGS–NASA, a visualização de uma rota proposta do Curiosity, o NASA Worldview (dados da Terra, inspiração de interface) e a galeria de imagens brutas do Perseverance. São links complementares no diálogo de fontes, não fontes de camadas desta versão. Não foram usados projetos de outras equipes como código ou dados.
 
 Produtos oficiais:
 
-- `CTX_beta01_uncontrolled_5m_Caltech`: https://trek.nasa.gov/tiles/Mars/EQ/CTX_beta01_uncontrolled_5m_Caltech/1.0.0/WMTSCapabilities.xml
+- `Mars2020CTX_E76_N16`: https://murray-lab.caltech.edu/Mars2020/index.html (mosaico CTX local; georreferência em KML preservada no manifesto)
 - `Mars_MGS_MOLA_ClrShade_merge_global_463m`: https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/WMTSCapabilities.xml
 - `Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly`: https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0/WMTSCapabilities.xml
 
-Os níveis de visualização estão nos metadados; o tamanho nominal do produto não é a resolução final de cada tile. As camadas usam suas matrizes WMTS nativas. O mapa projeta as coordenadas em um plano equiretangular local, usando o raio equatorial de Marte (3.396.190 m).
+Os níveis de visualização estão nos metadados; o tamanho nominal do produto não é a resolução final de cada tile. MOLA e THEMIS usam suas matrizes WMTS nativas; CTX usa os limites geográficos fornecidos no KML. O mapa projeta as coordenadas em um plano equiretangular local, usando o raio equatorial de Marte (3.396.190 m).
 
-Para repetir o download em PowerShell, leia e execute `fetch-data.ps1`. As políticas de execução do Windows podem exigir autorização. O script não pede chaves de API.
+Para repetir o download em PowerShell, leia e execute `fetch-data.ps1`, que também chama `fetch-optical.ps1` para baixar o mosaico local. As políticas de execução do Windows podem exigir autorização. Os scripts não pedem chaves de API.
 
 ## Limites científicos do protótipo
 
@@ -54,12 +55,12 @@ Para repetir o download em PowerShell, leia e execute `fetch-data.ps1`. As polí
 - THEMIS é um mosaico infravermelho histórico; o brilho não é convertido em temperatura ou previsão meteorológica.
 - A velocidade é constante. Não há modelo de gasto de oxigênio, esforço fisiológico, fadiga, radiação, comunicação ou duração real de traje.
 - “Dentro da autonomia” significa apenas que a soma do tempo estimado e da reserva cabe no orçamento definido.
-- Sem cobertura do recorte local, o mapa mostra o esquema de coordenadas e avisa que a cartografia está indisponível.
+- O zoom e o deslocamento são limitados para manter a área visível dentro do recorte local. Se as imagens falharem ao carregar, o mapa informa indisponibilidade.
 
 ## Validação
 
 ```powershell
-.\node.exe --test tests/planner.test.mjs
+.\node.exe --test tests/planner.test.mjs tests/map-view.test.mjs
 .\node.exe --check dist/app.js
 ```
 

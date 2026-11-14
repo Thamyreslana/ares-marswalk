@@ -1,6 +1,193 @@
-﻿{
-    "retrievedAt":  "2026-11-14T17:29:45.9584247Z",
+{
+    "retrievedAt":  "2026-11-14T17:51:51.6446954Z",
     "layers":  {
+                   "topography":  {
+                                      "matrixHeight":  128,
+                                      "tileSize":  256,
+                                      "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/WMTSCapabilities.xml",
+                                      "tiles":  [
+                                                    {
+                                                        "row":  48,
+                                                        "path":  "assets/tiles/topography-7-48-181.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/48/181.jpg",
+                                                        "col":  181,
+                                                        "bytes":  52040
+                                                    },
+                                                    {
+                                                        "row":  48,
+                                                        "path":  "assets/tiles/topography-7-48-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/48/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  60996
+                                                    },
+                                                    {
+                                                        "row":  48,
+                                                        "path":  "assets/tiles/topography-7-48-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/48/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  65523
+                                                    },
+                                                    {
+                                                        "row":  48,
+                                                        "path":  "assets/tiles/topography-7-48-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/48/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  62035
+                                                    },
+                                                    {
+                                                        "row":  48,
+                                                        "path":  "assets/tiles/topography-7-48-185.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/48/185.jpg",
+                                                        "col":  185,
+                                                        "bytes":  63266
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-181.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/181.jpg",
+                                                        "col":  181,
+                                                        "bytes":  60661
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  60338
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  62140
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  60317
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-185.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/185.jpg",
+                                                        "col":  185,
+                                                        "bytes":  54060
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-181.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/181.jpg",
+                                                        "col":  181,
+                                                        "bytes":  56385
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  62775
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  63039
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  62804
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-185.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/185.jpg",
+                                                        "col":  185,
+                                                        "bytes":  57623
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-181.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/181.jpg",
+                                                        "col":  181,
+                                                        "bytes":  54721
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  64961
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  65120
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  54334
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-185.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/185.jpg",
+                                                        "col":  185,
+                                                        "bytes":  51813
+                                                    },
+                                                    {
+                                                        "row":  52,
+                                                        "path":  "assets/tiles/topography-7-52-181.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/52/181.jpg",
+                                                        "col":  181,
+                                                        "bytes":  50313
+                                                    },
+                                                    {
+                                                        "row":  52,
+                                                        "path":  "assets/tiles/topography-7-52-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/52/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  56917
+                                                    },
+                                                    {
+                                                        "row":  52,
+                                                        "path":  "assets/tiles/topography-7-52-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/52/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  54824
+                                                    },
+                                                    {
+                                                        "row":  52,
+                                                        "path":  "assets/tiles/topography-7-52-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/52/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  57439
+                                                    },
+                                                    {
+                                                        "row":  52,
+                                                        "path":  "assets/tiles/topography-7-52-185.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/52/185.jpg",
+                                                        "col":  185,
+                                                        "bytes":  47570
+                                                    }
+                                                ],
+                                      "label":  "MGS - MOLA",
+                                      "matrixWidth":  256,
+                                      "level":  7,
+                                      "sourceResolutionMeters":  463,
+                                      "product":  "Mars_MGS_MOLA_ClrShade_merge_global_463m"
+                                  },
                    "context":  {
                                    "matrixHeight":  128,
                                    "tileSize":  256,
@@ -82,6 +269,48 @@
                                    "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0/WMTSCapabilities.xml",
                                    "tiles":  [
                                                  {
+                                                     "row":  99,
+                                                     "path":  "assets/tiles/thermal-8-99-364.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/99/364.png",
+                                                     "col":  364,
+                                                     "bytes":  52336
+                                                 },
+                                                 {
+                                                     "row":  99,
+                                                     "path":  "assets/tiles/thermal-8-99-365.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/99/365.png",
+                                                     "col":  365,
+                                                     "bytes":  59170
+                                                 },
+                                                 {
+                                                     "row":  99,
+                                                     "path":  "assets/tiles/thermal-8-99-366.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/99/366.png",
+                                                     "col":  366,
+                                                     "bytes":  54594
+                                                 },
+                                                 {
+                                                     "row":  99,
+                                                     "path":  "assets/tiles/thermal-8-99-367.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/99/367.png",
+                                                     "col":  367,
+                                                     "bytes":  56423
+                                                 },
+                                                 {
+                                                     "row":  99,
+                                                     "path":  "assets/tiles/thermal-8-99-368.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/99/368.png",
+                                                     "col":  368,
+                                                     "bytes":  51911
+                                                 },
+                                                 {
+                                                     "row":  100,
+                                                     "path":  "assets/tiles/thermal-8-100-364.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/364.png",
+                                                     "col":  364,
+                                                     "bytes":  51179
+                                                 },
+                                                 {
                                                      "row":  100,
                                                      "path":  "assets/tiles/thermal-8-100-365.png",
                                                      "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/365.png",
@@ -101,6 +330,20 @@
                                                      "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/367.png",
                                                      "col":  367,
                                                      "bytes":  57417
+                                                 },
+                                                 {
+                                                     "row":  100,
+                                                     "path":  "assets/tiles/thermal-8-100-368.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/368.png",
+                                                     "col":  368,
+                                                     "bytes":  51105
+                                                 },
+                                                 {
+                                                     "row":  101,
+                                                     "path":  "assets/tiles/thermal-8-101-364.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/101/364.png",
+                                                     "col":  364,
+                                                     "bytes":  54353
                                                  },
                                                  {
                                                      "row":  101,
@@ -124,6 +367,20 @@
                                                      "bytes":  54934
                                                  },
                                                  {
+                                                     "row":  101,
+                                                     "path":  "assets/tiles/thermal-8-101-368.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/101/368.png",
+                                                     "col":  368,
+                                                     "bytes":  52138
+                                                 },
+                                                 {
+                                                     "row":  102,
+                                                     "path":  "assets/tiles/thermal-8-102-364.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/364.png",
+                                                     "col":  364,
+                                                     "bytes":  53290
+                                                 },
+                                                 {
                                                      "row":  102,
                                                      "path":  "assets/tiles/thermal-8-102-365.png",
                                                      "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/365.png",
@@ -143,6 +400,48 @@
                                                      "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/367.png",
                                                      "col":  367,
                                                      "bytes":  55515
+                                                 },
+                                                 {
+                                                     "row":  102,
+                                                     "path":  "assets/tiles/thermal-8-102-368.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/368.png",
+                                                     "col":  368,
+                                                     "bytes":  53051
+                                                 },
+                                                 {
+                                                     "row":  103,
+                                                     "path":  "assets/tiles/thermal-8-103-364.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/103/364.png",
+                                                     "col":  364,
+                                                     "bytes":  52889
+                                                 },
+                                                 {
+                                                     "row":  103,
+                                                     "path":  "assets/tiles/thermal-8-103-365.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/103/365.png",
+                                                     "col":  365,
+                                                     "bytes":  54697
+                                                 },
+                                                 {
+                                                     "row":  103,
+                                                     "path":  "assets/tiles/thermal-8-103-366.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/103/366.png",
+                                                     "col":  366,
+                                                     "bytes":  55609
+                                                 },
+                                                 {
+                                                     "row":  103,
+                                                     "path":  "assets/tiles/thermal-8-103-367.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/103/367.png",
+                                                     "col":  367,
+                                                     "bytes":  54479
+                                                 },
+                                                 {
+                                                     "row":  103,
+                                                     "path":  "assets/tiles/thermal-8-103-368.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/103/368.png",
+                                                     "col":  368,
+                                                     "bytes":  51891
                                                  }
                                              ],
                                    "label":  "Odyssey - THEMIS",
@@ -152,266 +451,656 @@
                                    "product":  "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly"
                                },
                    "optical":  {
-                                   "matrixHeight":  2048,
-                                   "tileSize":  512,
-                                   "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/CTX_beta01_uncontrolled_5m_Caltech/1.0.0/WMTSCapabilities.xml",
+                                   "matrixHeight":  4096,
+                                   "tileSize":  256,
+                                   "retrievedAt":  "2026-11-14T17:52:02.5443133Z",
+                                   "capabilities":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/Mars2020CTX_E76_N16.kml",
+                                   "sourcePage":  "https://murray-lab.caltech.edu/Mars2020/index.html",
+                                   "label":  "MRO - CTX / NASA Mars 2020 - Caltech",
+                                   "matrixWidth":  8192,
+                                   "level":  12,
+                                   "coverageVerified":  true,
+                                   "sourceResolutionMeters":  5,
                                    "tiles":  [
                                                  {
-                                                     "row":  811,
-                                                     "path":  "assets/tiles/optical-11-811-2926.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2926",
-                                                     "col":  2926,
-                                                     "bytes":  110282
+                                                     "bytes":  46558,
+                                                     "col":  5854,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2465.png"
                                                  },
                                                  {
-                                                     "row":  811,
-                                                     "path":  "assets/tiles/optical-11-811-2927.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2927",
-                                                     "col":  2927,
-                                                     "bytes":  112907
+                                                     "bytes":  48005,
+                                                     "col":  5855,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2465.png"
                                                  },
                                                  {
-                                                     "row":  811,
-                                                     "path":  "assets/tiles/optical-11-811-2928.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2928",
-                                                     "col":  2928,
-                                                     "bytes":  113305
+                                                     "bytes":  50974,
+                                                     "col":  5856,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2465.png"
                                                  },
                                                  {
-                                                     "row":  811,
-                                                     "path":  "assets/tiles/optical-11-811-2929.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2929",
-                                                     "col":  2929,
-                                                     "bytes":  114557
+                                                     "bytes":  51041,
+                                                     "col":  5857,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2465.png"
                                                  },
                                                  {
-                                                     "row":  811,
-                                                     "path":  "assets/tiles/optical-11-811-2930.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2930",
-                                                     "col":  2930,
-                                                     "bytes":  110273
+                                                     "bytes":  46903,
+                                                     "col":  5858,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2465.png"
                                                  },
                                                  {
-                                                     "row":  812,
-                                                     "path":  "assets/tiles/optical-11-812-2926.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2926",
-                                                     "col":  2926,
-                                                     "bytes":  110738
+                                                     "bytes":  46216,
+                                                     "col":  5859,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2465.png"
                                                  },
                                                  {
-                                                     "row":  812,
-                                                     "path":  "assets/tiles/optical-11-812-2927.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2927",
-                                                     "col":  2927,
-                                                     "bytes":  109640
+                                                     "bytes":  46092,
+                                                     "col":  5860,
+                                                     "row":  1630,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2465.png",
+                                                     "bounds":  {
+                                                                    "north":  18.369140625,
+                                                                    "south":  18.3251953125,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2465.png"
                                                  },
                                                  {
-                                                     "row":  812,
-                                                     "path":  "assets/tiles/optical-11-812-2928.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2928",
-                                                     "col":  2928,
-                                                     "bytes":  109315
+                                                     "bytes":  47180,
+                                                     "col":  5854,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2466.png"
                                                  },
                                                  {
-                                                     "row":  812,
-                                                     "path":  "assets/tiles/optical-11-812-2929.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2929",
-                                                     "col":  2929,
-                                                     "bytes":  103022
+                                                     "bytes":  49327,
+                                                     "col":  5855,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2466.png"
                                                  },
                                                  {
-                                                     "row":  812,
-                                                     "path":  "assets/tiles/optical-11-812-2930.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2930",
-                                                     "col":  2930,
-                                                     "bytes":  102370
+                                                     "bytes":  51992,
+                                                     "col":  5856,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2466.png"
                                                  },
                                                  {
-                                                     "row":  813,
-                                                     "path":  "assets/tiles/optical-11-813-2926.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2926",
-                                                     "col":  2926,
-                                                     "bytes":  115571
+                                                     "bytes":  47178,
+                                                     "col":  5857,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2466.png"
                                                  },
                                                  {
-                                                     "row":  813,
-                                                     "path":  "assets/tiles/optical-11-813-2927.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2927",
-                                                     "col":  2927,
-                                                     "bytes":  101621
+                                                     "bytes":  44676,
+                                                     "col":  5858,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2466.png"
                                                  },
                                                  {
-                                                     "row":  813,
-                                                     "path":  "assets/tiles/optical-11-813-2928.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2928",
-                                                     "col":  2928,
-                                                     "bytes":  100208
+                                                     "bytes":  44803,
+                                                     "col":  5859,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2466.png"
                                                  },
                                                  {
-                                                     "row":  813,
-                                                     "path":  "assets/tiles/optical-11-813-2929.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2929",
-                                                     "col":  2929,
-                                                     "bytes":  80620
+                                                     "bytes":  47102,
+                                                     "col":  5860,
+                                                     "row":  1629,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2466.png",
+                                                     "bounds":  {
+                                                                    "north":  18.4130859375,
+                                                                    "south":  18.369140625,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2466.png"
                                                  },
                                                  {
-                                                     "row":  813,
-                                                     "path":  "assets/tiles/optical-11-813-2930.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2930",
-                                                     "col":  2930,
-                                                     "bytes":  90282
+                                                     "bytes":  47034,
+                                                     "col":  5854,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2467.png"
                                                  },
                                                  {
-                                                     "row":  814,
-                                                     "path":  "assets/tiles/optical-11-814-2926.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2926",
-                                                     "col":  2926,
-                                                     "bytes":  106733
+                                                     "bytes":  48859,
+                                                     "col":  5855,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2467.png"
                                                  },
                                                  {
-                                                     "row":  814,
-                                                     "path":  "assets/tiles/optical-11-814-2927.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2927",
-                                                     "col":  2927,
-                                                     "bytes":  98104
+                                                     "bytes":  49790,
+                                                     "col":  5856,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2467.png"
                                                  },
                                                  {
-                                                     "row":  814,
-                                                     "path":  "assets/tiles/optical-11-814-2928.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2928",
-                                                     "col":  2928,
-                                                     "bytes":  94549
+                                                     "bytes":  46569,
+                                                     "col":  5857,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2467.png"
                                                  },
                                                  {
-                                                     "row":  814,
-                                                     "path":  "assets/tiles/optical-11-814-2929.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2929",
-                                                     "col":  2929,
-                                                     "bytes":  83944
+                                                     "bytes":  46223,
+                                                     "col":  5858,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2467.png"
                                                  },
                                                  {
-                                                     "row":  814,
-                                                     "path":  "assets/tiles/optical-11-814-2930.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2930",
-                                                     "col":  2930,
-                                                     "bytes":  89634
+                                                     "bytes":  44752,
+                                                     "col":  5859,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2467.png"
                                                  },
                                                  {
-                                                     "row":  815,
-                                                     "path":  "assets/tiles/optical-11-815-2926.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2926",
-                                                     "col":  2926,
-                                                     "bytes":  97075
+                                                     "bytes":  44721,
+                                                     "col":  5860,
+                                                     "row":  1628,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2467.png",
+                                                     "bounds":  {
+                                                                    "north":  18.45703125,
+                                                                    "south":  18.4130859375,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2467.png"
                                                  },
                                                  {
-                                                     "row":  815,
-                                                     "path":  "assets/tiles/optical-11-815-2927.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2927",
-                                                     "col":  2927,
-                                                     "bytes":  94006
+                                                     "bytes":  46746,
+                                                     "col":  5854,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2468.png"
                                                  },
                                                  {
-                                                     "row":  815,
-                                                     "path":  "assets/tiles/optical-11-815-2928.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2928",
-                                                     "col":  2928,
-                                                     "bytes":  102664
+                                                     "bytes":  52353,
+                                                     "col":  5855,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2468.png"
                                                  },
                                                  {
-                                                     "row":  815,
-                                                     "path":  "assets/tiles/optical-11-815-2929.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2929",
-                                                     "col":  2929,
-                                                     "bytes":  89247
+                                                     "bytes":  49587,
+                                                     "col":  5856,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2468.png"
                                                  },
                                                  {
-                                                     "row":  815,
-                                                     "path":  "assets/tiles/optical-11-815-2930.png",
-                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2930",
-                                                     "col":  2930,
-                                                     "bytes":  93137
+                                                     "bytes":  48043,
+                                                     "col":  5857,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2468.png"
+                                                 },
+                                                 {
+                                                     "bytes":  43266,
+                                                     "col":  5858,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2468.png"
+                                                 },
+                                                 {
+                                                     "bytes":  44018,
+                                                     "col":  5859,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2468.png"
+                                                 },
+                                                 {
+                                                     "bytes":  44646,
+                                                     "col":  5860,
+                                                     "row":  1627,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2468.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5009765625,
+                                                                    "south":  18.45703125,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2468.png"
+                                                 },
+                                                 {
+                                                     "bytes":  52481,
+                                                     "col":  5854,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  48506,
+                                                     "col":  5855,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  49519,
+                                                     "col":  5856,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  47953,
+                                                     "col":  5857,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  46350,
+                                                     "col":  5858,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  46655,
+                                                     "col":  5859,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  47310,
+                                                     "col":  5860,
+                                                     "row":  1626,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2469.png",
+                                                     "bounds":  {
+                                                                    "north":  18.544921875,
+                                                                    "south":  18.5009765625,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2469.png"
+                                                 },
+                                                 {
+                                                     "bytes":  53856,
+                                                     "col":  5854,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  49752,
+                                                     "col":  5855,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  49418,
+                                                     "col":  5856,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  51362,
+                                                     "col":  5857,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  48466,
+                                                     "col":  5858,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  46171,
+                                                     "col":  5859,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  45470,
+                                                     "col":  5860,
+                                                     "row":  1625,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2470.png",
+                                                     "bounds":  {
+                                                                    "north":  18.5888671875,
+                                                                    "south":  18.544921875,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2470.png"
+                                                 },
+                                                 {
+                                                     "bytes":  56831,
+                                                     "col":  5854,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5854-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.255859375,
+                                                                    "east":  77.2998046875
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5854/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  57497,
+                                                     "col":  5855,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5855-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.2998046875,
+                                                                    "east":  77.34375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5855/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  57112,
+                                                     "col":  5856,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5856-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.34375,
+                                                                    "east":  77.3876953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5856/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  53273,
+                                                     "col":  5857,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5857-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.3876953125,
+                                                                    "east":  77.431640625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5857/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  49341,
+                                                     "col":  5858,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5858-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.431640625,
+                                                                    "east":  77.4755859375
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5858/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  48810,
+                                                     "col":  5859,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5859-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.4755859375,
+                                                                    "east":  77.51953125
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5859/2471.png"
+                                                 },
+                                                 {
+                                                     "bytes":  49548,
+                                                     "col":  5860,
+                                                     "row":  1624,
+                                                     "path":  "assets/tiles/jezero-ctx-12-5860-2471.png",
+                                                     "bounds":  {
+                                                                    "north":  18.6328125,
+                                                                    "south":  18.5888671875,
+                                                                    "west":  77.51953125,
+                                                                    "east":  77.5634765625
+                                                                },
+                                                     "url":  "https://murray-lab.caltech.edu/Mars2020/kml/CTX/Mars2020CTX_E76_N16/12/5860/2471.png"
                                                  }
                                              ],
-                                   "label":  "MRO - CTX",
-                                   "matrixWidth":  4096,
-                                   "level":  11,
-                                   "sourceResolutionMeters":  5,
-                                   "product":  "CTX_beta01_uncontrolled_5m_Caltech"
-                               },
-                   "topography":  {
-                                      "matrixHeight":  128,
-                                      "tileSize":  256,
-                                      "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/WMTSCapabilities.xml",
-                                      "tiles":  [
-                                                    {
-                                                        "row":  49,
-                                                        "path":  "assets/tiles/topography-7-49-182.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/182.jpg",
-                                                        "col":  182,
-                                                        "bytes":  60338
-                                                    },
-                                                    {
-                                                        "row":  49,
-                                                        "path":  "assets/tiles/topography-7-49-183.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/183.jpg",
-                                                        "col":  183,
-                                                        "bytes":  62140
-                                                    },
-                                                    {
-                                                        "row":  49,
-                                                        "path":  "assets/tiles/topography-7-49-184.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/184.jpg",
-                                                        "col":  184,
-                                                        "bytes":  60317
-                                                    },
-                                                    {
-                                                        "row":  50,
-                                                        "path":  "assets/tiles/topography-7-50-182.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/182.jpg",
-                                                        "col":  182,
-                                                        "bytes":  62775
-                                                    },
-                                                    {
-                                                        "row":  50,
-                                                        "path":  "assets/tiles/topography-7-50-183.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/183.jpg",
-                                                        "col":  183,
-                                                        "bytes":  63039
-                                                    },
-                                                    {
-                                                        "row":  50,
-                                                        "path":  "assets/tiles/topography-7-50-184.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/184.jpg",
-                                                        "col":  184,
-                                                        "bytes":  62804
-                                                    },
-                                                    {
-                                                        "row":  51,
-                                                        "path":  "assets/tiles/topography-7-51-182.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/182.jpg",
-                                                        "col":  182,
-                                                        "bytes":  64961
-                                                    },
-                                                    {
-                                                        "row":  51,
-                                                        "path":  "assets/tiles/topography-7-51-183.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/183.jpg",
-                                                        "col":  183,
-                                                        "bytes":  65120
-                                                    },
-                                                    {
-                                                        "row":  51,
-                                                        "path":  "assets/tiles/topography-7-51-184.png",
-                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/184.jpg",
-                                                        "col":  184,
-                                                        "bytes":  54334
-                                                    }
-                                                ],
-                                      "label":  "MGS - MOLA",
-                                      "matrixWidth":  256,
-                                      "level":  7,
-                                      "sourceResolutionMeters":  463,
-                                      "product":  "Mars_MGS_MOLA_ClrShade_merge_global_463m"
-                                  }
+                                   "product":  "Mars2020CTX_E76_N16"
+                               }
                }
 }
