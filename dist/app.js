@@ -1,4 +1,4 @@
-import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong} from './planner.js';
+import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,createNightIr,analyzeSurface,nightClass,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong,evaTimeline,evaStateAt,gcrDose} from './planner.js';
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
@@ -9,14 +9,14 @@ const MIDPOINT=Object.freeze({x:(HABITAT.x+TARGET.x)/2,y:(HABITAT.y+TARGET.y)/2}
 const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:HABITAT.x,y:HABITAT.y},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
 let toastTimer;
 let demo=null;
-const localLayer=()=>state.layer==='optical'||state.layer==='slope';
-const imageLayer=()=>state.manifest?.layers?.[state.layer==='slope'?'optical':state.layer];
+const localLayer=()=>state.layer==='optical'||state.layer==='slope'||state.layer==='night';
+const imageLayer=()=>state.manifest?.layers?.[localLayer()?'optical':state.layer];
 function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,3200);}
 function readNumber(id,min,max){const el=$(id),n=Number(el.value);if(el.value.trim()===''||!Number.isFinite(n)||n<min||n>max){el.value=Math.max(min,Math.min(max,Number.isFinite(n)&&el.value.trim()!==''?n:min));toast(t('adjusted'));}return Number(el.value);}
 function params(){return {autonomy:readNumber('autonomy',60,480),work:readNumber('work',0,120),speed:readNumber('speed',.5,6),reserve:readNumber('reserve',0,180),maxSlope:readNumber('slope-limit',3,25)};}
 function policy(){return {...DEFAULT_POLICY,maxSlope:Number($('slope-limit').value)};}
 function setStatus(key,kind=''){const el=$('result-chip');el.textContent=t(key);el.className='result-chip'+(kind?' '+kind:'');}
-function clearResults(key){for(const id of ['distance-metric','time-metric','leave-metric'])$(id).textContent='—';$('leave-caption').textContent=t('leaveByCaptionEmpty');$('leave-card').dataset.status='';for(const id of ['walking-bar','work-bar','reserve-bar'])$(id).style.width='0';$('insight').textContent=t(key);$('scenario-body').replaceChildren();$('elevation-profile').replaceChildren();$('ascent-metric').textContent='';state.scenarios=null;}
+function clearResults(key){for(const id of ['distance-metric','time-metric','leave-metric'])$(id).textContent='—';$('leave-caption').textContent=t('leaveByCaptionEmpty');$('leave-card').dataset.status='';$('rad-dose').textContent='—';$('rad-shelter').textContent='—';for(const id of ['walking-bar','work-bar','reserve-bar'])$(id).style.width='0';$('insight').textContent=t(key);$('scenario-body').replaceChildren();$('elevation-profile').replaceChildren();$('ascent-metric').textContent='';state.scenarios=null;}
 
 function calculate(){
   const p=params();$('autonomy-value').textContent=p.autonomy+' min';$('work-value').textContent=p.work+' min';$('slope-value').textContent=p.maxSlope+'°';$('reserve-caption').textContent=t('reserveConfigured')+': '+p.reserve+' min';
@@ -25,12 +25,13 @@ function calculate(){
   state.terrainRoute=state.routeCache.get(p.maxSlope);
   state.route=state.strategy==='terrain'?state.terrainRoute:state.directRoute;
   state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy())};
+  state.surface={terrain:analyzeSurface(state.terrainRoute,state.terrain,state.night),direct:analyzeSurface(state.directRoute,state.terrain,state.night)};
   state.comparisons=compareRoutes(state.analyses,p);
   renderDecision();
   const current=state.analyses[state.strategy];
   $('plan').disabled=false;$('export').disabled=!state.route;$('demo-start').disabled=!!demo;
   renderComparison(p);
-  if(!state.route||!current){clearResults('noRouteText');setStatus('noRoute','danger');draw();return;}
+  if(!state.route||!current){clearResults('noRouteText');setStatus('noRoute','danger');updateSim();draw();return;}
   const scenarios=state.comparisons[state.strategy].scenarios,base=scenarios[1],conservative=scenarios[2],walk=state.comparisons[state.strategy].walkback;state.scenarios=scenarios;
   $('distance-metric').textContent=fmt(current.roundTripMeters/1000,2)+' km';$('time-metric').textContent=fmt(base.total)+' min';
   const leaveStatus=current.passable?walk.status:'blocked';
@@ -42,8 +43,57 @@ function calculate(){
   const note=base.feasible?(conservative.feasible?t('robustText',{margin:fmt(conservative.remaining-p.reserve)}):t('conditionalText',{short:fmt(conservative.excess)})):t('insufficientText',{short:fmt(base.excess)});
   let terrainNote='';if(current.unknownSamples)terrainNote=t('unknownText');else if(current.blockedCells)terrainNote=t('baselineWarn',{count:current.blockedCells,limit:p.maxSlope});
   const walkNote=leaveStatus==='blocked'?'':t('walkback_'+walk.status,{leave:fmt(Math.floor(walk.leaveBy)),max:fmt(Math.floor(walk.maxWork)),planned:fmt(p.work),km:fmt(walk.limitMeters/1000,2)});
-  $('insight').textContent=[terrainNote,note,walkNote].filter(Boolean).join(' ');
-  renderScenarios();renderProfile(current);draw();
+  const surface=state.surface?.[state.strategy],surfaceNote=surface?t('surfaceInsight',{pct:fmt(surface.share.cool*100)}):'';
+  $('insight').textContent=[terrainNote,note,walkNote,surfaceNote].filter(Boolean).join(' ');
+  state.params=p;renderRadiation(base,walk,current.passable);renderScenarios();renderProfile(current);updateSim();draw();
+}
+
+function renderRadiation(base,walk,passable){
+  $('rad-dose').textContent=passable?'≈ '+fmt(gcrDose(base.total),2)+' mSv':'—';
+  $('rad-dose-caption').textContent=t('radDoseCaptionN',{min:fmt(base.total)});
+  $('rad-shelter').textContent=passable?fmt(Math.round(walk.slowReturn))+' min':'—';
+}
+
+// EVA playback: a pure timeline (planner) drawn on the map and read out minute by minute.
+const sim={t:0,playing:false,raf:0,last:0,timeline:null};
+const PLAYBACK_MS=15000;
+function updateSim(){
+  const c=state.comparisons?.[state.strategy],ok=!!(c?.analysis?.passable&&state.params);
+  sim.timeline=ok?evaTimeline(c.analysis.outboundMeters,state.params,{slowReturn:$('sim-slow').checked}):null;
+  for(const id of ['sim-play','sim-time','sim-slow'])$(id).disabled=!ok;
+  if(!ok){stopSim();sim.t=0;$('sim-status').textContent=t('simBlocked');$('sim-status').dataset.level='danger';$('sim-alert').textContent=t('simBlockedText');for(const id of ['sim-phase','sim-distance','sim-shelter','sim-leave'])$(id).textContent='—';$('sim-clock').textContent='—';return;}
+  $('sim-time').max=String(Math.ceil(sim.timeline.total));sim.t=Math.min(sim.t,sim.timeline.total);renderSim();
+}
+function renderSim(){
+  const tl=sim.timeline;if(!tl)return;const s=evaStateAt(tl,sim.t);
+  $('sim-time').value=String(Math.round(sim.t));$('sim-clock').textContent='T+'+fmt(Math.floor(s.t))+' min';
+  $('sim-phase').textContent=t('simPhase_'+s.phase);$('sim-distance').textContent=fmt(s.distance/1000,2)+' km';$('sim-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';
+  $('sim-leave').textContent='T+'+fmt(Math.floor(tl.leaveBy))+' min';
+  let key,level;
+  if(s.phase==='home'){key=tl.reserveAtArrival>=tl.reserve?'simHomeOk':'simHomeLow';level=tl.reserveAtArrival>=tl.reserve?'ok':'danger';}
+  else if(s.pastLeaveBy){key='simTurnBack';level='danger';}
+  else if(s.margin<0){key='simAtRisk';level='danger';}
+  else if(s.phase==='work'&&tl.leaveBy-s.t<=15){key='simLeaveSoon';level='warning';}
+  else{key=s.phase==='outbound'?'simOutbound':s.phase==='work'?'simWorking':'simReturning';level='ok';}
+  $('sim-status').textContent=t((s.phase==='home'||level!=='ok'?key:'simOk')+'Chip');$('sim-status').dataset.level=level;
+  $('sim-alert').textContent=t(key,{left:fmt(Math.max(0,Math.floor(tl.leaveBy-s.t))),late:fmt(Math.ceil(s.t-tl.leaveBy)),reserve:fmt(Math.floor(tl.reserveAtArrival)),required:fmt(tl.reserve),arrive:fmt(Math.ceil(tl.outbound)),leave:fmt(Math.floor(tl.leaveBy)),home:fmt(Math.ceil(tl.total))});
+  $('sim-alert').dataset.level=level;
+}
+function stopSim(){sim.playing=false;cancelAnimationFrame(sim.raf);$('sim-play').setAttribute('aria-pressed','false');$('sim-play-icon').textContent='▶';$('sim-play-label').textContent=t('simPlay');}
+function stepSim(now){
+  if(!sim.playing||!sim.timeline)return;const dt=now-sim.last;sim.last=now;sim.t=Math.min(sim.timeline.total,sim.t+dt*sim.timeline.total/PLAYBACK_MS);
+  renderSim();draw();if(sim.t>=sim.timeline.total){stopSim();return;}sim.raf=requestAnimationFrame(stepSim);
+}
+function toggleSim(){
+  if(!sim.timeline)return;if(sim.playing){stopSim();return;}
+  if(sim.t>=sim.timeline.total)sim.t=0;if(!localLayer())setLayer('optical');
+  sim.playing=true;sim.last=performance.now();$('sim-play').setAttribute('aria-pressed','true');$('sim-play-icon').textContent='❚❚';$('sim-play-label').textContent=t('simPause');sim.raf=requestAnimationFrame(stepSim);
+}
+function drawSimMarker(){
+  if(!sim.timeline||!state.route||(sim.t<=0&&!sim.playing))return;const s=evaStateAt(sim.timeline,sim.t),p=pointAlong(state.route,s.distance),q=screen(p);
+  const danger=s.pastLeaveBy||s.margin<0;ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,15,0,Math.PI*2);ctx.fillStyle=danger?'#ff6b5740':'#fff1d640';ctx.fill();
+  ctx.beginPath();ctx.arc(q.x,q.y,7,0,Math.PI*2);ctx.fillStyle='#fffaf0';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=danger?'#ff6b57':'#ef9a76';ctx.stroke();ctx.restore();
+  label(t('simMarker',{t:fmt(Math.floor(s.t))}),q,t('simPhase_'+s.phase).toUpperCase(),danger?'#ffb4a6':'#fff1d6',40);
 }
 
 function renderDecision(){
@@ -59,7 +109,7 @@ function renderComparison(p){
     const title=document.createElement('h4');title.textContent=t(kind==='terrain'?'terrainAware':'direct');card.append(title);
     const status=document.createElement('p');status.className='route-verdict '+(c.status==='robust'?'verdict-ok':c.status==='conditional'?'verdict-warning':'verdict-danger');status.textContent=t(c.status);card.append(status);
     const list=document.createElement('dl');
-    const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min'],['leaveBy',!c.walkback||c.walkback.status==='beyond'||!a.passable?'—':'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min']];
+    const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min'],['leaveBy',!c.walkback||c.walkback.status==='beyond'||!a.passable?'—':'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min'],['looseShare',state.surface?.[kind]?fmt(state.surface[kind].share.cool*100)+'%':'—']];
     for(const [key,value]of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=t(key);dd.textContent=value;dd.dataset.metric=key;if(key==='reserveMargin'&&a?.passable)dd.className=c.reserveMargin>=0?'margin-positive':'margin-negative';row.append(dt,dd);list.append(row);}card.append(list);
     const button=document.createElement('button');button.type='button';button.className='inspect-route';button.dataset.inspectRoute=kind;button.textContent=t(state.strategy===kind?'selectedRoute':'inspectRoute');button.disabled=!a;button.setAttribute('aria-pressed',state.strategy===kind);button.addEventListener('click',()=>{chooseRoute(kind);document.querySelector(`[data-inspect-route="${kind}"]`)?.focus({preventScroll:true});});card.append(button);body.append(card);
   }
@@ -110,7 +160,13 @@ function terrainImage(full){
   }
   context.putImageData(image,0,0);state.slopeLayers.set(key,c);return c;
 }
-function drawTerrain(){const full=state.layer==='slope',image=terrainImage(full);if(!image)return;const g=state.terrain,tl=screen({x:g.xMin,y:g.yMax}),br=screen({x:g.xMin+g.cols*g.step,y:g.yMax-g.rows*g.step});ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
+function nightImage(){
+  if(!state.night||!state.terrain)return null;if(state.slopeLayers.has('night'))return state.slopeLayers.get('night');
+  const g=state.terrain,c=document.createElement('canvas');c.width=g.cols;c.height=g.rows;const context=c.getContext('2d'),image=context.createImageData(g.cols,g.rows);
+  for(let i=0;i<state.night.values.length;i++){const k=nightClass(state.night.values[i],state.night),color=k==='cool'?[86,160,222,165]:k==='warm'?[240,150,84,150]:k==='unknown'?[75,80,70,180]:[0,0,0,0];image.data.set(color,i*4);}
+  context.putImageData(image,0,0);state.slopeLayers.set('night',c);return c;
+}
+function drawTerrain(){const full=state.layer==='slope',image=state.layer==='night'?nightImage():terrainImage(full);if(!image)return;const g=state.terrain,tl=screen({x:g.xMin,y:g.yMax}),br=screen({x:g.xMin+g.cols*g.step,y:g.yMax-g.rows*g.step});ctx.save();ctx.imageSmoothingEnabled=state.layer==='night';ctx.drawImage(image,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
 function drawPath(points,color,width,dash=[]){if(!points?.length)return;ctx.save();ctx.beginPath();points.forEach((p,i)=>{const q=screen(p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#102015b0';ctx.lineWidth=width+2.5;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.restore();}
 function label(title,p,subtitle,color='#eef0db',dy=0){
   if(p.x<0||p.x>state.width||p.y<0||p.y>state.height)return;
@@ -121,7 +177,7 @@ function label(title,p,subtitle,color='#eef0db',dy=0){
 function draw(){
   const {width:w,height:h}=state;ctx.clearRect(0,0,w,h);ctx.fillStyle='#3f473a';ctx.fillRect(0,0,w,h);
   const visible=drawTiles(ctx,imageLayer(),state.images,screen,w,h);
-  if(localLayer()&&(state.overlays||state.layer==='slope'))drawTerrain();
+  if(localLayer()&&(state.overlays||state.layer!=='optical'))drawTerrain();
   if(state.overlays){
     if(localLayer()){
       drawPath(state.directRoute,'#9dcee9',state.strategy==='direct'?3:1.8,[4,4]);drawPath(state.terrainRoute,'#ffc395',state.strategy==='terrain'?3:1.7,[]);
@@ -135,6 +191,7 @@ function draw(){
       const target=screen(TARGET);ctx.beginPath();ctx.arc(target.x,target.y,11,0,Math.PI*2);ctx.fillStyle='#ef9a7655';ctx.fill();ctx.strokeStyle='#ffe1bd';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(target.x,target.y,3.5,0,Math.PI*2);ctx.fillStyle='#ffe4ca';ctx.fill();
       label('Rochette',target,routeOk&&walk&&walk.status!=='beyond'?t('leaveBySubtitle',{leave:fmt(Math.floor(walk.leaveBy))}):t('workspaceLabel'),'#ffceaa');
       const base=screen(HABITAT);ctx.fillStyle='#e5ecd6';ctx.strokeStyle='#26351b';ctx.lineWidth=2;ctx.fillRect(base.x-6,base.y-6,12,12);ctx.strokeRect(base.x-6,base.y-6,12,12);label('ARES',base,t('hypotheticalBase'));
+      drawSimMarker();
     }else{
       drawPath(state.terrainRoute,'#ffd0a5',2,[]);const p=screen(MIDPOINT);ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fillStyle='#f2b184';ctx.fill();label(t('areaLabel'),p,'ARES → ROCHETTE');
     }
@@ -145,15 +202,16 @@ function draw(){
 }
 function updateLayerText(){
   const key=state.layer,layer=imageLayer();$('layer-caption').textContent=t(key+'Caption');$('layer-description').textContent=t(key+'Description');$('tile-status').textContent=layer?.tiles?.length?t('cached'):t('unavailable');
-  $('map-source-credit').textContent=key==='slope'?'USGS / NASA · CTX DEM':key==='optical'?'NASA / MSSS / Caltech · CTX':'NASA / JPL-Caltech · Mars Trek';
-  $('resolution-note').textContent=key==='slope'?' · 20 m source → 40 m grid':layer?' · ≈ '+fmt(pixelSize(layer))+' m/px':'';
+  $('map-source-credit').textContent=key==='slope'?'USGS / NASA · CTX DEM':key==='optical'?'NASA / MSSS / Caltech · CTX':key==='night'?'NASA / JPL / ASU · THEMIS Night IR · Mars Trek':'NASA / JPL-Caltech · Mars Trek';
+  $('resolution-note').textContent=key==='slope'?' · 20 m source → 40 m grid':key==='night'?' · 100 m source on CTX':layer?' · ≈ '+fmt(pixelSize(layer))+' m/px':'';
   document.querySelectorAll('[data-layer]').forEach(b=>{const selected=b.dataset.layer===key;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',selected);});
-  $('view-mission').hidden=localLayer();$('map-legend').hidden=!state.overlays;$('slope-legend').hidden=key!=='slope';$('toggle-overlays').textContent=t(state.overlays?'hideMarks':'showMarks');
+  $('view-mission').hidden=localLayer();$('map-legend').hidden=!state.overlays;$('slope-legend').hidden=key!=='slope';$('night-legend').hidden=key!=='night';$('toggle-overlays').textContent=t(state.overlays?'hideMarks':'showMarks');
 }
 function setLayer(key){state.views[state.layer]={scale:state.scale,center:{...state.center}};state.layer=key;updateLayerText();if(state.views[key]){Object.assign(state,state.views[key]);constrain();draw();}else recenter();}
 function inspect(p){
   if(!state.terrain)return;const id=cellId(p,state.terrain),sample=sampleTerrain(p,state.terrain);
-  $('terrain-sample').textContent=id<0?t('sampleOutside'):!sample?t('sampleUnknown'):t('sample',{slope:fmt(sample.slope,1),elevation:fmt(sample.elevation)});
+  const night=id>=0&&state.night?' · '+t('nightSample_'+nightClass(state.night.values[id],state.night)):'';
+  $('terrain-sample').textContent=id<0?t('sampleOutside'):!sample?t('sampleUnknown'):t('sample',{slope:fmt(sample.slope,1),elevation:fmt(sample.elevation)})+night;
 }
 function showSources(){ $('sources-content').innerHTML=renderEvidence(state);if(!dialog.open)dialog.showModal(); }
 function exportPlan(){
@@ -184,14 +242,22 @@ function demoValues(){
   const d=state.analyses?.direct,a=state.analyses?.terrain,w=state.comparisons?.terrain?.walkback;if(!d||!a||!w)return {};
   return {cells:fmt(d.blockedCells),limit:DEMO_PARAMETERS.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters),work:DEMO_LONG_WORK,leave:fmt(Math.floor(w.leaveBy)),max:fmt(Math.floor(w.maxWork))};
 }
-function setDemoStep(step){demo.step=step;setParameters({...DEMO_PARAMETERS,work:step===2?DEMO_LONG_WORK:DEMO_PARAMETERS.work});setLayer(step===0?'slope':'optical');chooseRoute(step===0?'direct':'terrain');renderDemo();}
+function setDemoStep(step){
+  demo.step=step;stopSim();sim.t=0;setParameters({...DEMO_PARAMETERS,work:step===2?DEMO_LONG_WORK:DEMO_PARAMETERS.work});setLayer(step===0?'slope':'optical');chooseRoute(step===0?'direct':'terrain');
+  // Step 3 freezes the playback one minute past the leave-by time, while the crew is still at Rochette.
+  if(step===2&&sim.timeline){sim.t=Math.floor(sim.timeline.leaveBy)+1;renderSim();draw();}
+  renderDemo();
+}
 function startDemo(){
   if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
   for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
 }
 function finishDemo(){
-  if(!demo)return;const snapshot=demo.snapshot;demo=null;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
+  if(!demo)return;const snapshot=demo.snapshot;demo=null;stopSim();sim.t=0;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
 }
+$('sim-play').addEventListener('click',toggleSim);
+$('sim-time').addEventListener('input',()=>{stopSim();sim.t=Number($('sim-time').value);renderSim();draw();});
+$('sim-slow').addEventListener('change',()=>{updateSim();draw();});
 $('demo-start').addEventListener('click',startDemo);$('demo-previous').addEventListener('click',()=>{if(demo&&demo.step>0)setDemoStep(demo.step-1);});$('demo-next').addEventListener('click',()=>{if(!demo)return;if(demo.step===2)finishDemo();else setDemoStep(demo.step+1);});$('demo-exit').addEventListener('click',finishDemo);
 $('plan').addEventListener('click',()=>{calculate();recenter();toast(t('recalculated'));});$('export').addEventListener('click',exportPlan);
 $('locate-target').addEventListener('click',()=>{closeSettings();setLayer('optical');recenter();canvas.scrollIntoView({block:'center',behavior:'smooth'});});
@@ -222,11 +288,17 @@ async function loadTerrain(){
   try{const r=await fetch('assets/jezero-terrain.json',{cache:'no-store'});if(!r.ok)throw new Error('Terrain HTTP '+r.status);state.terrain=createTerrain(await r.json());updateTerrainStatus();calculate();recenter();}
   catch(error){state.terrainError=true;$('terrain-status').textContent=t('dataFailed');document.querySelector('.evidence-banner').classList.add('error');calculate();console.error(error);}
 }
+// Optional advisory layer: the planner works without it.
+async function loadNightIr(){
+  try{await terrainReady;if(!state.terrain)return;const r=await fetch('assets/jezero-night-ir.json',{cache:'no-store'});if(!r.ok)throw new Error('Night IR HTTP '+r.status);state.night=createNightIr(await r.json(),state.terrain);state.slopeLayers.delete('night');calculate();}
+  catch(error){state.night=null;console.warn(error);}
+}
 async function loadImagery(){
   try{const r=await fetch('assets/data-manifest.json',{cache:'no-store'});if(!r.ok)throw new Error('Imagery manifest HTTP '+r.status);state.manifest=await r.json();
-    const layers=['optical','topography','thermal'].map(k=>state.manifest.layers[k]).filter(Boolean);
+    const layers=['optical','topography'].map(k=>state.manifest.layers[k]).filter(Boolean);
     await Promise.all(layers.flatMap(layer=>layer.tiles.map(tile=>new Promise(resolve=>{const image=new Image();state.images.set(tile.path,image);image.onload=()=>{draw();resolve();};image.onerror=()=>resolve();image.src=tile.path;}))));state.ready=true;updateLayerText();recenter();
   }catch(error){state.manifest={layers:{}};state.ready=true;updateLayerText();draw();console.error(error);}
 }
-await Promise.all([loadTerrain(),loadImagery()]);
+const terrainReady=loadTerrain();
+await Promise.all([terrainReady,loadImagery(),loadNightIr()]);
 if(new URL(location.href).searchParams.get('demo')==='1'&&state.terrain)startDemo();

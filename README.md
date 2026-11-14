@@ -29,6 +29,13 @@ Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installe
 
 Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
 
+## What changed in ARES-03b
+
+- **EVA playback.** A play button and timeline under the map walk the plan minute by minute: phase, distance from the habitat, time to shelter at a 25% slower pace, and the leave-by time. The status turns to **TURN BACK NOW** once the leave-by time passes while the crew is still at Rochette. An option simulates a 25% slower walk home. The guided demo's third step freezes the playback at T+136 min.
+- **THEMIS Night IR (Mars Trek).** The controlled night-time infrared mosaic is resampled to the 40 m grid by `tools/prepare-night-ir.mjs` (no dependencies) into `dist/assets/jezero-night-ir.json`. Cells are split by brightness quartiles: cool at night (likely loose material) and warm (likely rock). It is a map layer, a terrain-inspector readout and a per-route share (terrain route: 25% night-cool ground), and it is **not** part of the route cost. Plausibility check: the share of warm cells rises with slope, from 19% below 3° to 47% above 12°.
+- **Radiation and space weather.** Curiosity RAD measured about 0.67 mSv/day from galactic cosmic rays on the surface (Hassler et al. 2014, value as reported by SwRI), so the base-case EVA adds about 0.08 mSv. The acute hazard is a solar particle event; the card shows the longest walk to shelter on the route (90 min at the slower pace).
+- **Legibility.** Minimum visible text is now 10 px (it was 5–7 px for labels and status), the leave-by time is the highlighted result, and the repeated disclaimers are merged into one "Limits" block. The day-time THEMIS layer was dropped from the picker in favour of the night layer.
+
 ## What changed in ARES-03
 
 - **A scenario with a real hazard.** In ARES-02 the direct line reached only 6.5°, so the detour avoided nothing important. The hypothetical habitat moved to **77.3971° E, 18.4407° N**, a flat site (under 4° within 120 m) chosen with `tools/find-habitat.mjs`. The straight line to Rochette now crosses **10 cells above the 12° limit, up to 23.2°**, over a hill about 40 m high that is also visible in the CTX image. `BASE` remains only the map projection origin.
@@ -69,7 +76,8 @@ The waypoint locates a rover workspace, not the exact center of a drill hole. De
 | Local CTX optical mosaic | Surface context; no automatic boulder detection | [NASA Mars 2020 / Caltech Murray Lab](https://murray-lab.caltech.edu/Mars2020/index.html) |
 | CTX numerical DEM | Slope, exclusion policy, route cost, profile | [USGS Mars 2020 Science Investigation CTX DEM](https://astrogeology.usgs.gov/search/map/mars_2020_science_investigation_ctx_dem_mosaic) |
 | MOLA color hillshade | Regional relief context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
-| THEMIS daytime infrared | Historical regional context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
+| THEMIS Night IR controlled mosaic | Likely loose vs rocky ground along the route (advisory) | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
+| Curiosity RAD surface dose | Order of magnitude of EVA radiation dose | [Hassler et al. 2014](https://doi.org/10.1126/science.1244797) |
 | Perseverance raw images | What the workspace looks like (not used in routing) | [NASA Mars 2020 raw images](https://mars.nasa.gov/mars2020/multimedia/raw-images/) |
 
 Mars Trek is listed in the [official 2026 challenge Resources](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources). The other official resources and their use are recorded in `dist/assets/challenge-resources.json`. Not every listed resource is integrated.

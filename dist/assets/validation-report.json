@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "title": "ARES-03 reproducible reference scenario",
-  "generatedAt": "2026-11-14T20:27:15.381Z",
+  "generatedAt": "2026-11-14T21:03:18.016Z",
   "humanMission": {
     "hypothetical": true,
     "habitat": {
@@ -2176,7 +2176,113 @@
       }
     }
   },
+  "surface": {
+    "source": "THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018",
+    "classes": {
+      "coolMax": 61,
+      "warmMin": 109,
+      "median": 82,
+      "method": "Quartiles of brightness within this terrain subset: cool = lowest 25%, warm = highest 25%."
+    },
+    "interpretation": "Relative night-time brightness only. Warmer at night usually indicates rock or consolidated material; cooler usually indicates finer, looser material (sand, dust). Not calibrated temperature or thermal inertia, and not used in route cost.",
+    "direct": {
+      "outboundMeters": 2722.2028059785976,
+      "meters": {
+        "cool": 578.3434532848297,
+        "mid": 1535.6015828597194,
+        "warm": 608.257769834045,
+        "unknown": 0
+      },
+      "share": {
+        "cool": 0.21245421245421225,
+        "mid": 0.5641025641025633,
+        "warm": 0.22344322344322323,
+        "unknown": 0
+      }
+    },
+    "terrain": {
+      "outboundMeters": 2811.2150168941744,
+      "meters": {
+        "cool": 704.1384272912876,
+        "mid": 1464.0264263178296,
+        "warm": 643.0501632850563,
+        "unknown": 0
+      },
+      "share": {
+        "cool": 0.25047476733715607,
+        "mid": 0.5207806651286615,
+        "warm": 0.2287445675341821,
+        "unknown": 0
+      }
+    },
+    "plausibility": {
+      "description": "Share of warm-at-night cells by mapped slope band; rocky slopes are expected to be warmer at night.",
+      "bands": [
+        {
+          "slopeBand": "<3",
+          "cells": 42559,
+          "warmShare": 0.19257971286919334
+        },
+        {
+          "slopeBand": "3-8",
+          "cells": 18811,
+          "warmShare": 0.3302323108819308
+        },
+        {
+          "slopeBand": "8-12",
+          "cells": 3052,
+          "warmShare": 0.432175622542595
+        },
+        {
+          "slopeBand": ">12",
+          "cells": 1742,
+          "warmShare": 0.46670493685419057
+        }
+      ]
+    }
+  },
+  "radiation": {
+    "gcrDoseEquivalentMsvPerDay": 0.67,
+    "source": "Curiosity RAD, Gale crater, Aug 2012-Jun 2013; Hassler et al. (2014) Science 343, doi:10.1126/science.1244797; value as reported by SwRI",
+    "baseCaseEvaMinutes": 164.93832081092037,
+    "baseCaseEvaDoseMsv": 0.07674213537730323,
+    "longestShelterWalkMinutes": 89.95888054061358
+  },
+  "playback": {
+    "default": {
+      "outboundMeters": 2811.2150168941744,
+      "outbound": 67.46916040546019,
+      "work": 30,
+      "back": 67.46916040546019,
+      "total": 164.93832081092037,
+      "leaveBy": 135.04111945938644,
+      "autonomy": 270,
+      "reserve": 45,
+      "metersPerMinute": 41.666666666666664,
+      "returnSpeed": 41.666666666666664,
+      "slowReturn": false,
+      "reserveAtArrival": 105.06167918907963
+    },
+    "longFieldwork": {
+      "outboundMeters": 2811.2150168941744,
+      "outbound": 67.46916040546019,
+      "work": 90,
+      "back": 67.46916040546019,
+      "total": 224.93832081092035,
+      "leaveBy": 135.04111945938644,
+      "autonomy": 270,
+      "reserve": 45,
+      "metersPerMinute": 41.666666666666664,
+      "returnSpeed": 41.666666666666664,
+      "slowReturn": false,
+      "reserveAtArrival": 45.061679189079655
+    }
+  },
   "checks": {
+    "nightIrCoversRoute": true,
+    "warmNightShareRisesWithSlope": true,
+    "playbackFlagsLateDeparture": true,
+    "playbackReturnsWithReserveByDefault": true,
     "targetMatchesPreservedNasaWaypoint": true,
     "routeFound": true,
     "noUnknownCells": true,
