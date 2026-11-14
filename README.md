@@ -6,6 +6,17 @@ ARES is a pre-EVA planning prototype for a round trip from a hypothetical habita
 
 The interface defaults to English and includes a Portuguese language selector. The mobile layout shows the map and result before opening mission settings in a dialog.
 
+**Live:** https://thamyreslana.github.io/ares-marswalk/ · [Portuguese](https://thamyreslana.github.io/ares-marswalk/?lang=pt) · [guided demo](https://thamyreslana.github.io/ares-marswalk/?lang=en&demo=1) · [7-slide brief](https://thamyreslana.github.io/ares-marswalk/mission-brief.html)
+
+## Publish to GitHub Pages
+
+GitHub Pages serves the `gh-pages` branch, which holds only the contents of `dist/`. After committing to `main`:
+
+```powershell
+git push origin main
+git push origin "$(git subtree split --prefix dist HEAD):refs/heads/gh-pages" --force
+```
+
 ## Run locally
 
 From this directory:
