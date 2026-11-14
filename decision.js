@@ -1,7 +1,10 @@
 import {sensitivity,walkback} from './planner.js';
 
+// A = direct line, B = terrain-aware, C = terrain-aware that also avoids likely loose ground (experimental).
+export const ROUTE_KINDS=Object.freeze(['direct','terrain','loose']);
+
 export function compareRoutes(analyses,parameters){
-  return Object.fromEntries(['direct','terrain'].map(kind=>{
+  return Object.fromEntries(ROUTE_KINDS.map(kind=>{
     const analysis=analyses?.[kind];
     if(!analysis)return [kind,{kind,analysis:null,scenarios:[],status:'noRoute',reserveMargin:null,walkback:null}];
     const scenarios=sensitivity(analysis.roundTripMeters,parameters),base=scenarios[1],conservative=scenarios[2];
@@ -16,11 +19,10 @@ export const DEMO_LONG_WORK=90;
 
 // Describe the combined terrain/time checks without selecting a route for the user.
 export function summarizeComparison(comparison){
-  const kinds=['direct','terrain'];
-  if(!kinds.some(kind=>comparison?.[kind]?.analysis))return {key:'decisionUnavailable',kind:null};
-  const robust=kinds.filter(kind=>comparison[kind]?.status==='robust');
-  if(robust.length===2)return {key:'decisionBoth',kind:null};
-  if(robust.length===1)return {key:'decisionOne',kind:robust[0]};
-  if(kinds.some(kind=>comparison[kind]?.status==='conditional'))return {key:'decisionConditional',kind:null};
-  return {key:'decisionRevise',kind:null};
+  if(!ROUTE_KINDS.some(kind=>comparison?.[kind]?.analysis))return {key:'decisionUnavailable',kind:null,kinds:[]};
+  const robust=ROUTE_KINDS.filter(kind=>comparison[kind]?.status==='robust');
+  if(robust.length>1)return {key:'decisionMany',kind:null,kinds:robust};
+  if(robust.length===1)return {key:'decisionOne',kind:robust[0],kinds:robust};
+  if(ROUTE_KINDS.some(kind=>comparison[kind]?.status==='conditional'))return {key:'decisionConditional',kind:null,kinds:[]};
+  return {key:'decisionRevise',kind:null,kinds:[]};
 }

@@ -56,7 +56,7 @@ function segmentAnalysis(a,b,t,policy,collect=false){
   for(let i=0;i<=n;i++){
     const p={x:a.x+(b.x-a.x)*i/n,y:a.y+(b.y-a.y)*i/n},sample=sampleTerrain(p,t);
     if(!sample||sample.slope>policy.maxSlope)allowed=false;
-    if(i>0)cost+=distance/n*(1+policy.slopeWeight*((sample?.slope??policy.maxSlope)/policy.maxSlope)**2);
+    if(i>0)cost+=distance/n*(1+policy.slopeWeight*((sample?.slope??policy.maxSlope)/policy.maxSlope)**2)*(1+(policy.cellPenalty&&sample?policy.cellPenalty[sample.id]:0));
     if(collect)samples.push({...p,distance:distance*i/n,...sample,known:!!sample});
   }
   return {allowed,cost,samples,cells};
@@ -98,7 +98,8 @@ export function findTerrainRoute(start,end,t,policy=DEFAULT_POLICY){
       const next=(row+dr)*t.cols+col+dc;if(closed[next]||!pass(next))continue;
       if(dr&&dc&&(!pass(row*t.cols+col+dc)||!pass((row+dr)*t.cols+col)))continue;
       const distance=t.step*Math.hypot(dr,dc),slope=(t.slopes[id]+t.slopes[next])/2;
-      const tentative=g[id]+distance*(1+policy.slopeWeight*(slope/policy.maxSlope)**2);
+      const penalty=policy.cellPenalty?(policy.cellPenalty[id]+policy.cellPenalty[next])/2:0;
+      const tentative=g[id]+distance*(1+policy.slopeWeight*(slope/policy.maxSlope)**2)*(1+penalty);
       if(tentative<g[next]){g[next]=tentative;came[next]=id;const p=cellPoint(next,t);push({id:next,f:tentative+Math.hypot(p.x-end.x,p.y-end.y)});}
     }
   }
@@ -132,6 +133,9 @@ export function createNightIr(raw,t){
   if(!(raw.classes.coolMax<raw.classes.warmMin))throw new Error('Invalid night IR classes');
   return {...raw,values:Int16Array.from(raw.values,v=>v==null?-1:v)};
 }
+// Experimental route C: extra relative cost on cells that are cool at night (likely loose material).
+export const LOOSE_GROUND_PENALTY=1;
+export function loosePenalty(night,weight=LOOSE_GROUND_PENALTY){return Float32Array.from(night.values,v=>nightClass(v,night)==='cool'?weight:0);}
 export function nightClass(value,night){return value<0?'unknown':value<=night.classes.coolMax?'cool':value>=night.classes.warmMin?'warm':'mid';}
 export function analyzeSurface(points,t,night){
   if(!points?.length||!night)return null;
@@ -163,7 +167,17 @@ export function evaTimeline(outboundMeters,p,{slowReturn=false}={}){
   return {outboundMeters,outbound,work:p.work,back,total,leaveBy:w.leaveBy,autonomy:p.autonomy,reserve:p.reserve,metersPerMinute,returnSpeed,slowReturn,reserveAtArrival:p.autonomy-total};
 }
 // State at minute t. "margin" = time left after a slow (75%) walk home from here, minus the reserve; negative means the reserve is at risk.
-export function evaStateAt(tl,t){
+// Abort the plan at minute `at`: head straight back along the checked route from the current position.
+// mode 'return' walks at the planned pace; 'emergency' assumes the slower (75%) pace.
+export function abortPlan(tl,at,mode='return'){
+  const from=evaStateAt(tl,at),speed=tl.metersPerMinute*(mode==='emergency'?WALKBACK_PACE_FACTOR:1),arrival=from.t+from.distance/speed;
+  return {t:from.t,distance:from.distance,mode,speed,arrival,reserveAtArrival:tl.autonomy-arrival};
+}
+export function evaStateAt(tl,t,abort=null){
+  if(abort&&t>=abort.t){
+    t=Math.max(abort.t,Math.min(t,abort.arrival));const distance=Math.max(0,abort.distance-(t-abort.t)*abort.speed),shelterMinutes=distance/(tl.metersPerMinute*WALKBACK_PACE_FACTOR);
+    return {t,phase:distance>0?'abort':'home',distance,shelterMinutes,margin:tl.autonomy-t-shelterMinutes-tl.reserve,remaining:tl.autonomy-t,pastLeaveBy:false,aborted:true,mode:abort.mode,eta:abort.arrival,reserveAtArrival:abort.reserveAtArrival};
+  }
   t=Math.max(0,Math.min(t,tl.total));let phase,distance;
   if(t<tl.outbound){phase='outbound';distance=t*tl.metersPerMinute;}
   else if(t<tl.outbound+tl.work){phase='work';distance=tl.outboundMeters;}

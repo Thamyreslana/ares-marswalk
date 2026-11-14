@@ -160,3 +160,46 @@ main{max-width:1180px;margin:0 auto;width:100%}
 .eva-note{margin:0;font-size:11.5px;color:#7f8893}
 @media(max-width:820px){.eva-dialog{width:100vw;height:100dvh;border-radius:0;border:0}.eva-hud{padding:14px;gap:10px;overflow:auto;grid-template-rows:auto auto auto auto auto}.eva-body{grid-template-columns:1fr}.eva-map{height:240px}.eva-primary strong{font-size:42px}.eva-card strong{font-size:19px}.eva-status strong{font-size:20px}.eva-clock{font-size:22px}.eva-controls{grid-template-columns:auto 1fr}.eva-slow{grid-column:1/-1}}
 @media(max-width:820px){.eva-body{min-height:auto}.eva-cards{grid-auto-rows:auto;min-height:auto}.eva-card{padding:12px 13px}.eva-card.eva-primary strong{font-size:42px}.eva-card span{font-size:10.5px;letter-spacing:.8px}}
+
+/* ARES-05: three routes, rover traverse, return & emergency, fewer frames */
+.comparison-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))!important}
+.route-tag{display:inline-block;font:600 9.5px var(--mono);letter-spacing:.8px;color:var(--warn-ink);border:1px solid #7a5a17;border-radius:3px;padding:2px 5px;vertical-align:middle}
+.legend-traverse{width:16px;border-top:2px dotted #e2c79a}
+#traverse-legend{display:flex;align-items:center;gap:6px}
+.map-footnote-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* Frames only where they mark the decision: strip metrics, map, playback, route cards, crew view */
+.comparison-card,.sensitivity-card,.profile-card,.radiation-card,.surface-card,.science-card{border:0!important;border-top:1px solid #2c3036!important;border-radius:0!important;background:none!important;padding:22px 0 4px!important;margin-top:22px!important;box-shadow:none!important}
+.scope-note{border:0!important;border-top:1px solid #2c3036!important;border-radius:0!important;background:none!important;padding:18px 0 0!important}
+.scope-note strong{color:#aeb5bf!important}
+.science-row{gap:28px!important}
+.leave-card{box-shadow:none!important;border:1px solid var(--ok)!important;border-radius:6px}
+.leave-card[data-status="shortWork"]{box-shadow:none!important;border-color:var(--warn)!important}
+.leave-card[data-status="beyond"],.leave-card[data-status="blocked"]{box-shadow:none!important;border-color:var(--danger)!important}
+.decision-strip .metrics{overflow:visible!important;gap:10px;border:0!important;background:none!important}
+.decision-strip .metrics article{border:1px solid #2c3036;border-radius:6px;background:#16191c}
+.decision-strip .metrics article+article{border-left:1px solid #2c3036!important}
+.decision-summary{border-left:0!important;border:1px solid #2c3036!important;border-radius:6px;background:#16191c!important}
+.decision-summary[data-outcome="decisionOne"],.decision-summary[data-outcome="decisionMany"]{border-color:#2f6b4a!important}
+.decision-summary[data-outcome="decisionConditional"]{border-color:#7a5a17!important}
+.decision-summary[data-outcome="decisionRevise"],.decision-summary[data-outcome="decisionUnavailable"]{border-color:#8a2f29!important}
+/* Crew view: return & emergency */
+.eva-status{justify-content:space-between;align-items:center!important;flex-wrap:wrap;gap:12px}
+.eva-status-text{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.eva-actions{display:flex;gap:10px;flex-wrap:wrap}
+.eva-actions button{font-weight:700;font-size:14px;padding:11px 16px;border-radius:8px;cursor:pointer}
+.eva-return{background:#2b220c;color:var(--warn-ink);border:1px solid var(--warn)}
+.eva-emergency{background:var(--danger);color:#fff;border:1px solid var(--danger)}
+.eva-resume{background:#12161a;color:#d7dce2;border:1px solid #3a3f46}
+.eva-actions button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.eva-next-row{display:flex;align-items:center;gap:12px;min-width:0}
+.eva-next-row>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.eva-arrow{width:44px;height:44px;flex:0 0 44px;fill:var(--plan);transition:transform .2s linear}
+.eva-hud[data-mode="return"] .eva-arrow{fill:var(--warn)}.eva-hud[data-mode="emergency"] .eva-arrow{fill:var(--danger)}
+.eva-return-path{fill:none;stroke:var(--warn);stroke-linecap:round;stroke-linejoin:round}
+.eva-hud[data-mode="emergency"] .eva-return-path{stroke:var(--danger)}
+.eva-hud[data-mode="plan"] .eva-return-path{stroke:#fff;opacity:.55}
+@media(prefers-reduced-motion:reduce){.eva-arrow,.eva-dot{transition:none}}
+@media(max-width:820px){.eva-actions{width:100%}.eva-actions button{flex:1}}
+.route-tag{font-size:10px!important}
+.night-warm{background:#f09654!important}.night-cool{background:#56a0de!important}.map-card.is-night .legend-line{border-top-color:#ffffff!important}
+.legend-alt{width:16px;border-top:2px solid #9aa3ad}
