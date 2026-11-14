@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
   <title>ARES — Evidence-based Marswalk Planning</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=mission-3"><link rel="stylesheet" href="mission.css?v=mission-3">
+  <link rel="stylesheet" href="style.css?v=decision-4"><link rel="stylesheet" href="mission.css?v=decision-4">
 </head>
 <body>
 <header class="topbar">
@@ -57,7 +57,15 @@
       <div class="budget-track" aria-label="Time allocation"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i><span data-t="walkLabel">Walking</span></span><span><i class="research"></i><span data-t="workLabel">Science</span></span><span><i class="reserve"></i><span data-t="reserveLabel">Reserve</span></span></div>
       <div class="insight" id="insight" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</div>
     </section>
-    <section class="comparison-card" id="comparison-section"><div class="card-heading"><div><span class="eyebrow" data-t="choice">WHY THIS ROUTE</span><h3 data-t="comparison">What changes when terrain matters?</h3></div><a href="assets/validation-report.json" target="_blank" rel="noopener noreferrer" data-t="validation">Reproducible scenario</a></div><p class="section-description" data-t="comparisonIntro">Both routes connect the same hypothetical habitat and the same NASA-documented workspace.</p><div class="table-wrap"><table class="comparison-table"><thead><tr><th scope="col" data-t="method">Route</th><th scope="col" data-t="roundTrip">Round trip</th><th scope="col" data-t="maxSlope">Max mapped slope</th><th scope="col" data-t="aboveLimit">Cells above limit</th><th scope="col" data-t="terrainCost">Terrain cost index</th></tr></thead><tbody id="comparison-body"><tr><td colspan="5">—</td></tr></tbody></table></div><p class="decision-text" id="route-explanation"></p><p class="parameter-note" data-t="terrainCostNote">Relative cost = distance × [1 + 4 × (slope / limit)²]. A prototype weighting, not metabolic energy.</p></section>
+    <section class="comparison-card" id="comparison-section">
+      <div class="card-heading"><div><span class="eyebrow" data-t="choice">WHY THIS ROUTE</span><h3 data-t="comparison">What changes when terrain matters?</h3></div><button class="button demo-start" id="demo-start" disabled data-t="walkthrough">Guided demo</button></div>
+      <section class="demo-panel" id="demo-panel" tabindex="-1" aria-live="polite" hidden><div class="demo-kicker"><span data-t="demoLabel">A DECISION IN THREE STEPS</span><span id="demo-progress"></span></div><h4 id="demo-title"></h4><p id="demo-text"></p><div class="demo-buttons"><button id="demo-previous" data-t="demoPrevious">Previous</button><button id="demo-next" data-t="demoNext">Next step</button><button id="demo-exit" data-t="demoReset">Exit & restore my plan</button></div></section>
+      <p class="section-description" data-t="comparisonBasis">Same assumptions for both routes. Time and reserve use the conservative scenario.</p><p class="comparison-reserve" id="comparison-reserve"></p>
+      <div class="comparison-grid" id="comparison-body" aria-label="Route comparison"></div>
+      <p class="decision-text" id="route-explanation"></p><p class="comparison-note" data-t="noUniversalWinner">Lower mapped slope and more time reserve are different priorities. The cost index does not establish which route is safer.</p>
+      <details class="method-details"><summary data-t="methodDetails">Method details</summary><p class="parameter-note" id="comparison-method"></p><p class="parameter-note" data-t="terrainCostNote">Relative cost = distance × [1 + 4 × (slope / limit)²]. A prototype weighting, not metabolic energy.</p></details>
+      <div class="comparison-links"><a href="assets/validation-report.json" target="_blank" rel="noopener noreferrer" data-t="validation">Reproducible scenario</a><a id="comprehension-test-link" href="comprehension-test.html" data-t="testLink">Run a 5-minute comprehension test ↗</a></div>
+    </section>
     <section class="profile-card"><div class="card-heading"><h3 data-t="profile">Elevation along the outbound route</h3><span id="ascent-metric"></span></div><div id="elevation-profile" class="elevation-profile"></div><p class="parameter-note" data-t="profileNote">Elevations sampled from the USGS model. The return retraces this path.</p></section>
     <section class="sensitivity-card"><div class="card-heading"><h3 data-t="sensitivity">If the walk takes longer</h3></div><p class="section-description" data-t="sensitivityIntro">These are explicit what-if scenarios, not statistical confidence intervals.</p><div class="table-wrap"><table class="scenario-table"><thead><tr><th scope="col" data-t="scenario">Scenario</th><th scope="col" data-t="pace">Pace</th><th scope="col" data-t="total">Mission time</th><th scope="col" data-t="left">Time left</th><th scope="col" data-t="reserveCheck">Reserve check</th></tr></thead><tbody id="scenario-body"><tr><td colspan="5">—</td></tr></tbody></table></div><p class="parameter-note" data-t="scenarioAssumptions">Faster: pace ×1.20, work ×0.85. Conservative: pace ×0.75, work ×1.25. Return is included in every scenario.</p></section>
     <aside class="scope-note"><strong data-t="scope">TIME BUDGET, NOT A SUIT MODEL</strong><p data-t="limits">The model does not certify safety or estimate oxygen, radiation, weather, fatigue, or small obstacles. Orbital data cannot resolve every hazard.</p></aside>
@@ -68,5 +76,5 @@
 <dialog id="settings-dialog" class="settings-dialog" aria-label="Mission settings"></dialog>
 <dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow" data-t="evidenceEyebrow">PROVENANCE & REPRODUCIBILITY</div><h2 id="sources-title" data-t="evidenceTitle">From observation to decision.</h2></div><button id="close-sources" class="close-button" data-aria="close" aria-label="Close">×</button></div><div id="sources-content"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=mission-3"></script>
+<script type="module" src="app.js?v=decision-4"></script>
 </body></html>

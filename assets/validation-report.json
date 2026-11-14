@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "title": "ARES-02 reproducible reference scenario",
-  "generatedAt": "2026-11-14T18:53:05.835Z",
+  "generatedAt": "2026-11-14T19:27:58.820Z",
   "humanMission": {
     "hypothetical": true,
     "habitat": {
@@ -2275,5 +2275,302 @@
     "independentAbsoluteImageDemAlignmentValidated": false,
     "operationalSafetyValidated": false
   },
-  "limitations": "Prototype terrain cost and slope threshold are assumptions, not NASA EVA policy. Orbital terrain cannot resolve every hazard. Time scenarios are what-if assumptions, not statistical confidence intervals or suit-performance predictions."
+  "limitations": "Prototype terrain cost and slope threshold are assumptions, not NASA EVA policy. Orbital terrain cannot resolve every hazard. Time scenarios are what-if assumptions, not statistical confidence intervals or suit-performance predictions.",
+  "routeTimeComparison": {
+    "direct": {
+      "kind": "direct",
+      "scenarios": [
+        {
+          "id": "optimistic",
+          "speedFactor": 1.2,
+          "workFactor": 0.85,
+          "speed": 3,
+          "walking": 90.45346097145185,
+          "work": 25.5,
+          "total": 115.95346097145185,
+          "remaining": 124.04653902854815,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "base",
+          "speedFactor": 1,
+          "workFactor": 1,
+          "speed": 2.5,
+          "walking": 108.5441531657422,
+          "work": 30,
+          "total": 138.54415316574222,
+          "remaining": 101.45584683425778,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "conservative",
+          "speedFactor": 0.75,
+          "workFactor": 1.25,
+          "speed": 1.875,
+          "walking": 144.72553755432295,
+          "work": 37.5,
+          "total": 182.22553755432295,
+          "remaining": 57.774462445677045,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        }
+      ],
+      "base": {
+        "id": "base",
+        "speedFactor": 1,
+        "workFactor": 1,
+        "speed": 2.5,
+        "walking": 108.5441531657422,
+        "work": 30,
+        "total": 138.54415316574222,
+        "remaining": 101.45584683425778,
+        "reserve": 45,
+        "feasible": true,
+        "excess": 0
+      },
+      "conservative": {
+        "id": "conservative",
+        "speedFactor": 0.75,
+        "workFactor": 1.25,
+        "speed": 1.875,
+        "walking": 144.72553755432295,
+        "work": 37.5,
+        "total": 182.22553755432295,
+        "remaining": 57.774462445677045,
+        "reserve": 45,
+        "feasible": true,
+        "excess": 0
+      },
+      "status": "robust",
+      "reserveMargin": 12.774462445677045
+    },
+    "terrain": {
+      "kind": "terrain",
+      "scenarios": [
+        {
+          "id": "optimistic",
+          "speedFactor": 1.2,
+          "workFactor": 0.85,
+          "speed": 3,
+          "walking": 96.520205050784,
+          "work": 25.5,
+          "total": 122.020205050784,
+          "remaining": 117.979794949216,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "base",
+          "speedFactor": 1,
+          "workFactor": 1,
+          "speed": 2.5,
+          "walking": 115.82424606094081,
+          "work": 30,
+          "total": 145.82424606094082,
+          "remaining": 94.17575393905918,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "conservative",
+          "speedFactor": 0.75,
+          "workFactor": 1.25,
+          "speed": 1.875,
+          "walking": 154.4323280812544,
+          "work": 37.5,
+          "total": 191.9323280812544,
+          "remaining": 48.06767191874559,
+          "reserve": 45,
+          "feasible": true,
+          "excess": 0
+        }
+      ],
+      "base": {
+        "id": "base",
+        "speedFactor": 1,
+        "workFactor": 1,
+        "speed": 2.5,
+        "walking": 115.82424606094081,
+        "work": 30,
+        "total": 145.82424606094082,
+        "remaining": 94.17575393905918,
+        "reserve": 45,
+        "feasible": true,
+        "excess": 0
+      },
+      "conservative": {
+        "id": "conservative",
+        "speedFactor": 0.75,
+        "workFactor": 1.25,
+        "speed": 1.875,
+        "walking": 154.4323280812544,
+        "work": 37.5,
+        "total": 191.9323280812544,
+        "remaining": 48.06767191874559,
+        "reserve": 45,
+        "feasible": true,
+        "excess": 0
+      },
+      "status": "robust",
+      "reserveMargin": 3.0676719187455888
+    }
+  },
+  "reserve50Comparison": {
+    "direct": {
+      "kind": "direct",
+      "scenarios": [
+        {
+          "id": "optimistic",
+          "speedFactor": 1.2,
+          "workFactor": 0.85,
+          "speed": 3,
+          "walking": 90.45346097145185,
+          "work": 25.5,
+          "total": 115.95346097145185,
+          "remaining": 124.04653902854815,
+          "reserve": 50,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "base",
+          "speedFactor": 1,
+          "workFactor": 1,
+          "speed": 2.5,
+          "walking": 108.5441531657422,
+          "work": 30,
+          "total": 138.54415316574222,
+          "remaining": 101.45584683425778,
+          "reserve": 50,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "conservative",
+          "speedFactor": 0.75,
+          "workFactor": 1.25,
+          "speed": 1.875,
+          "walking": 144.72553755432295,
+          "work": 37.5,
+          "total": 182.22553755432295,
+          "remaining": 57.774462445677045,
+          "reserve": 50,
+          "feasible": true,
+          "excess": 0
+        }
+      ],
+      "base": {
+        "id": "base",
+        "speedFactor": 1,
+        "workFactor": 1,
+        "speed": 2.5,
+        "walking": 108.5441531657422,
+        "work": 30,
+        "total": 138.54415316574222,
+        "remaining": 101.45584683425778,
+        "reserve": 50,
+        "feasible": true,
+        "excess": 0
+      },
+      "conservative": {
+        "id": "conservative",
+        "speedFactor": 0.75,
+        "workFactor": 1.25,
+        "speed": 1.875,
+        "walking": 144.72553755432295,
+        "work": 37.5,
+        "total": 182.22553755432295,
+        "remaining": 57.774462445677045,
+        "reserve": 50,
+        "feasible": true,
+        "excess": 0
+      },
+      "status": "robust",
+      "reserveMargin": 7.774462445677045
+    },
+    "terrain": {
+      "kind": "terrain",
+      "scenarios": [
+        {
+          "id": "optimistic",
+          "speedFactor": 1.2,
+          "workFactor": 0.85,
+          "speed": 3,
+          "walking": 96.520205050784,
+          "work": 25.5,
+          "total": 122.020205050784,
+          "remaining": 117.979794949216,
+          "reserve": 50,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "base",
+          "speedFactor": 1,
+          "workFactor": 1,
+          "speed": 2.5,
+          "walking": 115.82424606094081,
+          "work": 30,
+          "total": 145.82424606094082,
+          "remaining": 94.17575393905918,
+          "reserve": 50,
+          "feasible": true,
+          "excess": 0
+        },
+        {
+          "id": "conservative",
+          "speedFactor": 0.75,
+          "workFactor": 1.25,
+          "speed": 1.875,
+          "walking": 154.4323280812544,
+          "work": 37.5,
+          "total": 191.9323280812544,
+          "remaining": 48.06767191874559,
+          "reserve": 50,
+          "feasible": false,
+          "excess": 1.9323280812544112
+        }
+      ],
+      "base": {
+        "id": "base",
+        "speedFactor": 1,
+        "workFactor": 1,
+        "speed": 2.5,
+        "walking": 115.82424606094081,
+        "work": 30,
+        "total": 145.82424606094082,
+        "remaining": 94.17575393905918,
+        "reserve": 50,
+        "feasible": true,
+        "excess": 0
+      },
+      "conservative": {
+        "id": "conservative",
+        "speedFactor": 0.75,
+        "workFactor": 1.25,
+        "speed": 1.875,
+        "walking": 154.4323280812544,
+        "work": 37.5,
+        "total": 191.9323280812544,
+        "remaining": 48.06767191874559,
+        "reserve": 50,
+        "feasible": false,
+        "excess": 1.9323280812544112
+      },
+      "status": "conditional",
+      "reserveMargin": -1.9323280812544112
+    }
+  },
+  "tradeoff": {
+    "additionalConservativeMinutes": 9.706790526931456,
+    "directConservativeReserveMarginMinutes": 12.774462445677045,
+    "terrainConservativeReserveMarginMinutes": 3.0676719187455888
+  }
 }

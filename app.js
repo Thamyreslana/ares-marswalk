@@ -2,10 +2,12 @@ import {BASE,TARGET,DEFAULT_POLICY,createTerrain,findTerrainRoute,analyzeRoute,s
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
+import {compareRoutes,DEMO_PARAMETERS} from './decision.js';
 
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d'),dialog=$('sources-dialog'),settingsDialog=$('settings-dialog');
 const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:0,y:0},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
 let toastTimer;
+let demo=null;
 const localLayer=()=>state.layer==='optical'||state.layer==='slope';
 const imageLayer=()=>state.manifest?.layers?.[state.layer==='slope'?'optical':state.layer];
 function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,3200);}
@@ -22,11 +24,12 @@ function calculate(){
   state.terrainRoute=state.routeCache.get(p.maxSlope);
   state.route=state.strategy==='terrain'?state.terrainRoute:state.directRoute;
   state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy())};
+  state.comparisons=compareRoutes(state.analyses,p);
   const current=state.analyses[state.strategy];
-  $('plan').disabled=false;$('export').disabled=!state.route;
-  renderComparison();
+  $('plan').disabled=false;$('export').disabled=!state.route;$('demo-start').disabled=!!demo;
+  renderComparison(p);
   if(!state.route||!current){clearResults('noRouteText');setStatus('noRoute','danger');draw();return;}
-  const scenarios=sensitivity(current.roundTripMeters,p),base=scenarios[1],conservative=scenarios[2];state.scenarios=scenarios;
+  const scenarios=state.comparisons[state.strategy].scenarios,base=scenarios[1],conservative=scenarios[2];state.scenarios=scenarios;
   $('distance-metric').textContent=fmt(current.roundTripMeters/1000,2)+' km';$('time-metric').textContent=fmt(base.total)+' min';$('remaining-metric').textContent=fmt(base.remaining)+' min';
   if(!current.passable)setStatus('blocked','danger');else if(!base.feasible)setStatus('insufficient','danger');else if(!conservative.feasible)setStatus('conditional','warning');else setStatus('robust');
   const denominator=Math.max(p.autonomy,base.total+p.reserve);$('walking-bar').style.width=base.walking/denominator*100+'%';$('work-bar').style.width=base.work/denominator*100+'%';$('reserve-bar').style.width=p.reserve/denominator*100+'%';
@@ -36,15 +39,24 @@ function calculate(){
   renderScenarios();renderProfile(current);draw();
 }
 
-function renderComparison(){
+function renderComparison(p){
   const body=$('comparison-body');body.replaceChildren();
   for(const kind of ['direct','terrain']){
-    const a=state.analyses?.[kind],tr=document.createElement('tr');tr.className=kind+'-row';
-    const cells=[t(kind==='terrain'?'terrainAware':'direct'),a?fmt(a.roundTripMeters/1000,2)+' km':'—',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—',a?String(a.blockedCells):'—',a?fmt(a.terrainCost):'—'];
-    for(const [i,value]of cells.entries()){const td=document.createElement(i===0?'th':'td');if(i===0)td.scope='row';td.textContent=value;tr.append(td);}body.append(tr);
+    const c=state.comparisons[kind],a=c.analysis,card=document.createElement('article');card.className='route-option '+kind+'-option'+(state.strategy===kind?' is-selected':'');card.dataset.route=kind;
+    const title=document.createElement('h4');title.textContent=t(kind==='terrain'?'terrainAware':'direct');card.append(title);
+    const status=document.createElement('p');status.className='route-verdict '+(c.status==='robust'?'verdict-ok':c.status==='conditional'?'verdict-warning':'verdict-danger');status.textContent=t(c.status);card.append(status);
+    const list=document.createElement('dl');
+    const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min']];
+    for(const [key,value]of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=t(key);dd.textContent=value;dd.dataset.metric=key;if(key==='reserveMargin')dd.className=c.reserveMargin>=0?'margin-positive':'margin-negative';row.append(dt,dd);list.append(row);}card.append(list);
+    const button=document.createElement('button');button.type='button';button.className='inspect-route';button.dataset.inspectRoute=kind;button.textContent=t(state.strategy===kind?'selectedRoute':'inspectRoute');button.disabled=!a;button.setAttribute('aria-pressed',state.strategy===kind);button.addEventListener('click',()=>{chooseRoute(kind);document.querySelector(`[data-inspect-route="${kind}"]`)?.focus({preventScroll:true});});card.append(button);body.append(card);
   }
   const a=state.analyses?.terrain,d=state.analyses?.direct;
-  $('route-explanation').textContent=!a?t('noRouteText'):a.roundTripMeters-d.roundTripMeters<1?t('sameRoute'):t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)});
+  const direct=state.comparisons.direct,terrain=state.comparisons.terrain;
+  const comparison=!a?t('noRouteText'):a.roundTripMeters-d.roundTripMeters<1?t('sameRoute'):t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)});
+  const tradeoff=a?t('reserveTradeoff',{extraTime:fmt(terrain.conservative.total-direct.conservative.total,1),directMargin:fmt(direct.reserveMargin,1),terrainMargin:fmt(terrain.reserveMargin,1)}):'';
+  $('route-explanation').textContent=[comparison,tradeoff].filter(Boolean).join(' ');
+  $('comparison-reserve').textContent=t('reserveConfigured')+': '+p.reserve+' min';
+  $('comparison-method').textContent=['direct','terrain'].map(kind=>{const c=state.comparisons[kind];return `${t(kind==='terrain'?'terrainAware':'direct')}: ${t('aboveLimit')} = ${c.analysis?.blockedCells??'—'}; ${t('terrainCost')} = ${c.analysis?fmt(c.analysis.terrainCost):'—'}`;}).join(' · ');
 }
 function renderScenarios(){
   const body=$('scenario-body');body.replaceChildren();
@@ -123,18 +135,35 @@ function showSources(){ $('sources-content').innerHTML=renderEvidence(state);if(
 function exportPlan(){
   if(!state.route||!state.analyses?.[state.strategy])return;
   const p=params(),coordinates=state.route.map(toGeo),tData=state.terrain,{elevations,slopes,valid,...terrainMetadata}=tData;
-  const data={schemaVersion:2,name:'ARES-02',prototype:true,exportedAt:new Date().toISOString(),humanMission:{hypothetical:true,habitat:BASE},target:TARGET,strategy:state.strategy,policy:{...policy(),assumption:true},parameters:{...p,timeUnit:'minutes',speedUnit:'km/h'},analysis:state.analyses[state.strategy],comparison:state.analyses,scenarios:state.scenarios,route:{type:'Feature',properties:{includesReturn:true},geometry:{type:'LineString',coordinates:[...coordinates,...coordinates.slice(0,-1).reverse()].map(p=>[p.lon,p.lat])}},sources:{terrain:terrainMetadata,imageryManifest:'assets/data-manifest.json',waypoint:'assets/rochette-waypoint.geojson',scientificPaper:TARGET.scienceSource},limitations:'Research prototype. Historical terrain; no operational safety, oxygen, radiation, current weather, fatigue, or sub-resolution obstacle assessment. Pace scenarios are assumptions, not statistical confidence intervals.'};
+  const data={schemaVersion:2,name:'ARES-02',prototype:true,exportedAt:new Date().toISOString(),humanMission:{hypothetical:true,habitat:BASE},target:TARGET,strategy:state.strategy,policy:{...policy(),assumption:true},parameters:{...p,timeUnit:'minutes',speedUnit:'km/h'},analysis:state.analyses[state.strategy],comparison:state.analyses,routeDecisions:state.comparisons,scenarios:state.scenarios,route:{type:'Feature',properties:{includesReturn:true},geometry:{type:'LineString',coordinates:[...coordinates,...coordinates.slice(0,-1).reverse()].map(p=>[p.lon,p.lat])}},sources:{terrain:terrainMetadata,imageryManifest:'assets/data-manifest.json',waypoint:'assets/rochette-waypoint.geojson',scientificPaper:TARGET.scienceSource},limitations:'Research prototype. Historical terrain; no operational safety, oxygen, radiation, current weather, fatigue, or sub-resolution obstacle assessment. Pace scenarios are assumptions, not statistical confidence intervals.'};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ares-02-mission-plan.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(t('exported'));
 }
 
 function updateTerrainStatus(){$('terrain-status').textContent=t(state.terrain?'terrainReady':state.terrainError?'dataFailed':'dataLoading');}
-function applyLanguage(next){setLanguage(next);$('language').value=language;translatePage();updateLayerText();updateTerrainStatus();calculate();updateExpanded();if(dialog.open)$('sources-content').innerHTML=renderEvidence(state);$('terrain-sample').textContent=t('inspectSample');document.title=language==='pt'?'ARES — Planejamento de exploração em Marte':'ARES — Evidence-based Marswalk Planning';}
+function applyLanguage(next){setLanguage(next);$('language').value=language;translatePage();updateLayerText();updateTerrainStatus();calculate();updateExpanded();renderDemo();$('comprehension-test-link').href='comprehension-test.html?lang='+language;if(dialog.open)$('sources-content').innerHTML=renderEvidence(state);$('terrain-sample').textContent=t('inspectSample');document.title=language==='pt'?'ARES — Planejamento de exploração em Marte':'ARES — Evidence-based Marswalk Planning';}
 let preferred='en';try{preferred=new URL(location.href).searchParams.get('lang')||localStorage.getItem('ares-language')||'en';}catch{}setLanguage(preferred);$('language').value=language;translatePage();
+$('comprehension-test-link').href='comprehension-test.html?lang='+language;
 $('language').addEventListener('change',()=>applyLanguage($('language').value));
 for(const id of ['sources-top','sources-bottom','nav-data'])$(id).addEventListener('click',showSources);$('close-sources').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 for(const id of ['autonomy','work','slope-limit'])$(id).addEventListener('input',calculate);for(const id of ['speed','reserve'])$(id).addEventListener('change',calculate);
-for(const strategy of ['terrain','direct'])$('route-'+strategy).addEventListener('click',()=>{state.strategy=strategy;for(const kind of ['terrain','direct']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();});
+function chooseRoute(strategy){state.strategy=strategy;for(const kind of ['terrain','direct']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
+for(const strategy of ['terrain','direct'])$('route-'+strategy).addEventListener('click',()=>chooseRoute(strategy));
+const demoInputs=['autonomy','work','speed','reserve','slope-limit'];
+function setParameters(p){for(const [key,id]of Object.entries({autonomy:'autonomy',work:'work',speed:'speed',reserve:'reserve',maxSlope:'slope-limit'}))$(id).value=p[key];}
+function renderDemo(){
+  $('demo-panel').hidden=!demo;if(!demo)return;
+  $('demo-title').textContent=t('demoTitle'+demo.step);$('demo-text').textContent=t('demoText'+demo.step);$('demo-progress').textContent=t('demoStep',{step:demo.step+1});$('demo-previous').disabled=demo.step===0;$('demo-next').textContent=t(demo.step===2?'demoFinish':'demoNext');
+}
+function setDemoStep(step){demo.step=step;setParameters({...DEMO_PARAMETERS,reserve:step===0?45:50});chooseRoute(step===2?'direct':'terrain');renderDemo();}
+function startDemo(){
+  if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
+  for(const id of demoInputs)$(id).disabled=true;$('open-settings').disabled=true;setLayer('optical');setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
+}
+function finishDemo(){
+  if(!demo)return;const snapshot=demo.snapshot;demo=null;for(const id of demoInputs)$(id).disabled=false;$('open-settings').disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
+}
+$('demo-start').addEventListener('click',startDemo);$('demo-previous').addEventListener('click',()=>{if(demo&&demo.step>0)setDemoStep(demo.step-1);});$('demo-next').addEventListener('click',()=>{if(!demo)return;if(demo.step===2)finishDemo();else setDemoStep(demo.step+1);});$('demo-exit').addEventListener('click',finishDemo);
 $('plan').addEventListener('click',()=>{calculate();recenter();toast(t('recalculated'));});$('export').addEventListener('click',exportPlan);
 $('locate-target').addEventListener('click',()=>{closeSettings();setLayer('optical');recenter();canvas.scrollIntoView({block:'center',behavior:'smooth'});});
 document.querySelectorAll('[data-layer]').forEach(b=>b.addEventListener('click',()=>setLayer(b.dataset.layer)));
@@ -169,3 +198,4 @@ async function loadImagery(){
   }catch(error){state.manifest={layers:{}};state.ready=true;updateLayerText();draw();console.error(error);}
 }
 await Promise.all([loadTerrain(),loadImagery()]);
+if(new URL(location.href).searchParams.get('demo')==='1'&&state.terrain)startDemo();
