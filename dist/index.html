@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
   <title>ARES — Evidence-based Marswalk Planning</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=decision-4"><link rel="stylesheet" href="mission.css?v=decision-4">
+  <link rel="stylesheet" href="style.css?v=settings-5"><link rel="stylesheet" href="mission.css?v=settings-5">
 </head>
 <body>
 <header class="topbar">
@@ -35,7 +35,7 @@
   </aside>
   </div>
   <main>
-    <div class="page-heading"><div><div class="eyebrow" data-t="sector">NASA MARS 2020 / JEZERO</div><h2 data-t="pageTitle">A mission to Rochette</h2></div><button class="button settings-open" id="open-settings"><span aria-hidden="true">☷</span><span data-t="settings">Plan settings</span></button></div>
+    <div class="page-heading"><div><div class="eyebrow" data-t="sector">NASA MARS 2020 / JEZERO</div><h2 data-t="pageTitle">A mission to Rochette</h2></div><button class="button settings-open" id="open-settings" aria-haspopup="dialog" aria-controls="settings-dialog" aria-expanded="false"><span aria-hidden="true">☷</span><span data-t="settings">Plan settings</span></button></div>
     <div class="evidence-banner"><span class="live-dot"></span><span id="terrain-status" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</span></div>
     <section class="map-card" aria-label="Jezero mission map">
       <canvas id="map" tabindex="0" role="img" data-aria="mapAccessible" aria-label="Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect."></canvas>
@@ -73,8 +73,8 @@
     <footer class="main-footer"><span data-t="footer">ARES / NASA SPACE APPS 2026</span><span data-t="footerNote">Real orbital terrain. Hypothetical human mission. Explicit assumptions.</span></footer>
   </main>
 </div>
-<dialog id="settings-dialog" class="settings-dialog" aria-label="Mission settings"></dialog>
+<dialog id="settings-dialog" class="settings-dialog" data-aria="settings" aria-label="Mission settings"></dialog>
 <dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow" data-t="evidenceEyebrow">PROVENANCE & REPRODUCIBILITY</div><h2 id="sources-title" data-t="evidenceTitle">From observation to decision.</h2></div><button id="close-sources" class="close-button" data-aria="close" aria-label="Close">×</button></div><div id="sources-content"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=decision-4"></script>
+<script type="module" src="app.js?v=settings-5"></script>
 </body></html>

@@ -19,6 +19,16 @@ try{
   await waitFor(`document.getElementById('tile-status')?.textContent.includes('stored locally') && document.getElementById('result-chip')?.textContent.includes('RESERVE HOLDS')`);
   assert.equal(await evaluate(`document.documentElement.lang`),'en');assert.match(await evaluate(`document.getElementById('distance-metric').textContent`),/4.83/);assert.equal(await evaluate(`document.getElementById('map-empty').hidden`),true);
   await screenshot('desktop-v2');
+  await evaluate(`document.getElementById('open-settings').click()`);assert.equal(await evaluate(`document.getElementById('settings-dialog').open`),true);
+  assert.equal(await evaluate(`document.getElementById('mission-settings').parentElement.id`),'settings-dialog');assert.equal(await evaluate(`document.activeElement.id`),'autonomy');
+  await evaluate(`document.getElementById('reserve').value=50;document.getElementById('reserve').dispatchEvent(new Event('input'));document.getElementById('settings-done').click()`);
+  assert.equal(await evaluate(`document.getElementById('settings-dialog').open`),false);assert.equal(await evaluate(`document.getElementById('mission-settings').parentElement.id`),'sidebar-home');assert.equal(await evaluate(`document.getElementById('reserve').value`),'50');
+  await evaluate(`document.getElementById('open-settings').click();document.getElementById('close-settings').click()`);assert.equal(await evaluate(`document.getElementById('settings-dialog').open`),false);
+  await evaluate(`document.getElementById('open-settings').click()`);await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27});await waitFor(`!document.getElementById('settings-dialog').open`);
+  assert.equal(await evaluate(`document.getElementById('mission-settings').parentElement.id`),'sidebar-home');
+  await evaluate(`document.getElementById('open-settings').click()`);await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});assert.equal(await evaluate(`document.getElementById('settings-dialog').open`),true);await screenshot('settings-fixed-mobile');
+  await evaluate(`document.getElementById('close-settings').click()`);await send('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});await waitFor(`document.getElementById('mission-settings').parentElement.id==='sidebar-home'`);
+  await evaluate(`document.getElementById('reserve').value=45;document.getElementById('reserve').dispatchEvent(new Event('change'));window.scrollTo(0,0);`);
   assert.match(await evaluate(`document.querySelector('[data-route="direct"] [data-metric="reserveMargin"]').textContent`),/12.8/);assert.match(await evaluate(`document.querySelector('[data-route="terrain"] [data-metric="reserveMargin"]').textContent`),/3.1/);
   await evaluate(`document.getElementById('reserve').value=50;document.getElementById('reserve').dispatchEvent(new Event('change'));`);
   assert.equal(await evaluate(`document.querySelector('[data-route="direct"] .route-verdict').textContent`),'RESERVE HOLDS IN ALL SCENARIOS');assert.equal(await evaluate(`document.querySelector('[data-route="terrain"] .route-verdict').textContent`),'RESERVE DEPENDS ON PACE');
