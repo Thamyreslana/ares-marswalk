@@ -137,7 +137,7 @@ function renderEva(s,status){
 }
 function abortEva(mode){
   if(!sim.timeline)return;const s=evaStateAt(sim.timeline,sim.t,sim.abort);if(s.phase==='home')return;
-  sim.abort=abortPlan(sim.timeline,sim.t,mode);renderSim();draw();if(!sim.playing)toggleSim();
+  sim.abort=abortPlan(sim.timeline,sim.t,mode,sim.abort);renderSim();draw();if(!sim.playing)toggleSim();
 }function openEva(){
   if(!state.terrain||demo)return;if(!state.analyses?.[state.strategy]?.passable)chooseRoute('terrain');if(!sim.timeline)return;
   closeSettings();buildEvaMap();if(!evaDialog.open)evaDialog.showModal();renderEva();$('eva-play').focus({preventScroll:true});
