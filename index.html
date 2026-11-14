@@ -1,67 +1,72 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#121514"><meta name="description" content="ARES: planeje uma caminhada em Marte com cartografia NASA Mars Trek e uma simulação de autonomia. Protótipo NASA Space Apps 2026.">
-  <title>ARES — Explorador de Marte</title>
-  <link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=maps-2">
+  <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
+  <title>ARES — Evidence-based Marswalk Planning</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css?v=mission-3"><link rel="stylesheet" href="mission.css?v=mission-3">
 </head>
 <body>
 <header class="topbar">
-  <a class="brand" href="./" aria-label="ARES início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 32 20 6l15 26H5Zm9-5h12L20 16l-6 11Z" fill="currentColor"/></svg><span>ARES<span class="brand-sub">MARS EXPLORATION SYSTEM</span></span></a>
-  <div class="top-middle"><span class="live-dot"></span> PLANEJAMENTO DE MISSÃO <span class="divider">/</span> JEZERO, MARTE</div>
-  <button class="button subtle" id="sources-top"><span aria-hidden="true">◈</span> Dados & fontes <span class="key">D</span></button>
+  <a class="brand" href="./" aria-label="ARES home"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 32 20 6l15 26H5Zm9-5h12L20 16l-6 11Z" fill="currentColor"/></svg><span>ARES<span class="brand-sub">MARS EXPLORATION SYSTEM</span></span></a>
+  <div class="top-middle"><span class="live-dot"></span><span data-t="missionPlanning">PRE-EVA MISSION PLANNING</span><span class="divider">/</span><span data-t="location">JEZERO, MARS</span></div>
+  <div class="header-actions"><label class="sr-only" for="language" data-t="language">Language</label><select id="language" aria-label="Language"><option value="en">EN</option><option value="pt">PT</option></select><button class="button subtle" id="sources-top"><span aria-hidden="true">◈</span><span data-t="sources">Data & evidence</span></button></div>
 </header>
 <div class="shell">
-  <nav class="rail" aria-label="Ferramentas"><button class="rail-item active" id="nav-map" aria-label="Mapa da missão" title="Mapa da missão">⌖</button><button class="rail-item" id="nav-targets" aria-label="Objetivos científicos" title="Objetivos científicos">⚑</button><button class="rail-item" id="nav-data" aria-label="Dados e fontes" title="Dados e fontes">▱</button><div class="rail-bottom">M<br>26</div></nav>
-  <aside class="mission-panel">
-    <div class="eyebrow"><span class="small-line"></span> EXPLORAÇÃO EXTRAVEICULAR</div>
-    <h1>O próximo passo.<br><span>Com um plano.</span></h1>
-    <p class="intro">Explore Jezero. Escolha um objetivo e planeje o caminho de volta.</p>
-    <div class="mission-id"><span>MISSÃO ARES–01</span><span class="chip">SIMULAÇÃO</span></div>
-    <section class="control-section" aria-labelledby="destination-heading">
-      <h2 id="destination-heading"><span class="section-number">01</span> Objetivo científico</h2>
-      <label for="destination">Destino da exploração</label>
-      <select id="destination"><option value="delta">Margem do delta</option><option value="rochas">Afloramento rochoso</option><option value="cratera">Transecto de superfície</option></select>
-      <p class="target-description" id="target-description"></p>
+  <nav class="rail" aria-label="Tools"><button class="rail-item active" id="nav-map" aria-label="Mission map" title="Map">⌖</button><button class="rail-item" id="nav-data" aria-label="Data and evidence" title="Evidence">▱</button><a class="rail-item" href="mission-brief.html" aria-label="Mission brief" title="Mission brief">↗</a><div class="rail-bottom">M<br>26</div></nav>
+  <div id="sidebar-home">
+  <aside class="mission-panel" id="mission-settings">
+    <button class="close-button settings-close" id="close-settings" data-aria="close" aria-label="Close">×</button>
+    <div class="eyebrow"><span class="small-line"></span><span data-t="eyebrow">ONE SITE. ONE SCIENCE QUESTION.</span></div>
+    <h1 data-t="headline">Walk with evidence.</h1><p class="intro" data-t="intro">Plan a return journey to a real Perseverance sampling workspace.</p>
+    <div class="mission-id"><span data-t="mission">MISSION ARES–02</span><span class="chip" data-t="prototype">RESEARCH PROTOTYPE</span></div>
+    <section class="control-section"><h2><span class="section-number">01</span><span data-t="targetHeading">Science destination</span></h2><div class="target-box"><strong data-t="targetSubtitle">Rochette · Artuby ridge</strong><span data-t="targetLocation">18.43074° N · 77.44437° E</span><p data-t="targetDescription">The workspace associated with Montdenier and Montagnac, Perseverance’s first collected rock cores.</p><button id="locate-target" data-t="locateTarget">Locate Rochette ↗</button></div></section>
+    <section class="control-section"><h2><span class="section-number">02</span><span data-t="parameters">Time assumptions</span></h2>
+      <div class="range-label"><label for="autonomy" data-t="autonomy">Available EVA time</label><output id="autonomy-value" for="autonomy">240 min</output></div><input id="autonomy" type="range" min="60" max="480" step="15" value="240">
+      <div class="range-label"><label for="work" data-t="work">Science work</label><output id="work-value" for="work">30 min</output></div><input id="work" type="range" min="0" max="120" step="5" value="30">
+      <div class="parameter-pair"><div><label for="speed" data-t="speed">Walking pace (km/h)</label><input id="speed" type="number" min="0.5" max="6" step="0.1" value="2.5"></div><div><label for="reserve" data-t="reserve">Reserve (min)</label><input id="reserve" type="number" min="0" max="180" step="5" value="45"></div></div>
+      <p class="parameter-note" data-t="assumption">Pace and EVA time are user assumptions, not predictions of suit oxygen or physiological performance.</p>
     </section>
-    <section class="control-section" aria-labelledby="parameters-heading">
-      <h2 id="parameters-heading"><span class="section-number">02</span> Parâmetros da missão</h2>
-      <div class="range-label"><label for="autonomy">Autonomia disponível</label><output id="autonomy-value" for="autonomy">240 min</output></div><input id="autonomy" type="range" min="60" max="480" step="15" value="240">
-      <div class="range-label"><label for="work">Tempo de pesquisa</label><output id="work-value" for="work">30 min</output></div><input id="work" type="range" min="0" max="120" step="5" value="30">
-      <div class="parameter-pair"><div><label for="speed">Caminhada (km/h)</label><input id="speed" type="number" min="0.5" max="6" step="0.1" value="2.5"></div><div><label for="reserve">Reserva (min)</label><input id="reserve" type="number" min="0" max="180" step="5" value="45"></div></div>
-      <p class="parameter-note">Velocidade constante e autonomia são hipóteses ajustáveis do cenário.</p>
-    </section>
-    <section class="control-section route-section"><h2><span class="section-number">03</span> Estratégia de percurso</h2><div class="segmented" role="group" aria-label="Estratégia de percurso"><button class="selected" id="route-avoid" aria-pressed="true">Desviar das zonas</button><button id="route-direct" aria-pressed="false">Linha direta</button></div><p class="parameter-note">Zonas hipotéticas de exclusão para demonstrar desvios. Não derivadas de obstáculos NASA.</p></section>
-    <button class="button primary" id="plan">Calcular missão <span aria-hidden="true">↗</span></button>
-    <button class="button export" id="export">↓ Exportar plano da missão</button>
+    <section class="control-section"><h2><span class="section-number">03</span><span data-t="policy">Terrain policy</span></h2><div class="range-label"><label for="slope-limit" data-t="slopeLimit">Maximum mapped slope</label><output id="slope-value" for="slope-limit">12°</output></div><input id="slope-limit" type="range" min="3" max="25" step="1" value="12"><p class="parameter-note" data-t="slopeNote">An editable planning assumption, not a NASA EVA limit. Unknown terrain is excluded.</p></section>
+    <section class="control-section route-section"><h2 data-t="strategy">Route strategy</h2><div class="segmented" role="group" aria-label="Route strategy"><button class="selected" id="route-terrain" aria-pressed="true" data-t="terrainAware">Terrain-aware</button><button id="route-direct" aria-pressed="false" data-t="direct">Direct baseline</button></div><p class="parameter-note" data-t="strategyNote">The terrain route penalizes steeper cells in the USGS/NASA elevation grid.</p></section>
+    <button class="button primary" id="plan" disabled><span data-t="calculate">Recalculate mission</span><span aria-hidden="true">↗</span></button><button class="button export" id="export" disabled><span aria-hidden="true">↓</span><span data-t="export">Export plan & evidence</span></button><button class="button settings-done" id="settings-done" data-t="done">Apply & return to map</button>
     <div class="panel-footer"><span class="live-dot"></span> NASA SPACE APPS <span>2026</span></div>
   </aside>
+  </div>
   <main>
-    <div class="page-heading"><div><div class="eyebrow">SETOR DE EXPLORAÇÃO / 001</div><h2>Cratera Jezero<span class="location-tag">MARTE</span></h2></div><div class="coordinates"><span>BASE HIPOTÉTICA</span><strong>18,4663° N &nbsp; 77,4298° E</strong></div></div>
-    <section class="map-card" aria-label="Mapa interativo da cratera Jezero">
-      <canvas id="map" tabindex="0" role="img" aria-label="Mapa NASA de Jezero com habitat hipotético, destino e rota. Arraste para mover; use os botões de zoom. Os destinos também estão disponíveis no seletor."></canvas>
-      <div class="map-top"><span class="map-caption"><span class="live-dot"></span> <span id="layer-caption">MRO · CTX / ÓPTICO</span></span><span class="map-caption light" id="tile-status">Carregando cartografia…</span></div>
-      <div class="layer-picker" role="group" aria-label="Camada de dados"><button data-layer="optical" class="selected" aria-pressed="true">◉ Óptico</button><button data-layer="topography" aria-pressed="false">≋ Relevo</button><button data-layer="thermal" aria-pressed="false">◐ Infravermelho</button></div>
-      <div class="map-tools"><button id="zoom-in" aria-label="Aproximar mapa">+</button><button id="zoom-out" aria-label="Afastar mapa">−</button><button id="recenter" aria-label="Centralizar mapa">⌖</button><button id="fullscreen-map" aria-label="Ampliar mapa em tela cheia">⛶</button></div>
-      <div class="imagery-controls"><button id="toggle-overlays" aria-pressed="true">Ocultar marcações</button><button id="view-mission" hidden>Ver missão de perto ↗</button></div>
-      <div class="layer-description" id="layer-description">Detalhe da exploração · mosaico CTX de Jezero</div>
-      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i> Ida e volta pelo mesmo percurso</span><span><i class="legend-zone"></i> Exclusão simulada</span></div>
-      <div class="scale"><div></div><span id="scale-text">1 km</span></div>
-      <div class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span><span id="coverage-note"></span></div>
-      <div class="map-empty" id="map-empty" hidden>Cartografia indisponível neste momento.<br><small>A rota continua disponível no esquema de coordenadas. Consulte Dados & fontes.</small></div>
+    <div class="page-heading"><div><div class="eyebrow" data-t="sector">NASA MARS 2020 / JEZERO</div><h2 data-t="pageTitle">A mission to Rochette</h2></div><button class="button settings-open" id="open-settings"><span aria-hidden="true">☷</span><span data-t="settings">Plan settings</span></button></div>
+    <div class="evidence-banner"><span class="live-dot"></span><span id="terrain-status" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</span></div>
+    <section class="map-card" aria-label="Jezero mission map">
+      <canvas id="map" tabindex="0" role="img" data-aria="mapAccessible" aria-label="Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect."></canvas>
+      <div class="map-top"><span class="map-caption"><span class="live-dot"></span><span id="layer-caption" data-t="opticalCaption">MRO · CTX / OPTICAL</span></span><span class="map-caption light" id="tile-status" data-t="loading">Loading evidence…</span></div>
+      <div class="layer-picker" role="group" aria-label="Map layer"><button data-layer="optical" class="selected" aria-pressed="true" data-t="optical">Optical</button><button data-layer="slope" aria-pressed="false" data-t="slope">Slope</button><button data-layer="topography" aria-pressed="false" data-t="topography">Regional relief</button><button data-layer="thermal" aria-pressed="false" data-t="thermal">Infrared</button></div>
+      <div class="layer-description" id="layer-description" data-t="opticalDescription">Local CTX imagery · route driven by a separate numerical terrain grid</div>
+      <div class="map-tools"><button id="zoom-in" data-aria="zoomIn" aria-label="Zoom in">+</button><button id="zoom-out" data-aria="zoomOut" aria-label="Zoom out">−</button><button id="recenter" data-aria="centerMap" aria-label="Center map">⌖</button><button id="fullscreen-map" data-aria="expandMap" aria-label="Expand map">⛶</button></div>
+      <div class="imagery-controls"><button id="toggle-overlays" aria-pressed="true" data-t="hideMarks">Hide markings</button><button id="view-mission" data-t="missionClose" hidden>Back to mission detail ↗</button></div>
+      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i><span data-t="routeLegend">Terrain-aware route</span></span><span><i class="legend-direct"></i><span data-t="directLegend">Direct baseline</span></span><span><i class="legend-terrain"></i><span data-t="thresholdLegend">Above assumed slope limit</span></span></div>
+      <div id="slope-legend" class="slope-legend" hidden><span data-t="slopeLow">Lower slope</span><i></i><span data-t="slopeHigh">Higher slope</span></div>
+      <div class="scale"><div></div><span id="scale-text">500 m</span></div>
+      <div class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span></div>
+      <div class="map-empty" id="map-empty" hidden><span data-t="mapError">Map imagery is unavailable.</span><br><small data-t="mapErrorHint">The numerical terrain model and plan can still be inspected in the evidence panel.</small></div>
     </section>
-    <section class="mission-summary" aria-label="Resumo calculado da missão" aria-live="polite">
-      <div class="summary-heading"><h2>Seu plano de exploração</h2><span class="result-chip" id="result-chip">CALCULANDO</span></div>
-      <div class="metrics"><article><span class="metric-label">↔ DISTÂNCIA TOTAL</span><strong id="distance-metric">—</strong><small>Inclui ida e volta</small></article><article><span class="metric-label">◷ TEMPO DE MISSÃO</span><strong id="time-metric">—</strong><small>Caminhada + pesquisa</small></article><article><span class="metric-label">◴ AUTONOMIA RESTANTE</span><strong id="remaining-metric">—</strong><small id="reserve-caption">Reserva configurada: 45 min</small></article></div>
-      <div class="budget-track" aria-label="Distribuição do tempo disponível"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i> Caminhada</span><span><i class="research"></i> Pesquisa</span><span><i class="reserve"></i> Reserva</span></div>
-      <div class="insight" id="insight"></div>
+    <div class="terrain-inspector"><span aria-hidden="true">⌖</span><span id="terrain-sample" data-t="inspectSample">Hover or tap the map to inspect the terrain cell.</span></div>
+    <section class="mission-summary" id="mission-summary" aria-label="Calculated mission plan" aria-live="polite">
+      <div class="summary-heading"><h2 data-t="summary">Your exploration plan</h2><span class="result-chip" id="result-chip" data-t="statusLoading">LOADING TERRAIN</span></div>
+      <div class="metrics"><article><span class="metric-label" data-t="distance">ROUND-TRIP DISTANCE</span><strong id="distance-metric">—</strong><small data-t="returnIncluded">Includes return to the habitat</small></article><article><span class="metric-label" data-t="duration">BASE-CASE TIME</span><strong id="time-metric">—</strong><small data-t="walkAndWork">Walking + science work</small></article><article><span class="metric-label" data-t="remaining">BASE-CASE TIME LEFT</span><strong id="remaining-metric">—</strong><small id="reserve-caption">Configured reserve: 45 min</small></article></div>
+      <div class="budget-track" aria-label="Time allocation"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i><span data-t="walkLabel">Walking</span></span><span><i class="research"></i><span data-t="workLabel">Science</span></span><span><i class="reserve"></i><span data-t="reserveLabel">Reserve</span></span></div>
+      <div class="insight" id="insight" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</div>
     </section>
-    <section class="science-row"><article class="science-card"><span class="eyebrow">A PERGUNTA CIENTÍFICA</span><h3>O que a água deixou para trás?</h3><p>O antigo delta de Jezero preserva registros da história de um lago marciano. O cenário propõe observar e coletar amostras desses materiais.</p><a href="https://www.jpl.nasa.gov/news/nasas-perseverance-rover-deciphers-ancient-history-of-martian-lake/" target="_blank" rel="noopener noreferrer">Conhecer a ciência da missão ↗</a></article><article class="science-card data-card"><span class="eyebrow">DADOS QUE DÃO CONTEXTO</span><h3>Três olhares sobre Marte.</h3><div class="data-types"><span>01 <b>Óptico</b> MRO · CTX</span><span>02 <b>Topográfico</b> MGS · MOLA</span><span>03 <b>Térmico</b> Odyssey · THEMIS</span></div><button id="sources-bottom">Explorar fontes e limitações ↗</button></article></section>
-    <footer class="main-footer"><span>ARES / PROTÓTIPO DE EXPLORAÇÃO</span><span>Cartografia real. Missão e zonas de exclusão simuladas.</span></footer>
+    <section class="comparison-card" id="comparison-section"><div class="card-heading"><div><span class="eyebrow" data-t="choice">WHY THIS ROUTE</span><h3 data-t="comparison">What changes when terrain matters?</h3></div><a href="assets/validation-report.json" target="_blank" rel="noopener noreferrer" data-t="validation">Reproducible scenario</a></div><p class="section-description" data-t="comparisonIntro">Both routes connect the same hypothetical habitat and the same NASA-documented workspace.</p><div class="table-wrap"><table class="comparison-table"><thead><tr><th scope="col" data-t="method">Route</th><th scope="col" data-t="roundTrip">Round trip</th><th scope="col" data-t="maxSlope">Max mapped slope</th><th scope="col" data-t="aboveLimit">Cells above limit</th><th scope="col" data-t="terrainCost">Terrain cost index</th></tr></thead><tbody id="comparison-body"><tr><td colspan="5">—</td></tr></tbody></table></div><p class="decision-text" id="route-explanation"></p><p class="parameter-note" data-t="terrainCostNote">Relative cost = distance × [1 + 4 × (slope / limit)²]. A prototype weighting, not metabolic energy.</p></section>
+    <section class="profile-card"><div class="card-heading"><h3 data-t="profile">Elevation along the outbound route</h3><span id="ascent-metric"></span></div><div id="elevation-profile" class="elevation-profile"></div><p class="parameter-note" data-t="profileNote">Elevations sampled from the USGS model. The return retraces this path.</p></section>
+    <section class="sensitivity-card"><div class="card-heading"><h3 data-t="sensitivity">If the walk takes longer</h3></div><p class="section-description" data-t="sensitivityIntro">These are explicit what-if scenarios, not statistical confidence intervals.</p><div class="table-wrap"><table class="scenario-table"><thead><tr><th scope="col" data-t="scenario">Scenario</th><th scope="col" data-t="pace">Pace</th><th scope="col" data-t="total">Mission time</th><th scope="col" data-t="left">Time left</th><th scope="col" data-t="reserveCheck">Reserve check</th></tr></thead><tbody id="scenario-body"><tr><td colspan="5">—</td></tr></tbody></table></div><p class="parameter-note" data-t="scenarioAssumptions">Faster: pace ×1.20, work ×0.85. Conservative: pace ×0.75, work ×1.25. Return is included in every scenario.</p></section>
+    <aside class="scope-note"><strong data-t="scope">TIME BUDGET, NOT A SUIT MODEL</strong><p data-t="limits">The model does not certify safety or estimate oxygen, radiation, weather, fatigue, or small obstacles. Orbital data cannot resolve every hazard.</p></aside>
+    <section class="science-row"><article class="science-card"><span class="eyebrow" data-t="questionLabel">THE SCIENCE QUESTION</span><h3 data-t="question">What can altered basalt tell us about water in Jezero?</h3><p data-t="scienceText">Rochette is a basaltic rock workspace associated with the Montdenier and Montagnac samples. NASA describes salts that may record interaction with water. The proposed EVA would document textures and mineral context; it does not claim evidence of life.</p><p class="coordinate-note" data-t="coordinateNote">NASA waypoint 7_0, sol 180. This is a rover workspace position, not the exact center of a drill hole. Decimal precision is not a statement of geodetic accuracy.</p><div class="science-links"><a href="assets/rochette-waypoint.geojson" target="_blank" rel="noopener noreferrer" data-t="coordinates">Coordinate evidence</a><a href="https://doi.org/10.1029/2022JE007474" target="_blank" rel="noopener noreferrer" data-t="scienceEvidence">Scientific evidence</a></div></article><article class="science-card data-card"><span class="eyebrow" data-t="dataHeading">THREE DATA TYPES. DISTINCT ROLES.</span><h3 data-t="dataTitle">Every layer has a job.</h3><div class="data-list"><p data-t="dataOptical">CTX optical · inspect surface context</p><p data-t="dataTerrain">CTX DEM · constrain and weight the route</p><p data-t="dataThermal">THEMIS infrared · regional context only</p></div><button id="sources-bottom" data-t="evidenceLink">Open sources, methods & limitations ↗</button><a class="brief-link" href="mission-brief.html" data-t="brief">Read the 7-slide mission brief ↗</a></article></section>
+    <footer class="main-footer"><span data-t="footer">ARES / NASA SPACE APPS 2026</span><span data-t="footerNote">Real orbital terrain. Hypothetical human mission. Explicit assumptions.</span></footer>
   </main>
 </div>
-<dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow">PROVENIÊNCIA & TRANSPARÊNCIA</div><h2 id="sources-title">Por trás de cada camada.</h2></div><button id="close-sources" class="close-button" aria-label="Fechar fontes">×</button></div><div id="sources-content"></div></dialog>
+<dialog id="settings-dialog" class="settings-dialog" aria-label="Mission settings"></dialog>
+<dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow" data-t="evidenceEyebrow">PROVENANCE & REPRODUCIBILITY</div><h2 id="sources-title" data-t="evidenceTitle">From observation to decision.</h2></div><button id="close-sources" class="close-button" data-aria="close" aria-label="Close">×</button></div><div id="sources-content"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=maps-2"></script>
+<script type="module" src="app.js?v=mission-3"></script>
 </body></html>
