@@ -2,7 +2,7 @@ import {BASE,TARGET,DEFAULT_POLICY,createTerrain,findTerrainRoute,analyzeRoute,s
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
-import {compareRoutes,DEMO_PARAMETERS} from './decision.js';
+import {compareRoutes,summarizeComparison,DEMO_PARAMETERS} from './decision.js';
 
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d'),dialog=$('sources-dialog'),settingsDialog=$('settings-dialog');
 const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:0,y:0},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
@@ -19,12 +19,13 @@ function clearResults(key){for(const id of ['distance-metric','time-metric','rem
 
 function calculate(){
   const p=params();$('autonomy-value').textContent=p.autonomy+' min';$('work-value').textContent=p.work+' min';$('slope-value').textContent=p.maxSlope+'°';$('reserve-caption').textContent=t('reserveConfigured')+': '+p.reserve+' min';
-  if(!state.terrain){clearResults(state.terrainError?'dataFailed':'dataLoading');setStatus(state.terrainError?'noRoute':'statusLoading',state.terrainError?'danger':'');return;}
+  if(!state.terrain){renderDecision();clearResults(state.terrainError?'dataFailed':'dataLoading');setStatus(state.terrainError?'noRoute':'statusLoading',state.terrainError?'danger':'');return;}
   if(!state.routeCache.has(p.maxSlope))state.routeCache.set(p.maxSlope,findTerrainRoute({x:0,y:0},TARGET,state.terrain,policy()));
   state.terrainRoute=state.routeCache.get(p.maxSlope);
   state.route=state.strategy==='terrain'?state.terrainRoute:state.directRoute;
   state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy())};
   state.comparisons=compareRoutes(state.analyses,p);
+  renderDecision();
   const current=state.analyses[state.strategy];
   $('plan').disabled=false;$('export').disabled=!state.route;$('demo-start').disabled=!!demo;
   renderComparison(p);
@@ -39,6 +40,12 @@ function calculate(){
   renderScenarios();renderProfile(current);draw();
 }
 
+function renderDecision(){
+  const summary=summarizeComparison(state.comparisons);
+  $('decision-summary').textContent=t(summary.key,{route:summary.kind?t(summary.kind==='terrain'?'terrainAware':'direct'):''});
+  $('decision-summary').dataset.outcome=summary.key;
+  $('selected-route').textContent=t('inspectingRoute',{route:t(state.strategy==='terrain'?'terrainAware':'direct')});
+}
 function renderComparison(p){
   const body=$('comparison-body');body.replaceChildren();
   for(const kind of ['direct','terrain']){
@@ -144,7 +151,7 @@ function applyLanguage(next){setLanguage(next);$('language').value=language;tran
 let preferred='en';try{preferred=new URL(location.href).searchParams.get('lang')||localStorage.getItem('ares-language')||'en';}catch{}setLanguage(preferred);$('language').value=language;translatePage();
 $('comprehension-test-link').href='comprehension-test.html?lang='+language;
 $('language').addEventListener('change',()=>applyLanguage($('language').value));
-for(const id of ['sources-top','sources-bottom','nav-data'])$(id).addEventListener('click',showSources);$('close-sources').addEventListener('click',()=>dialog.close());
+for(const id of ['sources-top','sources-bottom','nav-data','quick-evidence'])$(id).addEventListener('click',showSources);$('close-sources').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 for(const id of ['autonomy','work','slope-limit'])$(id).addEventListener('input',calculate);for(const id of ['speed','reserve'])$(id).addEventListener('change',calculate);
 function chooseRoute(strategy){state.strategy=strategy;for(const kind of ['terrain','direct']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
@@ -158,10 +165,10 @@ function renderDemo(){
 function setDemoStep(step){demo.step=step;setParameters({...DEMO_PARAMETERS,reserve:step===0?45:50});chooseRoute(step===2?'direct':'terrain');renderDemo();}
 function startDemo(){
   if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
-  for(const id of demoInputs)$(id).disabled=true;$('open-settings').disabled=true;setLayer('optical');setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
+  for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setLayer('optical');setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
 }
 function finishDemo(){
-  if(!demo)return;const snapshot=demo.snapshot;demo=null;for(const id of demoInputs)$(id).disabled=false;$('open-settings').disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
+  if(!demo)return;const snapshot=demo.snapshot;demo=null;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
 }
 $('demo-start').addEventListener('click',startDemo);$('demo-previous').addEventListener('click',()=>{if(demo&&demo.step>0)setDemoStep(demo.step-1);});$('demo-next').addEventListener('click',()=>{if(!demo)return;if(demo.step===2)finishDemo();else setDemoStep(demo.step+1);});$('demo-exit').addEventListener('click',finishDemo);
 $('plan').addEventListener('click',()=>{calculate();recenter();toast(t('recalculated'));});$('export').addEventListener('click',exportPlan);
@@ -176,9 +183,10 @@ $('fullscreen-map').addEventListener('click',async()=>{if(document.fullscreenEle
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mapCard.classList.contains('map-expanded'))expandedFallback(false);});
 const sidebar=$('mission-settings'),sidebarHome=$('sidebar-home'),mobile=matchMedia('(max-width:900px)');
 function syncSettings(){const home=settingsDialog.open||mobile.matches?settingsDialog:sidebarHome;if(sidebar.parentElement!==home)home.append(sidebar);$('open-settings').setAttribute('aria-expanded',String(settingsDialog.open));}
-function openSettings(){if(settingsDialog.open)return;settingsDialog.append(sidebar);settingsDialog.showModal();syncSettings();$('autonomy').focus({preventScroll:true});}
+function openSettings(){if(settingsDialog.open||demo)return;settingsDialog.append(sidebar);settingsDialog.showModal();syncSettings();$('autonomy').focus({preventScroll:true});}
 function closeSettings(){if(settingsDialog.open)settingsDialog.close();syncSettings();}
 $('open-settings').addEventListener('click',openSettings);$('close-settings').addEventListener('click',closeSettings);$('settings-done').addEventListener('click',()=>{calculate();closeSettings();$('mission-summary').scrollIntoView({block:'center',behavior:'smooth'});});settingsDialog.addEventListener('close',syncSettings);mobile.addEventListener('change',syncSettings);syncSettings();
+$('quick-settings').addEventListener('click',openSettings);$('quick-compare').addEventListener('click',()=>{const section=$('comparison-section');section.scrollIntoView({block:'start',behavior:'smooth'});section.focus({preventScroll:true});});
 $('nav-map').addEventListener('click',()=>{canvas.scrollIntoView({block:'center',behavior:'smooth'});canvas.focus({preventScroll:true});});
 canvas.addEventListener('pointerdown',e=>{state.drag={x:e.clientX,y:e.clientY,start:{...state.center},moved:false};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();if(state.drag){const dx=e.clientX-state.drag.x,dy=e.clientY-state.drag.y;if(Math.hypot(dx,dy)>5)state.drag.moved=true;state.center={x:state.drag.start.x-dx/state.scale,y:state.drag.start.y+dy/state.scale};constrain();draw();}else inspect(ground({x:e.clientX-rect.left,y:e.clientY-rect.top}));});
