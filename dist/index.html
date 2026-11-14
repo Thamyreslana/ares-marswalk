@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
   <title>ARES — Evidence-based Marswalk Planning</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=ares-04b"><link rel="stylesheet" href="mission.css?v=ares-04b">
+  <link rel="stylesheet" href="style.css?v=ares-05b"><link rel="stylesheet" href="mission.css?v=ares-05b">
 </head>
 <body>
 <header class="topbar">
@@ -30,7 +30,7 @@
       <p class="parameter-note" data-t="assumption">Pace and EVA time are user assumptions, not predictions of suit oxygen or physiological performance.</p>
     </section>
     <section class="control-section"><h2><span class="section-number">03</span><span data-t="policy">Terrain policy</span></h2><div class="range-label"><label for="slope-limit" data-t="slopeLimit">Maximum mapped slope</label><output id="slope-value" for="slope-limit">12°</output></div><input id="slope-limit" type="range" min="3" max="25" step="1" value="12"><p class="parameter-note" data-t="slopeNote">An editable planning assumption, not a NASA EVA limit. Unknown terrain is excluded.</p></section>
-    <section class="control-section route-section"><h2 data-t="strategy">Route strategy</h2><div class="segmented" role="group" aria-label="Route strategy"><button class="selected" id="route-terrain" aria-pressed="true" data-t="terrainAware">Terrain-aware</button><button id="route-direct" aria-pressed="false" data-t="direct">Direct baseline</button></div><p class="parameter-note" data-t="strategyNote">The terrain route penalizes steeper cells in the USGS/NASA elevation grid.</p></section>
+    <section class="control-section route-section"><h2 data-t="strategy">Route strategy</h2><div class="segmented" role="group" aria-label="Route strategy"><button class="selected" id="route-terrain" aria-pressed="true" data-t="terrainAware">Terrain-aware</button><button id="route-direct" aria-pressed="false" data-t="direct">Direct baseline</button><button id="route-loose" aria-pressed="false" data-t="looseShort">Avoid loose ground</button></div><p class="parameter-note" data-t="strategyNote">The terrain route penalizes steeper cells in the USGS/NASA elevation grid.</p></section>
     <button class="button primary" id="plan" disabled><span data-t="calculate">Recalculate mission</span><span aria-hidden="true">↗</span></button><button class="button export" id="export" disabled><span aria-hidden="true">↓</span><span data-t="export">Export plan & evidence</span></button><button class="button settings-done" id="settings-done" data-t="done">Apply & return to map</button>
     <div class="panel-footer"><span class="live-dot"></span> NASA SPACE APPS <span>2026</span></div>
   </aside>
@@ -52,7 +52,7 @@
       <canvas id="map" tabindex="0" role="img" data-aria="mapAccessible" aria-label="Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect."></canvas>
       <div class="layer-picker" role="group" aria-label="Map layer"><button data-layer="optical" class="selected" aria-pressed="true" data-t="optical">Optical</button><button data-layer="slope" aria-pressed="false" data-t="slope">Slope</button><button data-layer="night" aria-pressed="false" data-t="night">Night IR</button><button data-layer="topography" aria-pressed="false" data-t="topography">Regional relief</button></div>
       <div class="map-tools"><button id="zoom-in" data-aria="zoomIn" aria-label="Zoom in">+</button><button id="zoom-out" data-aria="zoomOut" aria-label="Zoom out">−</button><button id="recenter" data-aria="centerMap" aria-label="Center map">⌖</button><button id="fullscreen-map" data-aria="expandMap" aria-label="Expand map">⛶</button></div>
-      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i><span data-t="routeLegend">Terrain-aware route</span></span><span><i class="legend-direct"></i><span data-t="directLegend">Direct baseline</span></span><span class="legend-hazard"><i class="legend-terrain"></i><span data-t="thresholdLegend">Above assumed slope limit</span></span>
+      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i><span data-t="routeLegend">Terrain-aware route</span></span><span><i class="legend-alt"></i><span data-t="altLegend">Other routes (B / C)</span></span><span><i class="legend-direct"></i><span data-t="directLegend">Direct baseline</span></span><span class="legend-hazard"><i class="legend-terrain"></i><span data-t="thresholdLegend">Above assumed slope limit</span></span><span id="traverse-legend"><i class="legend-traverse"></i><span><span data-t="traverseLegend">Perseverance traverse, sols</span> <span id="traverse-sols">15–1006</span></span></span>
         <div id="slope-legend" class="slope-legend" hidden><span data-t="slopeLow">Lower slope</span><i></i><span data-t="slopeHigh">Higher slope</span></div>
         <div id="night-legend" class="night-legend" hidden><span><i class="night-cool"></i><span data-t="nightCool">Cool at night · likely loose material</span></span><span><i class="night-warm"></i><span data-t="nightWarm">Warm at night · likely rock</span></span></div></div>
       <div class="scale"><div></div><span id="scale-text">500 m</span></div>
@@ -60,7 +60,7 @@
     </section>
     <div class="map-footnote">
       <p class="map-footnote-text"><span class="evidence-banner"><span class="live-dot"></span><span id="terrain-status" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</span></span><span><strong id="layer-caption" data-t="opticalCaption">MRO · CTX / OPTICAL</strong> · <span id="layer-description" data-t="opticalDescription">Local CTX imagery · route driven by a separate numerical terrain grid</span></span><span class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span> · <span id="tile-status" data-t="loading">Loading evidence…</span></span></p>
-      <div class="map-footnote-actions"><button id="toggle-overlays" aria-pressed="true" data-t="hideMarks">Hide markings</button><button id="view-mission" data-t="missionClose" hidden>Back to mission detail ↗</button></div>
+      <div class="map-footnote-actions"><button id="toggle-traverse" aria-pressed="true" data-t="hideTraverse">Hide rover traverse</button><button id="toggle-overlays" aria-pressed="true" data-t="hideMarks">Hide markings</button><button id="view-mission" data-t="missionClose" hidden>Back to mission detail ↗</button></div>
     </div>
     <div class="terrain-inspector"><span aria-hidden="true">⌖</span><span id="terrain-sample" data-t="inspectSample">Hover or tap the map to inspect the terrain cell.</span></div>
     <section class="sim-card" id="sim-card" aria-labelledby="sim-title">
@@ -120,13 +120,13 @@
 <dialog id="eva-dialog" class="eva-dialog" aria-labelledby="eva-title">
   <div class="eva-hud" id="eva-hud" data-level="ok">
     <header class="eva-top"><div><span class="eva-kicker" data-t="evaKicker">ARES · CREW EVA VIEW · SIMULATED</span><h2 id="eva-title" data-t="evaTitle">Sortie to Rochette</h2></div><output class="eva-clock" id="eva-clock">T+0</output><button class="eva-close" id="eva-close" type="button" data-aria="close" aria-label="Close">×</button></header>
-    <div class="eva-status" role="status"><strong id="eva-status-text">ON PLAN</strong><span id="eva-status-sub"></span></div>
+    <div class="eva-status"><div class="eva-status-text" role="status"><strong id="eva-status-text">ON PLAN</strong><span id="eva-status-sub"></span></div><div class="eva-actions"><button class="eva-return" id="eva-return" type="button" data-t="evaReturn">Return to base</button><button class="eva-emergency" id="eva-emergency" type="button" data-t="evaEmergency">Emergency</button><button class="eva-resume" id="eva-resume" type="button" data-t="evaResume" hidden>Cancel return</button></div></div>
     <div class="eva-body">
       <svg id="eva-map" class="eva-map" role="img" data-aria="evaMapLabel" aria-label="Route overview with the crew position"></svg>
       <div class="eva-cards">
         <div class="eva-card eva-primary"><span id="eva-count-label" data-t="evaLeaveIn">LEAVE ROCHETTE IN</span><strong id="eva-count">—</strong><small id="eva-count-sub"></small></div>
-        <div class="eva-card"><span data-t="evaNext">NEXT</span><strong id="eva-next">—</strong><small id="eva-bearing"></small></div>
-        <div class="eva-card"><span data-t="evaShelter">SHELTER · SLOW PACE</span><strong id="eva-shelter">—</strong><small data-t="evaShelterSub">walk back to the habitat from here</small></div>
+        <div class="eva-card eva-next-card"><span data-t="evaNext">NEXT</span><div class="eva-next-row"><svg class="eva-arrow" id="eva-arrow" viewBox="-12 -12 24 24" aria-hidden="true"><path d="M0 -10 L7 8 L0 4 L-7 8 Z"/></svg><div><strong id="eva-next">—</strong><small id="eva-bearing"></small></div></div></div>
+        <div class="eva-card"><span data-t="evaShelter">SHELTER · SLOW PACE</span><strong id="eva-shelter">—</strong><small id="eva-shelter-sub">walk back to the habitat from here</small></div>
         <div class="eva-card"><span data-t="evaGround">GROUND · NEXT 200 M</span><strong id="eva-ground">—</strong><small id="eva-slope"></small></div>
         <div class="eva-card"><span data-t="evaDose">COSMIC-RAY DOSE · SO FAR</span><strong id="eva-dose">—</strong><small data-t="evaDoseSub">Curiosity RAD rate · 0.67 mSv/day</small></div>
       </div>
@@ -136,5 +136,5 @@
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=ares-04b"></script>
+<script type="module" src="app.js?v=ares-05b"></script>
 </body></html>

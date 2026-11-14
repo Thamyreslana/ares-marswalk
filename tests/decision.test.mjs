@@ -11,11 +11,11 @@ test('a blocked route never receives a positive overall verdict from spare time'
 test('an unavailable route has no invented time, reserve or walkback result',()=>{const c=compareRoutes({direct:analyses.direct,terrain:null},DEMO_PARAMETERS);assert.equal(c.terrain.status,'noRoute');assert.deepEqual(c.terrain.scenarios,[]);assert.equal(c.terrain.reserveMargin,null);assert.equal(c.terrain.walkback,null);});
 
 test('the decision summary follows the actual terrain and time checks',()=>{
-  assert.deepEqual(summarizeComparison(compareRoutes(analyses,DEMO_PARAMETERS)),{key:'decisionOne',kind:'terrain'});
+  assert.deepEqual(summarizeComparison(compareRoutes(analyses,DEMO_PARAMETERS)),{key:'decisionOne',kind:'terrain',kinds:['terrain']});assert.deepEqual(summarizeComparison(compareRoutes({...analyses,loose:analyses.terrain},DEMO_PARAMETERS)),{key:'decisionMany',kind:null,kinds:['terrain','loose']});
   assert.equal(summarizeComparison(compareRoutes(analyses,{...DEMO_PARAMETERS,work:DEMO_LONG_WORK})).key,'decisionConditional');
   assert.equal(summarizeComparison(compareRoutes(analyses,{...DEMO_PARAMETERS,autonomy:60})).key,'decisionRevise');
   const bothPassable={...analyses,direct:{...analyses.direct,passable:true}};
-  assert.deepEqual(summarizeComparison(compareRoutes(bothPassable,DEMO_PARAMETERS)),{key:'decisionBoth',kind:null});
+  assert.deepEqual(summarizeComparison(compareRoutes(bothPassable,DEMO_PARAMETERS)),{key:'decisionMany',kind:null,kinds:['direct','terrain']});
 });
 
 test('summary does not make a route choice without terrain data',()=>{

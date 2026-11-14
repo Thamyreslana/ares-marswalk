@@ -29,6 +29,13 @@ Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installe
 
 Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
 
+## What changed in ARES-05
+
+- **Routes A / B / C.** A = direct line (blocked: 23.2°), B = terrain-aware (recommended), C = terrain-aware that also avoids ground in the coolest night-IR quartile (**experimental**; cost × 2 on those cells). C cuts likely-loose ground from 25% to 2.7% of the way for 242 m more, and its conservative scenario falls 0.2 min below the 45 min reserve, so the summary keeps B as the only route that passes everything. Map tags A/B/C match the comparison cards; the selected route is cyan (white on the night layer), alternatives grey.
+- **Ground already driven.** `tools/prepare-traverse.mjs` clips NASA/JPL's Perseverance traverse (MMGIS `M20_traverse.json`) to the map and converts it to the local frame (`dist/assets/perseverance-traverse.json`, sols 15–1006). Drawn as a sand dotted line with a show/hide button. It shows rover-proven ground, not a certified walking path.
+- **Return to base and Emergency** in the crew view. Both send the crew back from the current position along the checked route: *Return* at the planned pace, *Emergency* at the slower pace with "base alerted (simulated)". The view shows a heading arrow to the habitat, the return path on the mini-map, time to base and reserve on arrival; *Cancel return* resumes the plan.
+- **Fewer frames.** Only the decision metrics, the map, the playback, the route cards and the crew view keep a frame; secondary sections use a single top rule. The side accent bars were replaced by full status-coloured borders.
+
 ## What changed in ARES-04
 
 - **Crew EVA view** (`Crew EVA view` button, or `?view=eva`). One glanceable screen for the astronaut, driven by the EVA playback: a status bar (ON PLAN / LEAVE SOON / TURN BACK NOW), a countdown to the leave-by time, the next waypoint with heading, time to shelter at a slower pace, the ground and maximum slope over the next 200 m (USGS DEM + THEMIS Night IR), and the cosmic-ray dose so far (Curiosity RAD rate). It is labelled as simulated from the plan, not live telemetry.

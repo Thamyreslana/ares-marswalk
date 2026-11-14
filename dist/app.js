@@ -1,12 +1,13 @@
-import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,createNightIr,analyzeSurface,nightClass,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong,evaTimeline,evaStateAt,gcrDose,bearingDeg,compassPoint,lookAhead} from './planner.js';
+import {BASE as MAP_ORIGIN,HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,createNightIr,loosePenalty,analyzeSurface,nightClass,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong,evaTimeline,evaStateAt,abortPlan,gcrDose,bearingDeg,compassPoint,lookAhead} from './planner.js';
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
-import {compareRoutes,summarizeComparison,DEMO_PARAMETERS,DEMO_LONG_WORK} from './decision.js';
+import {compareRoutes,summarizeComparison,DEMO_PARAMETERS,DEMO_LONG_WORK,ROUTE_KINDS} from './decision.js';
+const routeName=kind=>t({direct:'routeA',terrain:'routeB',loose:'routeC'}[kind]);
 
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d'),dialog=$('sources-dialog'),settingsDialog=$('settings-dialog');
 const MIDPOINT=Object.freeze({x:(HABITAT.x+TARGET.x)/2,y:(HABITAT.y+TARGET.y)/2});
-const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:HABITAT.x,y:HABITAT.y},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
+const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,looseRoute:null,directRoute:[{x:HABITAT.x,y:HABITAT.y},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map(),traverse:null,showTraverse:true};
 let toastTimer;
 let demo=null;
 const localLayer=()=>state.layer==='optical'||state.layer==='slope'||state.layer==='night';
@@ -23,9 +24,13 @@ function calculate(){
   if(!state.terrain){renderDecision();clearResults(state.terrainError?'dataFailed':'dataLoading');setStatus(state.terrainError?'noRoute':'statusLoading',state.terrainError?'danger':'');return;}
   if(!state.routeCache.has(p.maxSlope))state.routeCache.set(p.maxSlope,findTerrainRoute(HABITAT,TARGET,state.terrain,policy()));
   state.terrainRoute=state.routeCache.get(p.maxSlope);
-  state.route=state.strategy==='terrain'?state.terrainRoute:state.directRoute;
-  state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy())};
-  state.surface={terrain:analyzeSurface(state.terrainRoute,state.terrain,state.night),direct:analyzeSurface(state.directRoute,state.terrain,state.night)};
+  // Route C (experimental) only exists once the THEMIS night layer is loaded.
+  if(state.night&&!state.routeCache.has('loose'+p.maxSlope))state.routeCache.set('loose'+p.maxSlope,findTerrainRoute(HABITAT,TARGET,state.terrain,{...policy(),cellPenalty:loosePenalty(state.night)}));
+  state.looseRoute=state.night?state.routeCache.get('loose'+p.maxSlope):null;
+  if(state.strategy==='loose'&&!state.looseRoute)state.strategy='terrain';
+  state.route={terrain:state.terrainRoute,direct:state.directRoute,loose:state.looseRoute}[state.strategy];
+  state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy()),loose:state.looseRoute?analyzeRoute(state.looseRoute,state.terrain,policy()):null};
+  state.surface={terrain:analyzeSurface(state.terrainRoute,state.terrain,state.night),direct:analyzeSurface(state.directRoute,state.terrain,state.night),loose:analyzeSurface(state.looseRoute,state.terrain,state.night)};
   state.comparisons=compareRoutes(state.analyses,p);
   renderDecision();
   const current=state.analyses[state.strategy];
@@ -55,30 +60,32 @@ function renderRadiation(base,walk,passable){
 }
 
 // EVA playback: a pure timeline (planner) drawn on the map and read out minute by minute.
-const sim={t:0,playing:false,raf:0,last:0,timeline:null};
+const sim={t:0,playing:false,raf:0,last:0,timeline:null,abort:null};
+const simEnd=()=>sim.abort?sim.abort.arrival:sim.timeline.total;
 const PLAYBACK_MS=15000;
 function updateSim(){
   const c=state.comparisons?.[state.strategy],ok=!!(c?.analysis?.passable&&state.params);
   sim.timeline=ok?evaTimeline(c.analysis.outboundMeters,state.params,{slowReturn:$('sim-slow').checked}):null;
   for(const id of ['sim-play','sim-time','sim-slow'])$(id).disabled=!ok;
   if(!ok){stopSim();sim.t=0;$('sim-status').textContent=t('simBlocked');$('sim-status').dataset.level='danger';$('sim-alert').textContent=t('simBlockedText');for(const id of ['sim-phase','sim-distance','sim-shelter','sim-leave'])$(id).textContent='—';$('sim-clock').textContent='—';return;}
-  $('sim-time').max=String(Math.ceil(sim.timeline.total));sim.t=Math.min(sim.t,sim.timeline.total);if(evaDialog.open)buildEvaMap();renderSim();
+  sim.abort=null;$('sim-time').max=String(Math.ceil(simEnd()));sim.t=Math.min(sim.t,simEnd());if(evaDialog.open)buildEvaMap();renderSim();
 }
 function simStatus(tl,s){
+  if(s.aborted){if(s.phase==='home')return s.reserveAtArrival>=tl.reserve?{key:'simAbortHomeOk',level:'ok'}:{key:'simAbortHomeLow',level:'danger'};return s.mode==='emergency'?{key:'simEmergency',level:'danger'}:{key:'simReturnBase',level:'warning'};}
   if(s.phase==='home')return tl.reserveAtArrival>=tl.reserve?{key:'simHomeOk',level:'ok'}:{key:'simHomeLow',level:'danger'};
   if(s.pastLeaveBy)return {key:'simTurnBack',level:'danger'};
   if(s.margin<0)return {key:'simAtRisk',level:'danger'};
   if(s.phase==='work'&&tl.leaveBy-s.t<=15)return {key:'simLeaveSoon',level:'warning'};
   return {key:s.phase==='outbound'?'simOutbound':s.phase==='work'?'simWorking':'simReturning',level:'ok'};
 }
-const chipKey=(s,{key,level})=>(s.phase==='home'||level!=='ok'?key:'simOk')+'Chip';
+const chipKey=(s,{key,level})=>(s.phase==='home'||level!=='ok'||s.aborted?key:'simOk')+'Chip';
 function renderSim(){
-  const tl=sim.timeline;if(!tl)return;const s=evaStateAt(tl,sim.t),status=simStatus(tl,s),{key,level}=status;
+  const tl=sim.timeline;if(!tl)return;const s=evaStateAt(tl,sim.t,sim.abort),status=simStatus(tl,s),{key,level}=status;$('sim-time').max=String(Math.ceil(simEnd()));
   $('sim-time').value=String(Math.round(sim.t));$('sim-clock').textContent='T+'+fmt(Math.floor(s.t))+' min';
   $('sim-phase').textContent=t('simPhase_'+s.phase);$('sim-distance').textContent=fmt(s.distance/1000,2)+' km';$('sim-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';
   $('sim-leave').textContent='T+'+fmt(Math.floor(tl.leaveBy))+' min';
   $('sim-status').textContent=t(chipKey(s,status));$('sim-status').dataset.level=level;
-  $('sim-alert').textContent=t(key,{left:fmt(Math.max(0,Math.floor(tl.leaveBy-s.t))),late:fmt(Math.ceil(s.t-tl.leaveBy)),reserve:fmt(Math.floor(tl.reserveAtArrival)),required:fmt(tl.reserve),arrive:fmt(Math.ceil(tl.outbound)),leave:fmt(Math.floor(tl.leaveBy)),home:fmt(Math.ceil(tl.total))});
+  $('sim-alert').textContent=t(key,{left:fmt(Math.max(0,Math.floor(tl.leaveBy-s.t))),late:fmt(Math.ceil(s.t-tl.leaveBy)),reserve:fmt(Math.floor(tl.reserveAtArrival)),required:fmt(tl.reserve),arrive:fmt(Math.ceil(tl.outbound)),leave:fmt(Math.floor(tl.leaveBy)),home:fmt(Math.ceil(tl.total)),eta:fmt(Math.ceil(s.eta??0)),abortReserve:fmt(Math.floor(s.reserveAtArrival??0)),at:fmt(Math.floor(sim.abort?.t??0))});
   $('sim-alert').dataset.level=level;
   if(evaDialog.open)renderEva(s,status);
 }
@@ -94,7 +101,7 @@ function buildEvaMap(){
   const g=state.terrain,limit=policy().maxSlope,cells=svgEl('g',{class:'eva-hazard'});
   for(let r=0;r<g.rows;r++)for(let c=0;c<g.cols;c++){const i=r*g.cols+c,x=g.xMin+c*g.step,y=g.yMax-r*g.step;if(x<minX||x>maxX||y<minY||y>maxY||!g.valid[i]||g.slopes[i]<=limit)continue;cells.append(svgEl('rect',{x,y:-y,width:g.step,height:g.step}));}
   svg.append(cells);
-  const pts=route.map(p=>`${p.x},${-p.y}`).join(' ');svg.append(svgEl('polyline',{points:pts,class:'eva-route-halo','stroke-width':span*.016}),svgEl('polyline',{points:pts,class:'eva-route','stroke-width':span*.008}));
+  const pts=route.map(p=>`${p.x},${-p.y}`).join(' ');svg.append(svgEl('polyline',{points:pts,class:'eva-route-halo','stroke-width':span*.016}),svgEl('polyline',{points:pts,class:'eva-route','stroke-width':span*.008}),svgEl('polyline',{id:'eva-return-path',points:'',class:'eva-return-path','stroke-width':span*.014}));
   const walk=state.comparisons?.terrain?.walkback;
   if(walk?.status==='beyond'){const lim=pointAlong(route,walk.limitMeters);svg.append(svgEl('polyline',{points:[lim,...route.slice(lim.index)].map(p=>`${p.x},${-p.y}`).join(' '),class:'eva-beyond','stroke-width':span*.009}));}
   const s=span*.018,fs=span*.034;
@@ -104,58 +111,66 @@ function buildEvaMap(){
   svg.append(svgEl('circle',{id:'eva-dot-halo',r:s*2.4,class:'eva-dot-halo',cx:HABITAT.x,cy:-HABITAT.y}),svgEl('circle',{id:'eva-dot',r:s*1.1,class:'eva-dot',cx:HABITAT.x,cy:-HABITAT.y}));
 }
 function renderEva(s,status){
-  const tl=sim.timeline;if(!tl||!state.route)return;s??=evaStateAt(tl,sim.t);status??=simStatus(tl,s);
-  $('eva-hud').dataset.level=status.level;$('eva-clock').textContent='T+'+fmt(Math.floor(s.t));
-  $('eva-status-text').textContent=t(chipKey(s,status));$('eva-status-sub').textContent=t('simPhase_'+s.phase);
+  const tl=sim.timeline;if(!tl||!state.route)return;s??=evaStateAt(tl,sim.t,sim.abort);status??=simStatus(tl,s);
+  $('eva-hud').dataset.level=status.level;$('eva-hud').dataset.mode=s.aborted?s.mode:'plan';$('eva-clock').textContent='T+'+fmt(Math.floor(s.t));
+  $('eva-status-text').textContent=t(chipKey(s,status));
+  $('eva-status-sub').textContent=s.aborted&&s.mode==='emergency'?t('evaAlerted',{at:fmt(Math.floor(sim.abort.t))}):t('simPhase_'+s.phase);
   $('eva-time').max=$('sim-time').max;$('eva-time').value=String(Math.round(sim.t));$('eva-slow').checked=$('sim-slow').checked;
-  const before=s.phase==='outbound'||s.phase==='work',rem=tl.leaveBy-s.t;
-  if(before&&rem>=0){$('eva-count-label').textContent=t('evaLeaveIn');$('eva-count').textContent=fmt(Math.floor(rem))+' min';$('eva-count-sub').textContent=t('evaLeaveAt',{leave:fmt(Math.floor(tl.leaveBy))});}
-  else if(before){$('eva-count-label').textContent=t('evaOverdue');$('eva-count').textContent='+'+fmt(Math.ceil(-rem))+' min';$('eva-count-sub').textContent=t('evaOverdueSub');}
-  else if(s.phase==='return'){$('eva-count-label').textContent=t('evaHomeIn');$('eva-count').textContent=fmt(Math.ceil(tl.total-s.t))+' min';$('eva-count-sub').textContent=t('evaReserveAtHome',{reserve:fmt(Math.floor(tl.reserveAtArrival))});}
-  else{$('eva-count-label').textContent=t('evaHome');$('eva-count').textContent=fmt(Math.floor(tl.reserveAtArrival))+' min';$('eva-count-sub').textContent=t('evaHomeSub',{required:fmt(tl.reserve)});}
-  const route=state.route,p=pointAlong(route,s.distance),dir=s.phase==='return'?-1:1;
-  if(s.phase==='outbound'||s.phase==='return'){
-    const next=dir>0?route[Math.min(p.index,route.length-1)]:route[Math.max(0,p.index-1)],to=dir>0?TARGET:HABITAT,remaining=dir>0?tl.outboundMeters-s.distance:s.distance,heading=bearingDeg(p,Math.hypot(next.x-p.x,next.y-p.y)<5?to:next);
-    $('eva-next').textContent=(dir>0?'Rochette':t('evaHabitat'))+' · '+fmt(remaining/1000,2)+' km';$('eva-bearing').textContent=t('evaHeading',{deg:fmt(Math.round(heading)),pt:compassPoint(heading)});
-    const ahead=lookAhead(route,s.distance,dir,200,state.terrain,state.night);
+  const before=s.phase==='outbound'||s.phase==='work',rem=tl.leaveBy-s.t,count=(label,value,sub)=>{$('eva-count-label').textContent=label;$('eva-count').textContent=value;$('eva-count-sub').textContent=sub;};
+  if(s.phase==='abort')count(t('evaBaseIn'),fmt(Math.ceil(s.eta-s.t))+' min',t('evaAbortSub',{reserve:fmt(Math.floor(s.reserveAtArrival))}));
+  else if(before&&rem>=0)count(t('evaLeaveIn'),fmt(Math.floor(rem))+' min',t('evaLeaveAt',{leave:fmt(Math.floor(tl.leaveBy))}));
+  else if(before)count(t('evaOverdue'),'+'+fmt(Math.ceil(-rem))+' min',t('evaOverdueSub'));
+  else if(s.phase==='return')count(t('evaHomeIn'),fmt(Math.ceil(tl.total-s.t))+' min',t('evaReserveAtHome',{reserve:fmt(Math.floor(tl.reserveAtArrival))}));
+  else{const reserve=s.aborted?s.reserveAtArrival:tl.reserveAtArrival;count(t('evaHome'),fmt(Math.floor(reserve))+' min',t('evaHomeSub',{required:fmt(tl.reserve)}));}
+  const route=state.route,p=pointAlong(route,s.distance),homeward=s.phase==='return'||s.phase==='abort',moving=s.phase==='outbound'||homeward,arrow=$('eva-arrow');
+  if(moving){
+    const next=homeward?route[Math.max(0,p.index-1)]:route[Math.min(p.index,route.length-1)],to=homeward?HABITAT:TARGET,remaining=homeward?s.distance:tl.outboundMeters-s.distance,heading=bearingDeg(p,Math.hypot(next.x-p.x,next.y-p.y)<5?to:next);
+    $('eva-next').textContent=(homeward?t('evaHabitat'):'Rochette')+' · '+fmt(remaining/1000,2)+' km';$('eva-bearing').textContent=t('evaHeading',{deg:fmt(Math.round(heading)),pt:compassPoint(heading)});
+    arrow.hidden=false;arrow.style.transform=`rotate(${heading}deg)`;
+    const ahead=lookAhead(route,s.distance,homeward?-1:1,200,state.terrain,state.night);
     $('eva-ground').textContent=t(ahead.coolShare>=.4?'evaGroundLoose':ahead.warmShare>=.4?'evaGroundRock':'evaGroundMixed');$('eva-slope').textContent=ahead.maxSlope==null?'':t('evaSlopeAhead',{max:fmt(ahead.maxSlope,1)});
-  }else{$('eva-next').textContent=s.phase==='work'?t('evaAtSite'):t('evaHabitat');$('eva-bearing').textContent='';$('eva-ground').textContent='—';$('eva-slope').textContent='';}
-  $('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
+  }else{arrow.hidden=true;$('eva-next').textContent=s.phase==='work'?t('evaAtSite'):t('evaHabitat');$('eva-bearing').textContent='';$('eva-ground').textContent='—';$('eva-slope').textContent='';}
+  $('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-shelter-sub').textContent=t(s.aborted?'evaShelterNearest':'evaShelterSub',{km:fmt(s.distance/1000,2)});$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
   const dot=$('eva-dot'),halo=$('eva-dot-halo');if(dot){for(const el of [dot,halo]){el.setAttribute('cx',p.x);el.setAttribute('cy',-p.y);}}
+  const back=$('eva-return-path');if(back)back.setAttribute('points',homeward?[p,...route.slice(0,p.index).reverse()].map(q=>`${q.x},${-q.y}`).join(' '):'');
+  const active=s.phase!=='home';$('eva-return').hidden=s.aborted||!active;$('eva-emergency').hidden=(s.aborted&&s.mode==='emergency')||!active;$('eva-resume').hidden=!s.aborted;
 }
-function openEva(){
-  if(!state.terrain||demo)return;if(state.strategy!=='terrain')chooseRoute('terrain');if(!sim.timeline)return;
+function abortEva(mode){
+  if(!sim.timeline)return;const s=evaStateAt(sim.timeline,sim.t,sim.abort);if(s.phase==='home')return;
+  sim.abort=abortPlan(sim.timeline,sim.t,mode);renderSim();draw();if(!sim.playing)toggleSim();
+}function openEva(){
+  if(!state.terrain||demo)return;if(!state.analyses?.[state.strategy]?.passable)chooseRoute('terrain');if(!sim.timeline)return;
   closeSettings();buildEvaMap();if(!evaDialog.open)evaDialog.showModal();renderEva();$('eva-play').focus({preventScroll:true});
 }
 function syncPlayButtons(){for(const [btn,icon,label]of [['sim-play','sim-play-icon','sim-play-label'],['eva-play','eva-play-icon','eva-play-label']]){$(btn).setAttribute('aria-pressed',String(sim.playing));$(icon).textContent=sim.playing?'❚❚':'▶';$(label).textContent=t(sim.playing?'simPause':'simPlay');}}
 function stopSim(){sim.playing=false;cancelAnimationFrame(sim.raf);syncPlayButtons();}
 function stepSim(now){
-  if(!sim.playing||!sim.timeline)return;const dt=now-sim.last;sim.last=now;sim.t=Math.min(sim.timeline.total,sim.t+dt*sim.timeline.total/PLAYBACK_MS);
-  renderSim();draw();if(sim.t>=sim.timeline.total){stopSim();return;}sim.raf=requestAnimationFrame(stepSim);
+  if(!sim.playing||!sim.timeline)return;const dt=now-sim.last;sim.last=now;sim.t=Math.min(simEnd(),sim.t+dt*sim.timeline.total/PLAYBACK_MS);
+  renderSim();draw();if(sim.t>=simEnd()){stopSim();return;}sim.raf=requestAnimationFrame(stepSim);
 }
 function toggleSim(){
   if(!sim.timeline)return;if(sim.playing){stopSim();return;}
-  if(sim.t>=sim.timeline.total)sim.t=0;if(!localLayer())setLayer('optical');
+  if(sim.t>=simEnd()){sim.t=0;sim.abort=null;}if(!localLayer())setLayer('optical');
   sim.playing=true;sim.last=performance.now();syncPlayButtons();sim.raf=requestAnimationFrame(stepSim);
 }
 function drawSimMarker(){
-  if(!sim.timeline||!state.route||(sim.t<=0&&!sim.playing))return;const s=evaStateAt(sim.timeline,sim.t),p=pointAlong(state.route,s.distance),q=screen(p);
-  const danger=s.pastLeaveBy||s.margin<0;ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,15,0,Math.PI*2);ctx.fillStyle=danger?'#ff5a4f55':'#5ad1e655';ctx.fill();
+  if(!sim.timeline||!state.route||(sim.t<=0&&!sim.playing))return;const s=evaStateAt(sim.timeline,sim.t,sim.abort),p=pointAlong(state.route,s.distance),q=screen(p);
+  const danger=s.pastLeaveBy||s.margin<0||s.mode==='emergency';ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,15,0,Math.PI*2);ctx.fillStyle=danger?'#ff5a4f55':'#5ad1e655';ctx.fill();
   ctx.beginPath();ctx.arc(q.x,q.y,7,0,Math.PI*2);ctx.fillStyle='#fffaf0';ctx.fill();ctx.lineWidth=3.5;ctx.strokeStyle=danger?'#ff5a4f':'#5ad1e6';ctx.stroke();ctx.restore();
   label(t('simMarker',{t:fmt(Math.floor(s.t))}),q,t('simPhase_'+s.phase).toUpperCase(),danger?'#ffb0a8':'#ffffff',44);
 }
 
 function renderDecision(){
   const summary=summarizeComparison(state.comparisons);
-  $('decision-summary').textContent=t(summary.key,{route:summary.kind?t(summary.kind==='terrain'?'terrainAware':'direct'):''});
+  $('decision-summary').textContent=t(summary.key,{route:summary.kind?routeName(summary.kind):'',routes:summary.kinds.map(routeName).join(t('andJoin'))});
   $('decision-summary').dataset.outcome=summary.key;
-  $('selected-route').textContent=t('inspectingRoute',{route:t(state.strategy==='terrain'?'terrainAware':'direct')});
+  $('selected-route').textContent=t('inspectingRoute',{route:routeName(state.strategy)});
 }
 function renderComparison(p){
   const body=$('comparison-body');body.replaceChildren();
-  for(const kind of ['direct','terrain']){
-    const c=state.comparisons[kind],a=c.analysis,card=document.createElement('article');card.className='route-option '+kind+'-option'+(state.strategy===kind?' is-selected':'');card.dataset.route=kind;
-    const title=document.createElement('h4');title.textContent=t(kind==='terrain'?'terrainAware':'direct');card.append(title);
+  for(const kind of ROUTE_KINDS){
+    const c=state.comparisons[kind],a=c.analysis;if(kind==='loose'&&!a)continue;const card=document.createElement('article');card.className='route-option '+kind+'-option'+(state.strategy===kind?' is-selected':'');card.dataset.route=kind;
+    const title=document.createElement('h4');title.textContent=routeName(kind);if(kind==='loose'){const tag=document.createElement('span');tag.className='route-tag';tag.textContent=t('experimental');title.append(' ',tag);}card.append(title);
     const status=document.createElement('p');status.className='route-verdict '+(c.status==='robust'?'verdict-ok':c.status==='conditional'?'verdict-warning':'verdict-danger');status.textContent=t(c.status);card.append(status);
     const list=document.createElement('dl');
     const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min'],['leaveBy',!c.walkback||c.walkback.status==='beyond'||!a.passable?'—':'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min'],['looseShare',state.surface?.[kind]?fmt(state.surface[kind].share.cool*100)+'%':'—']];
@@ -169,9 +184,11 @@ function renderComparison(p){
   else if(a.roundTripMeters-d.roundTripMeters<1)explanation=t('sameRoute');
   else if(!d.passable&&a.passable)explanation=t('detourExplain',{cells:fmt(d.blockedCells),limit:p.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters)});
   else explanation=[t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)}),t('reserveTradeoff',{extraTime:fmt(terrain.conservative.total-direct.conservative.total,1),directMargin:fmt(direct.reserveMargin,1),terrainMargin:fmt(terrain.reserveMargin,1)})].join(' ');
+  const l=state.analyses?.loose,ls=state.surface?.loose,ts=state.surface?.terrain;
+  if(a&&l&&ls&&ts)explanation+=' '+t('looseExplain',{extra:fmt(l.roundTripMeters-a.roundTripMeters),before:fmt(ts.share.cool*100),after:fmt(ls.share.cool*100,1)});
   $('route-explanation').textContent=explanation;
   $('comparison-reserve').textContent=t('reserveConfigured')+': '+p.reserve+' min';
-  $('comparison-method').textContent=['direct','terrain'].map(kind=>{const c=state.comparisons[kind];return `${t(kind==='terrain'?'terrainAware':'direct')}: ${t('aboveLimit')} = ${c.analysis?.blockedCells??'—'}; ${t('terrainCost')} = ${c.analysis?fmt(c.analysis.terrainCost):'—'}`;}).join(' · ');
+  $('comparison-method').textContent=ROUTE_KINDS.filter(kind=>state.comparisons[kind].analysis).map(kind=>{const c=state.comparisons[kind];return `${routeName(kind)}: ${t('aboveLimit')} = ${c.analysis?.blockedCells??'—'}; ${t('terrainCost')} = ${c.analysis?fmt(c.analysis.terrainCost):'—'}`;}).join(' · ');
 }
 function renderScenarios(){
   const body=$('scenario-body');body.replaceChildren();
@@ -217,6 +234,17 @@ function nightImage(){
 }
 function drawTerrain(){const full=state.layer==='slope',image=state.layer==='night'?nightImage():terrainImage(full);if(!image)return;const g=state.terrain,tl=screen({x:g.xMin,y:g.yMax}),br=screen({x:g.xMin+g.cols*g.step,y:g.yMax-g.rows*g.step});ctx.save();ctx.imageSmoothingEnabled=state.layer==='night';ctx.drawImage(image,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
 function drawPath(points,color,width,dash=[]){if(!points?.length)return;ctx.save();ctx.beginPath();points.forEach((p,i)=>{const q=screen(p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#0b0d10c0';ctx.lineWidth=width+3;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.restore();}
+// Perseverance's real traverse: ground a rover has already driven (context, not a walking path).
+function drawTraverse(){
+  if(!state.showTraverse||!state.traverse||!localLayer())return;ctx.save();ctx.strokeStyle='#e2c79a';ctx.globalAlpha=.85;ctx.lineWidth=1.8;ctx.setLineDash([1.5,4]);ctx.lineCap='round';ctx.lineJoin='round';
+  for(const seg of state.traverse.segments){ctx.beginPath();seg.points.forEach(([x,y],i)=>{const q=screen({x,y});i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.stroke();}ctx.restore();
+}
+// Small lettered tag at ~55% of a route, so A/B/C on the map match the comparison cards.
+function routeTag(points,letter,color){
+  if(!points?.length)return;let total=0;for(let i=1;i<points.length;i++)total+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);
+  const fraction={A:.32,B:.55,C:.7}[letter]??.55,q=screen(pointAlong(points,total*fraction));if(q.x<0||q.y<0||q.x>state.width||q.y>state.height)return;
+  ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,10,0,Math.PI*2);ctx.fillStyle='#0f1215';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=color;ctx.stroke();ctx.fillStyle=color;ctx.font='700 11px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(letter,q.x,q.y+.5);ctx.restore();
+}
 function label(title,p,subtitle,color='#ffffff',dy=0){
   if(p.x<0||p.x>state.width||p.y<0||p.y>state.height)return;
   const compact=state.width<520;ctx.save();ctx.font=`600 ${compact?12:13}px Arial`;const titleWidth=ctx.measureText(title).width;ctx.font=`${compact?10:11}px monospace`;const subWidth=ctx.measureText(subtitle).width;
@@ -231,7 +259,13 @@ function draw(){
   if(localLayer()&&(state.overlays||state.layer!=='optical'))drawTerrain();
   if(state.overlays){
     if(localLayer()){
-      drawPath(state.directRoute,'#c9ced6',state.strategy==='direct'?2.6:1.6,[5,5]);drawPath(state.terrainRoute,'#5ad1e6',state.strategy==='terrain'?3.6:2,[]);
+      drawTraverse();
+      // Selected route: cyan (white on the night layer, where blue means cool ground). Alternatives: thin grey. A is dashed.
+      const selectedColor=state.layer==='night'?'#ffffff':'#5ad1e6';
+      drawPath(state.directRoute,'#c9ced6',state.strategy==='direct'?2.8:1.6,[5,5]);
+      for(const kind of ['terrain','loose'])if(kind!==state.strategy)drawPath(kind==='terrain'?state.terrainRoute:state.looseRoute,'#9aa3ad',1.7,[]);
+      if(state.strategy!=='direct')drawPath(state.route,selectedColor,3.6,[]);
+      for(const [kind,letter,points]of [['direct','A',state.directRoute],['terrain','B',state.terrainRoute],['loose','C',state.looseRoute]])routeTag(points,letter,kind===state.strategy?(kind==='direct'?'#c9ced6':selectedColor):'#9aa3ad');
       const walk=state.comparisons?.[state.strategy]?.walkback;
       if(state.route&&walk?.status==='beyond'){
         // Past the walkback limit, a slower return would consume the reserve: draw that stretch in red.
@@ -256,7 +290,7 @@ function updateLayerText(){
   $('map-source-credit').textContent=key==='slope'?'USGS / NASA · CTX DEM':key==='optical'?'NASA / MSSS / Caltech · CTX':key==='night'?'NASA / JPL / ASU · THEMIS Night IR · Mars Trek':'NASA / JPL-Caltech · Mars Trek';
   $('resolution-note').textContent=key==='slope'?' · 20 m source → 40 m grid':key==='night'?' · 100 m source on CTX':layer?' · ≈ '+fmt(pixelSize(layer))+' m/px':'';
   document.querySelectorAll('[data-layer]').forEach(b=>{const selected=b.dataset.layer===key;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',selected);});
-  $('view-mission').hidden=localLayer();$('map-legend').hidden=!state.overlays;$('slope-legend').hidden=key!=='slope';$('night-legend').hidden=key!=='night';$('toggle-overlays').textContent=t(state.overlays?'hideMarks':'showMarks');
+  $('view-mission').hidden=localLayer();$('map-legend').hidden=!state.overlays;canvas.closest('.map-card').classList.toggle('is-night',key==='night');$('slope-legend').hidden=key!=='slope';$('night-legend').hidden=key!=='night';$('toggle-overlays').textContent=t(state.overlays?'hideMarks':'showMarks');
 }
 function setLayer(key){state.views[state.layer]={scale:state.scale,center:{...state.center}};state.layer=key;updateLayerText();if(state.views[key]){Object.assign(state,state.views[key]);constrain();draw();}else recenter();}
 function inspect(p){
@@ -280,8 +314,8 @@ $('language').addEventListener('change',()=>applyLanguage($('language').value));
 for(const id of ['sources-top','sources-bottom','nav-data','quick-evidence'])$(id).addEventListener('click',showSources);$('close-sources').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 for(const id of ['autonomy','work','slope-limit'])$(id).addEventListener('input',calculate);for(const id of ['speed','reserve'])$(id).addEventListener('change',calculate);
-function chooseRoute(strategy){state.strategy=strategy;for(const kind of ['terrain','direct']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
-for(const strategy of ['terrain','direct'])$('route-'+strategy).addEventListener('click',()=>chooseRoute(strategy));
+function chooseRoute(strategy){state.strategy=strategy;for(const kind of ['terrain','direct','loose']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
+for(const strategy of ['terrain','direct','loose'])$('route-'+strategy).addEventListener('click',()=>chooseRoute(strategy));
 const demoInputs=['autonomy','work','speed','reserve','slope-limit'];
 function setParameters(p){for(const [key,id]of Object.entries({autonomy:'autonomy',work:'work',speed:'speed',reserve:'reserve',maxSlope:'slope-limit'}))$(id).value=p[key];}
 function renderDemo(){
@@ -309,7 +343,7 @@ function finishDemo(){
 $('sim-play').addEventListener('click',toggleSim);
 $('sim-time').addEventListener('input',()=>{stopSim();sim.t=Number($('sim-time').value);renderSim();draw();});
 $('sim-slow').addEventListener('change',()=>{updateSim();draw();});
-$('eva-open').addEventListener('click',openEva);$('eva-close').addEventListener('click',()=>evaDialog.close());
+$('eva-open').addEventListener('click',openEva);$('eva-return').addEventListener('click',()=>abortEva('return'));$('eva-emergency').addEventListener('click',()=>abortEva('emergency'));$('eva-resume').addEventListener('click',()=>{sim.abort=null;sim.t=Math.min(sim.t,sim.timeline?.total??0);renderSim();draw();});$('eva-close').addEventListener('click',()=>evaDialog.close());
 $('eva-play').addEventListener('click',toggleSim);
 $('eva-time').addEventListener('input',()=>{stopSim();sim.t=Number($('eva-time').value);renderSim();draw();});
 $('eva-slow').addEventListener('change',()=>{$('sim-slow').checked=$('eva-slow').checked;updateSim();draw();});
@@ -318,6 +352,7 @@ $('plan').addEventListener('click',()=>{calculate();recenter();toast(t('recalcul
 $('locate-target').addEventListener('click',()=>{closeSettings();setLayer('optical');recenter();canvas.scrollIntoView({block:'center',behavior:'smooth'});});
 document.querySelectorAll('[data-layer]').forEach(b=>b.addEventListener('click',()=>setLayer(b.dataset.layer)));
 function zoom(factor){state.scale*=factor;constrain();draw();}$('zoom-in').addEventListener('click',()=>zoom(1.35));$('zoom-out').addEventListener('click',()=>zoom(1/1.35));$('recenter').addEventListener('click',recenter);
+$('toggle-traverse').addEventListener('click',()=>{state.showTraverse=!state.showTraverse;$('toggle-traverse').setAttribute('aria-pressed',String(state.showTraverse));$('toggle-traverse').textContent=t(state.showTraverse?'hideTraverse':'showTraverse');$('traverse-legend').hidden=!state.showTraverse;draw();});
 $('toggle-overlays').addEventListener('click',()=>{state.overlays=!state.overlays;$('toggle-overlays').setAttribute('aria-pressed',state.overlays);updateLayerText();draw();});$('view-mission').addEventListener('click',()=>{setLayer('optical');recenter();});
 const mapCard=canvas.closest('.map-card');
 function updateExpanded(){const expanded=!!document.fullscreenElement||mapCard.classList.contains('map-expanded');$('fullscreen-map').textContent=expanded?'×':'⛶';$('fullscreen-map').setAttribute('aria-label',t(expanded?'collapseMap':'expandMap'));}
@@ -343,6 +378,10 @@ async function loadTerrain(){
   try{const r=await fetch('assets/jezero-terrain.json',{cache:'no-store'});if(!r.ok)throw new Error('Terrain HTTP '+r.status);state.terrain=createTerrain(await r.json());updateTerrainStatus();calculate();recenter();}
   catch(error){state.terrainError=true;$('terrain-status').textContent=t('dataFailed');document.querySelector('.evidence-banner').classList.add('error');calculate();console.error(error);}
 }
+async function loadTraverse(){
+  try{const r=await fetch('assets/perseverance-traverse.json',{cache:'no-store'});if(!r.ok)throw new Error('Traverse HTTP '+r.status);const data=await r.json();if(Math.abs(data.origin.lon-MAP_ORIGIN.lon)>1e-8||Math.abs(data.origin.lat-MAP_ORIGIN.lat)>1e-8)throw new Error('Traverse origin mismatch');state.traverse=data;$('traverse-sols').textContent=data.solRange.join('–');draw();}
+  catch(error){state.traverse=null;$('toggle-traverse').hidden=true;$('traverse-legend').hidden=true;console.warn(error);}
+}
 // Optional advisory layer: the planner works without it.
 async function loadNightIr(){
   try{await terrainReady;if(!state.terrain)return;const r=await fetch('assets/jezero-night-ir.json',{cache:'no-store'});if(!r.ok)throw new Error('Night IR HTTP '+r.status);state.night=createNightIr(await r.json(),state.terrain);state.slopeLayers.delete('night');calculate();}
@@ -355,7 +394,7 @@ async function loadImagery(){
   }catch(error){state.manifest={layers:{}};state.ready=true;updateLayerText();draw();console.error(error);}
 }
 const terrainReady=loadTerrain();
-await Promise.all([terrainReady,loadImagery(),loadNightIr()]);
+await Promise.all([terrainReady,loadImagery(),loadNightIr(),loadTraverse()]);
 {const q=new URL(location.href).searchParams;
   if(q.get('demo')==='1'&&state.terrain)startDemo();
   // Deep link for recording: ?view=eva[&work=minutes][&t=minutes]
