@@ -125,6 +125,26 @@ export function budget(distance,speed,work,autonomy,reserve){
   const walking=distance/(speed*1000)*60,total=walking+work,remaining=autonomy-total;
   return {walking,work,total,remaining,reserve,feasible:remaining>=reserve,excess:Math.max(0,total-(autonomy-reserve))};
 }
+// THEMIS Night IR brightness on the same grid as the terrain. Advisory only: never used in route cost.
+export function createNightIr(raw,t){
+  if(!raw||!t)throw new Error('Missing night IR or terrain');
+  const g=raw.grid;if(g.cols!==t.cols||g.rows!==t.rows||g.step!==t.step||g.xMin!==t.xMin||g.yMax!==t.yMax||raw.values?.length!==t.cols*t.rows)throw new Error('Night IR grid mismatch');
+  if(!(raw.classes.coolMax<raw.classes.warmMin))throw new Error('Invalid night IR classes');
+  return {...raw,values:Int16Array.from(raw.values,v=>v==null?-1:v)};
+}
+export function nightClass(value,night){return value<0?'unknown':value<=night.classes.coolMax?'cool':value>=night.classes.warmMin?'warm':'mid';}
+export function analyzeSurface(points,t,night){
+  if(!points?.length||!night)return null;
+  const meters={cool:0,mid:0,warm:0,unknown:0};let total=0;
+  for(let i=1;i<points.length;i++){
+    const a=points[i-1],b=points[i],d=Math.hypot(b.x-a.x,b.y-a.y),n=Math.max(1,Math.ceil(d/(t.step/4)));
+    for(let k=0;k<n;k++){const p={x:a.x+(b.x-a.x)*(k+.5)/n,y:a.y+(b.y-a.y)*(k+.5)/n},id=cellId(p,t);meters[id<0?'unknown':nightClass(night.values[id],night)]+=d/n;}
+    total+=d;
+  }
+  const share=Object.fromEntries(Object.entries(meters).map(([k,v])=>[k,total?v/total:0]));
+  return {outboundMeters:total,meters,share};
+}
+
 // Walkback rule, inspired by the walkback constraints used to plan Apollo rover traverses:
 // walk out at the planned pace, but plan the return as if the pace drops to WALKBACK_PACE_FACTOR.
 // Times are minutes elapsed since leaving the habitat.
@@ -136,6 +156,25 @@ export function walkback(outboundMeters,p){
   const status=maxWork<0?'beyond':maxWork<p.work?'shortWork':'ok';
   return {outbound,slowReturn,leaveBy,maxWork,plannedDeparture:outbound+p.work,workMargin:maxWork-p.work,limitMeters,status};
 }
+// EVA timeline used by the playback: out at planned pace, science work, back at planned (or 25% slower) pace.
+export function evaTimeline(outboundMeters,p,{slowReturn=false}={}){
+  const w=walkback(outboundMeters,p),metersPerMinute=p.speed*1000/60,returnSpeed=metersPerMinute*(slowReturn?WALKBACK_PACE_FACTOR:1);
+  const outbound=outboundMeters/metersPerMinute,back=outboundMeters/returnSpeed,total=outbound+p.work+back;
+  return {outboundMeters,outbound,work:p.work,back,total,leaveBy:w.leaveBy,autonomy:p.autonomy,reserve:p.reserve,metersPerMinute,returnSpeed,slowReturn,reserveAtArrival:p.autonomy-total};
+}
+// State at minute t. "margin" = time left after a slow (75%) walk home from here, minus the reserve; negative means the reserve is at risk.
+export function evaStateAt(tl,t){
+  t=Math.max(0,Math.min(t,tl.total));let phase,distance;
+  if(t<tl.outbound){phase='outbound';distance=t*tl.metersPerMinute;}
+  else if(t<tl.outbound+tl.work){phase='work';distance=tl.outboundMeters;}
+  else if(t<tl.total){phase='return';distance=Math.max(0,tl.outboundMeters-(t-tl.outbound-tl.work)*tl.returnSpeed);}
+  else{phase='home';distance=0;}
+  const shelterMinutes=distance/(tl.metersPerMinute*WALKBACK_PACE_FACTOR),margin=tl.autonomy-t-shelterMinutes-tl.reserve;
+  return {t,phase,distance,shelterMinutes,margin,remaining:tl.autonomy-t,pastLeaveBy:phase==='work'&&t>tl.leaveBy};
+}
+// Galactic cosmic ray dose equivalent measured by Curiosity RAD at Gale crater, Aug 2012 - Jun 2013 (Hassler et al. 2014).
+export const RAD_GCR_MSV_PER_DAY=0.67;
+export function gcrDose(minutes){return minutes/1440*RAD_GCR_MSV_PER_DAY;}
 export function pointAlong(points,distance){
   if(!points?.length)return null;let travelled=0;
   for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],d=Math.hypot(b.x-a.x,b.y-a.y);if(travelled+d>=distance){const f=d?(distance-travelled)/d:0;return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,index:i};}travelled+=d;}
