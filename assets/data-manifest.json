@@ -1,0 +1,417 @@
+﻿{
+    "retrievedAt":  "2026-11-14T17:29:45.9584247Z",
+    "layers":  {
+                   "context":  {
+                                   "matrixHeight":  128,
+                                   "tileSize":  256,
+                                   "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/WMTSCapabilities.xml",
+                                   "tiles":  [
+                                                 {
+                                                     "row":  49,
+                                                     "path":  "assets/tiles/context-7-49-182.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/49/182.jpg",
+                                                     "col":  182,
+                                                     "bytes":  61265
+                                                 },
+                                                 {
+                                                     "row":  49,
+                                                     "path":  "assets/tiles/context-7-49-183.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/49/183.jpg",
+                                                     "col":  183,
+                                                     "bytes":  61607
+                                                 },
+                                                 {
+                                                     "row":  49,
+                                                     "path":  "assets/tiles/context-7-49-184.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/49/184.jpg",
+                                                     "col":  184,
+                                                     "bytes":  57219
+                                                 },
+                                                 {
+                                                     "row":  50,
+                                                     "path":  "assets/tiles/context-7-50-182.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/50/182.jpg",
+                                                     "col":  182,
+                                                     "bytes":  61672
+                                                 },
+                                                 {
+                                                     "row":  50,
+                                                     "path":  "assets/tiles/context-7-50-183.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/50/183.jpg",
+                                                     "col":  183,
+                                                     "bytes":  60074
+                                                 },
+                                                 {
+                                                     "row":  50,
+                                                     "path":  "assets/tiles/context-7-50-184.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/50/184.jpg",
+                                                     "col":  184,
+                                                     "bytes":  57883
+                                                 },
+                                                 {
+                                                     "row":  51,
+                                                     "path":  "assets/tiles/context-7-51-182.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/51/182.jpg",
+                                                     "col":  182,
+                                                     "bytes":  62237
+                                                 },
+                                                 {
+                                                     "row":  51,
+                                                     "path":  "assets/tiles/context-7-51-183.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/51/183.jpg",
+                                                     "col":  183,
+                                                     "bytes":  61980
+                                                 },
+                                                 {
+                                                     "row":  51,
+                                                     "path":  "assets/tiles/context-7-51-184.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/7/51/184.jpg",
+                                                     "col":  184,
+                                                     "bytes":  51008
+                                                 }
+                                             ],
+                                   "label":  "Viking - Context",
+                                   "matrixWidth":  256,
+                                   "level":  7,
+                                   "sourceResolutionMeters":  232,
+                                   "product":  "Mars_Viking_MDIM21_ClrMosaic_global_232m"
+                               },
+                   "thermal":  {
+                                   "matrixHeight":  256,
+                                   "tileSize":  256,
+                                   "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0/WMTSCapabilities.xml",
+                                   "tiles":  [
+                                                 {
+                                                     "row":  100,
+                                                     "path":  "assets/tiles/thermal-8-100-365.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/365.png",
+                                                     "col":  365,
+                                                     "bytes":  59839
+                                                 },
+                                                 {
+                                                     "row":  100,
+                                                     "path":  "assets/tiles/thermal-8-100-366.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/366.png",
+                                                     "col":  366,
+                                                     "bytes":  56052
+                                                 },
+                                                 {
+                                                     "row":  100,
+                                                     "path":  "assets/tiles/thermal-8-100-367.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/100/367.png",
+                                                     "col":  367,
+                                                     "bytes":  57417
+                                                 },
+                                                 {
+                                                     "row":  101,
+                                                     "path":  "assets/tiles/thermal-8-101-365.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/101/365.png",
+                                                     "col":  365,
+                                                     "bytes":  58396
+                                                 },
+                                                 {
+                                                     "row":  101,
+                                                     "path":  "assets/tiles/thermal-8-101-366.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/101/366.png",
+                                                     "col":  366,
+                                                     "bytes":  49114
+                                                 },
+                                                 {
+                                                     "row":  101,
+                                                     "path":  "assets/tiles/thermal-8-101-367.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/101/367.png",
+                                                     "col":  367,
+                                                     "bytes":  54934
+                                                 },
+                                                 {
+                                                     "row":  102,
+                                                     "path":  "assets/tiles/thermal-8-102-365.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/365.png",
+                                                     "col":  365,
+                                                     "bytes":  56100
+                                                 },
+                                                 {
+                                                     "row":  102,
+                                                     "path":  "assets/tiles/thermal-8-102-366.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/366.png",
+                                                     "col":  366,
+                                                     "bytes":  54683
+                                                 },
+                                                 {
+                                                     "row":  102,
+                                                     "path":  "assets/tiles/thermal-8-102-367.png",
+                                                     "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0//default/default028mm/8/102/367.png",
+                                                     "col":  367,
+                                                     "bytes":  55515
+                                                 }
+                                             ],
+                                   "label":  "Odyssey - THEMIS",
+                                   "matrixWidth":  512,
+                                   "level":  8,
+                                   "sourceResolutionMeters":  100,
+                                   "product":  "Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly"
+                               },
+                   "optical":  {
+                                   "matrixHeight":  2048,
+                                   "tileSize":  512,
+                                   "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/CTX_beta01_uncontrolled_5m_Caltech/1.0.0/WMTSCapabilities.xml",
+                                   "tiles":  [
+                                                 {
+                                                     "row":  811,
+                                                     "path":  "assets/tiles/optical-11-811-2926.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2926",
+                                                     "col":  2926,
+                                                     "bytes":  110282
+                                                 },
+                                                 {
+                                                     "row":  811,
+                                                     "path":  "assets/tiles/optical-11-811-2927.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2927",
+                                                     "col":  2927,
+                                                     "bytes":  112907
+                                                 },
+                                                 {
+                                                     "row":  811,
+                                                     "path":  "assets/tiles/optical-11-811-2928.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2928",
+                                                     "col":  2928,
+                                                     "bytes":  113305
+                                                 },
+                                                 {
+                                                     "row":  811,
+                                                     "path":  "assets/tiles/optical-11-811-2929.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2929",
+                                                     "col":  2929,
+                                                     "bytes":  114557
+                                                 },
+                                                 {
+                                                     "row":  811,
+                                                     "path":  "assets/tiles/optical-11-811-2930.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/811/2930",
+                                                     "col":  2930,
+                                                     "bytes":  110273
+                                                 },
+                                                 {
+                                                     "row":  812,
+                                                     "path":  "assets/tiles/optical-11-812-2926.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2926",
+                                                     "col":  2926,
+                                                     "bytes":  110738
+                                                 },
+                                                 {
+                                                     "row":  812,
+                                                     "path":  "assets/tiles/optical-11-812-2927.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2927",
+                                                     "col":  2927,
+                                                     "bytes":  109640
+                                                 },
+                                                 {
+                                                     "row":  812,
+                                                     "path":  "assets/tiles/optical-11-812-2928.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2928",
+                                                     "col":  2928,
+                                                     "bytes":  109315
+                                                 },
+                                                 {
+                                                     "row":  812,
+                                                     "path":  "assets/tiles/optical-11-812-2929.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2929",
+                                                     "col":  2929,
+                                                     "bytes":  103022
+                                                 },
+                                                 {
+                                                     "row":  812,
+                                                     "path":  "assets/tiles/optical-11-812-2930.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/812/2930",
+                                                     "col":  2930,
+                                                     "bytes":  102370
+                                                 },
+                                                 {
+                                                     "row":  813,
+                                                     "path":  "assets/tiles/optical-11-813-2926.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2926",
+                                                     "col":  2926,
+                                                     "bytes":  115571
+                                                 },
+                                                 {
+                                                     "row":  813,
+                                                     "path":  "assets/tiles/optical-11-813-2927.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2927",
+                                                     "col":  2927,
+                                                     "bytes":  101621
+                                                 },
+                                                 {
+                                                     "row":  813,
+                                                     "path":  "assets/tiles/optical-11-813-2928.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2928",
+                                                     "col":  2928,
+                                                     "bytes":  100208
+                                                 },
+                                                 {
+                                                     "row":  813,
+                                                     "path":  "assets/tiles/optical-11-813-2929.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2929",
+                                                     "col":  2929,
+                                                     "bytes":  80620
+                                                 },
+                                                 {
+                                                     "row":  813,
+                                                     "path":  "assets/tiles/optical-11-813-2930.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/813/2930",
+                                                     "col":  2930,
+                                                     "bytes":  90282
+                                                 },
+                                                 {
+                                                     "row":  814,
+                                                     "path":  "assets/tiles/optical-11-814-2926.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2926",
+                                                     "col":  2926,
+                                                     "bytes":  106733
+                                                 },
+                                                 {
+                                                     "row":  814,
+                                                     "path":  "assets/tiles/optical-11-814-2927.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2927",
+                                                     "col":  2927,
+                                                     "bytes":  98104
+                                                 },
+                                                 {
+                                                     "row":  814,
+                                                     "path":  "assets/tiles/optical-11-814-2928.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2928",
+                                                     "col":  2928,
+                                                     "bytes":  94549
+                                                 },
+                                                 {
+                                                     "row":  814,
+                                                     "path":  "assets/tiles/optical-11-814-2929.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2929",
+                                                     "col":  2929,
+                                                     "bytes":  83944
+                                                 },
+                                                 {
+                                                     "row":  814,
+                                                     "path":  "assets/tiles/optical-11-814-2930.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/814/2930",
+                                                     "col":  2930,
+                                                     "bytes":  89634
+                                                 },
+                                                 {
+                                                     "row":  815,
+                                                     "path":  "assets/tiles/optical-11-815-2926.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2926",
+                                                     "col":  2926,
+                                                     "bytes":  97075
+                                                 },
+                                                 {
+                                                     "row":  815,
+                                                     "path":  "assets/tiles/optical-11-815-2927.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2927",
+                                                     "col":  2927,
+                                                     "bytes":  94006
+                                                 },
+                                                 {
+                                                     "row":  815,
+                                                     "path":  "assets/tiles/optical-11-815-2928.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2928",
+                                                     "col":  2928,
+                                                     "bytes":  102664
+                                                 },
+                                                 {
+                                                     "row":  815,
+                                                     "path":  "assets/tiles/optical-11-815-2929.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2929",
+                                                     "col":  2929,
+                                                     "bytes":  89247
+                                                 },
+                                                 {
+                                                     "row":  815,
+                                                     "path":  "assets/tiles/optical-11-815-2930.png",
+                                                     "url":  "https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/11/815/2930",
+                                                     "col":  2930,
+                                                     "bytes":  93137
+                                                 }
+                                             ],
+                                   "label":  "MRO - CTX",
+                                   "matrixWidth":  4096,
+                                   "level":  11,
+                                   "sourceResolutionMeters":  5,
+                                   "product":  "CTX_beta01_uncontrolled_5m_Caltech"
+                               },
+                   "topography":  {
+                                      "matrixHeight":  128,
+                                      "tileSize":  256,
+                                      "capabilities":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/WMTSCapabilities.xml",
+                                      "tiles":  [
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  60338
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  62140
+                                                    },
+                                                    {
+                                                        "row":  49,
+                                                        "path":  "assets/tiles/topography-7-49-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/49/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  60317
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  62775
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  63039
+                                                    },
+                                                    {
+                                                        "row":  50,
+                                                        "path":  "assets/tiles/topography-7-50-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/50/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  62804
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-182.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/182.jpg",
+                                                        "col":  182,
+                                                        "bytes":  64961
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-183.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/183.jpg",
+                                                        "col":  183,
+                                                        "bytes":  65120
+                                                    },
+                                                    {
+                                                        "row":  51,
+                                                        "path":  "assets/tiles/topography-7-51-184.png",
+                                                        "url":  "https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0//default/default028mm/7/51/184.jpg",
+                                                        "col":  184,
+                                                        "bytes":  54334
+                                                    }
+                                                ],
+                                      "label":  "MGS - MOLA",
+                                      "matrixWidth":  256,
+                                      "level":  7,
+                                      "sourceResolutionMeters":  463,
+                                      "product":  "Mars_MGS_MOLA_ClrShade_merge_global_463m"
+                                  }
+               }
+}
