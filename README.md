@@ -29,6 +29,14 @@ Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installe
 
 Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
 
+## What changed in ARES-04
+
+- **Crew EVA view** (`Crew EVA view` button, or `?view=eva`). One glanceable screen for the astronaut, driven by the EVA playback: a status bar (ON PLAN / LEAVE SOON / TURN BACK NOW), a countdown to the leave-by time, the next waypoint with heading, time to shelter at a slower pace, the ground and maximum slope over the next 200 m (USGS DEM + THEMIS Night IR), and the cosmic-ray dose so far (Curiosity RAD rate). It is labelled as simulated from the plan, not live telemetry.
+  Recording links: `?lang=en&view=eva&t=40` (walking out) and `?lang=en&view=eva&work=90&t=140` (turn back now).
+- **Decision first.** The status, the leave-by time (largest number on the page), distance and base-case time sit above the map; the supporting explanation is one click away ("How this plan was checked"). Plan settings open in a dialog on every screen size.
+- **Colour with meaning.** Graphite interface; cyan = the ARES plan and actions; green / amber / red are reserved for status; red cells = terrain above the slope limit; the direct line is a grey dashed reference.
+- **Cleaner map.** Overlays on the map reduced to the layer picker, zoom tools and one legend; layer description, credits and data status moved to a line below the map; map labels enlarged (12–13 px titles, 10–11 px details).
+
 ## What changed in ARES-03b
 
 - **EVA playback.** A play button and timeline under the map walk the plan minute by minute: phase, distance from the habitat, time to shelter at a 25% slower pace, and the leave-by time. The status turns to **TURN BACK NOW** once the leave-by time passes while the crew is still at Rochette. An option simulates a 25% slower walk home. The guided demo's third step freezes the playback at T+136 min.

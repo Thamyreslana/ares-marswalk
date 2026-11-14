@@ -1,4 +1,4 @@
-import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,createNightIr,analyzeSurface,nightClass,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong,evaTimeline,evaStateAt,gcrDose} from './planner.js';
+import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,createNightIr,analyzeSurface,nightClass,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong,evaTimeline,evaStateAt,gcrDose,bearingDeg,compassPoint,lookAhead} from './planner.js';
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
@@ -62,24 +62,73 @@ function updateSim(){
   sim.timeline=ok?evaTimeline(c.analysis.outboundMeters,state.params,{slowReturn:$('sim-slow').checked}):null;
   for(const id of ['sim-play','sim-time','sim-slow'])$(id).disabled=!ok;
   if(!ok){stopSim();sim.t=0;$('sim-status').textContent=t('simBlocked');$('sim-status').dataset.level='danger';$('sim-alert').textContent=t('simBlockedText');for(const id of ['sim-phase','sim-distance','sim-shelter','sim-leave'])$(id).textContent='—';$('sim-clock').textContent='—';return;}
-  $('sim-time').max=String(Math.ceil(sim.timeline.total));sim.t=Math.min(sim.t,sim.timeline.total);renderSim();
+  $('sim-time').max=String(Math.ceil(sim.timeline.total));sim.t=Math.min(sim.t,sim.timeline.total);if(evaDialog.open)buildEvaMap();renderSim();
 }
+function simStatus(tl,s){
+  if(s.phase==='home')return tl.reserveAtArrival>=tl.reserve?{key:'simHomeOk',level:'ok'}:{key:'simHomeLow',level:'danger'};
+  if(s.pastLeaveBy)return {key:'simTurnBack',level:'danger'};
+  if(s.margin<0)return {key:'simAtRisk',level:'danger'};
+  if(s.phase==='work'&&tl.leaveBy-s.t<=15)return {key:'simLeaveSoon',level:'warning'};
+  return {key:s.phase==='outbound'?'simOutbound':s.phase==='work'?'simWorking':'simReturning',level:'ok'};
+}
+const chipKey=(s,{key,level})=>(s.phase==='home'||level!=='ok'?key:'simOk')+'Chip';
 function renderSim(){
-  const tl=sim.timeline;if(!tl)return;const s=evaStateAt(tl,sim.t);
+  const tl=sim.timeline;if(!tl)return;const s=evaStateAt(tl,sim.t),status=simStatus(tl,s),{key,level}=status;
   $('sim-time').value=String(Math.round(sim.t));$('sim-clock').textContent='T+'+fmt(Math.floor(s.t))+' min';
   $('sim-phase').textContent=t('simPhase_'+s.phase);$('sim-distance').textContent=fmt(s.distance/1000,2)+' km';$('sim-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';
   $('sim-leave').textContent='T+'+fmt(Math.floor(tl.leaveBy))+' min';
-  let key,level;
-  if(s.phase==='home'){key=tl.reserveAtArrival>=tl.reserve?'simHomeOk':'simHomeLow';level=tl.reserveAtArrival>=tl.reserve?'ok':'danger';}
-  else if(s.pastLeaveBy){key='simTurnBack';level='danger';}
-  else if(s.margin<0){key='simAtRisk';level='danger';}
-  else if(s.phase==='work'&&tl.leaveBy-s.t<=15){key='simLeaveSoon';level='warning';}
-  else{key=s.phase==='outbound'?'simOutbound':s.phase==='work'?'simWorking':'simReturning';level='ok';}
-  $('sim-status').textContent=t((s.phase==='home'||level!=='ok'?key:'simOk')+'Chip');$('sim-status').dataset.level=level;
+  $('sim-status').textContent=t(chipKey(s,status));$('sim-status').dataset.level=level;
   $('sim-alert').textContent=t(key,{left:fmt(Math.max(0,Math.floor(tl.leaveBy-s.t))),late:fmt(Math.ceil(s.t-tl.leaveBy)),reserve:fmt(Math.floor(tl.reserveAtArrival)),required:fmt(tl.reserve),arrive:fmt(Math.ceil(tl.outbound)),leave:fmt(Math.floor(tl.leaveBy)),home:fmt(Math.ceil(tl.total))});
   $('sim-alert').dataset.level=level;
+  if(evaDialog.open)renderEva(s,status);
 }
-function stopSim(){sim.playing=false;cancelAnimationFrame(sim.raf);$('sim-play').setAttribute('aria-pressed','false');$('sim-play-icon').textContent='▶';$('sim-play-label').textContent=t('simPlay');}
+
+// Crew EVA view: one glanceable screen driven by the same playback.
+const evaDialog=$('eva-dialog'),SVG='http://www.w3.org/2000/svg';
+function svgEl(name,attrs){const el=document.createElementNS(SVG,name);for(const [k,v]of Object.entries(attrs))el.setAttribute(k,v);return el;}
+function buildEvaMap(){
+  const svg=$('eva-map');svg.replaceChildren();const route=state.route;if(!route)return;
+  const xs=[...route.map(p=>p.x),HABITAT.x,TARGET.x],ys=[...route.map(p=>p.y),HABITAT.y,TARGET.y],pad=Math.max(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys))*.12;
+  const minX=Math.min(...xs)-pad,maxX=Math.max(...xs)+pad,minY=Math.min(...ys)-pad,maxY=Math.max(...ys)+pad,span=Math.max(maxX-minX,maxY-minY);
+  svg.setAttribute('viewBox',`${minX} ${-maxY} ${maxX-minX} ${maxY-minY}`);svg.dataset.span=String(span);
+  const g=state.terrain,limit=policy().maxSlope,cells=svgEl('g',{class:'eva-hazard'});
+  for(let r=0;r<g.rows;r++)for(let c=0;c<g.cols;c++){const i=r*g.cols+c,x=g.xMin+c*g.step,y=g.yMax-r*g.step;if(x<minX||x>maxX||y<minY||y>maxY||!g.valid[i]||g.slopes[i]<=limit)continue;cells.append(svgEl('rect',{x,y:-y,width:g.step,height:g.step}));}
+  svg.append(cells);
+  const pts=route.map(p=>`${p.x},${-p.y}`).join(' ');svg.append(svgEl('polyline',{points:pts,class:'eva-route-halo','stroke-width':span*.016}),svgEl('polyline',{points:pts,class:'eva-route','stroke-width':span*.008}));
+  const walk=state.comparisons?.terrain?.walkback;
+  if(walk?.status==='beyond'){const lim=pointAlong(route,walk.limitMeters);svg.append(svgEl('polyline',{points:[lim,...route.slice(lim.index)].map(p=>`${p.x},${-p.y}`).join(' '),class:'eva-beyond','stroke-width':span*.009}));}
+  const s=span*.018,fs=span*.034;
+  svg.append(svgEl('rect',{x:HABITAT.x-s,y:-HABITAT.y-s,width:2*s,height:2*s,class:'eva-habitat'}),svgEl('circle',{cx:TARGET.x,cy:-TARGET.y,r:s*1.2,class:'eva-target'}));
+  const label=(p,text,dy)=>{const el=svgEl('text',{x:p.x,y:-p.y+dy,'font-size':fs,class:'eva-label','text-anchor':'middle'});el.textContent=text;svg.append(el);};
+  label(HABITAT,t('evaHabitat'),-s*2.2);label(TARGET,'Rochette',s*3.6);
+  svg.append(svgEl('circle',{id:'eva-dot-halo',r:s*2.4,class:'eva-dot-halo',cx:HABITAT.x,cy:-HABITAT.y}),svgEl('circle',{id:'eva-dot',r:s*1.1,class:'eva-dot',cx:HABITAT.x,cy:-HABITAT.y}));
+}
+function renderEva(s,status){
+  const tl=sim.timeline;if(!tl||!state.route)return;s??=evaStateAt(tl,sim.t);status??=simStatus(tl,s);
+  $('eva-hud').dataset.level=status.level;$('eva-clock').textContent='T+'+fmt(Math.floor(s.t));
+  $('eva-status-text').textContent=t(chipKey(s,status));$('eva-status-sub').textContent=t('simPhase_'+s.phase);
+  $('eva-time').max=$('sim-time').max;$('eva-time').value=String(Math.round(sim.t));$('eva-slow').checked=$('sim-slow').checked;
+  const before=s.phase==='outbound'||s.phase==='work',rem=tl.leaveBy-s.t;
+  if(before&&rem>=0){$('eva-count-label').textContent=t('evaLeaveIn');$('eva-count').textContent=fmt(Math.floor(rem))+' min';$('eva-count-sub').textContent=t('evaLeaveAt',{leave:fmt(Math.floor(tl.leaveBy))});}
+  else if(before){$('eva-count-label').textContent=t('evaOverdue');$('eva-count').textContent='+'+fmt(Math.ceil(-rem))+' min';$('eva-count-sub').textContent=t('evaOverdueSub');}
+  else if(s.phase==='return'){$('eva-count-label').textContent=t('evaHomeIn');$('eva-count').textContent=fmt(Math.ceil(tl.total-s.t))+' min';$('eva-count-sub').textContent=t('evaReserveAtHome',{reserve:fmt(Math.floor(tl.reserveAtArrival))});}
+  else{$('eva-count-label').textContent=t('evaHome');$('eva-count').textContent=fmt(Math.floor(tl.reserveAtArrival))+' min';$('eva-count-sub').textContent=t('evaHomeSub',{required:fmt(tl.reserve)});}
+  const route=state.route,p=pointAlong(route,s.distance),dir=s.phase==='return'?-1:1;
+  if(s.phase==='outbound'||s.phase==='return'){
+    const next=dir>0?route[Math.min(p.index,route.length-1)]:route[Math.max(0,p.index-1)],to=dir>0?TARGET:HABITAT,remaining=dir>0?tl.outboundMeters-s.distance:s.distance,heading=bearingDeg(p,Math.hypot(next.x-p.x,next.y-p.y)<5?to:next);
+    $('eva-next').textContent=(dir>0?'Rochette':t('evaHabitat'))+' · '+fmt(remaining/1000,2)+' km';$('eva-bearing').textContent=t('evaHeading',{deg:fmt(Math.round(heading)),pt:compassPoint(heading)});
+    const ahead=lookAhead(route,s.distance,dir,200,state.terrain,state.night);
+    $('eva-ground').textContent=t(ahead.coolShare>=.4?'evaGroundLoose':ahead.warmShare>=.4?'evaGroundRock':'evaGroundMixed');$('eva-slope').textContent=ahead.maxSlope==null?'':t('evaSlopeAhead',{max:fmt(ahead.maxSlope,1)});
+  }else{$('eva-next').textContent=s.phase==='work'?t('evaAtSite'):t('evaHabitat');$('eva-bearing').textContent='';$('eva-ground').textContent='—';$('eva-slope').textContent='';}
+  $('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
+  const dot=$('eva-dot'),halo=$('eva-dot-halo');if(dot){for(const el of [dot,halo]){el.setAttribute('cx',p.x);el.setAttribute('cy',-p.y);}}
+}
+function openEva(){
+  if(!state.terrain||demo)return;if(state.strategy!=='terrain')chooseRoute('terrain');if(!sim.timeline)return;
+  closeSettings();buildEvaMap();if(!evaDialog.open)evaDialog.showModal();renderEva();$('eva-play').focus({preventScroll:true});
+}
+function syncPlayButtons(){for(const [btn,icon,label]of [['sim-play','sim-play-icon','sim-play-label'],['eva-play','eva-play-icon','eva-play-label']]){$(btn).setAttribute('aria-pressed',String(sim.playing));$(icon).textContent=sim.playing?'❚❚':'▶';$(label).textContent=t(sim.playing?'simPause':'simPlay');}}
+function stopSim(){sim.playing=false;cancelAnimationFrame(sim.raf);syncPlayButtons();}
 function stepSim(now){
   if(!sim.playing||!sim.timeline)return;const dt=now-sim.last;sim.last=now;sim.t=Math.min(sim.timeline.total,sim.t+dt*sim.timeline.total/PLAYBACK_MS);
   renderSim();draw();if(sim.t>=sim.timeline.total){stopSim();return;}sim.raf=requestAnimationFrame(stepSim);
@@ -87,13 +136,13 @@ function stepSim(now){
 function toggleSim(){
   if(!sim.timeline)return;if(sim.playing){stopSim();return;}
   if(sim.t>=sim.timeline.total)sim.t=0;if(!localLayer())setLayer('optical');
-  sim.playing=true;sim.last=performance.now();$('sim-play').setAttribute('aria-pressed','true');$('sim-play-icon').textContent='❚❚';$('sim-play-label').textContent=t('simPause');sim.raf=requestAnimationFrame(stepSim);
+  sim.playing=true;sim.last=performance.now();syncPlayButtons();sim.raf=requestAnimationFrame(stepSim);
 }
 function drawSimMarker(){
   if(!sim.timeline||!state.route||(sim.t<=0&&!sim.playing))return;const s=evaStateAt(sim.timeline,sim.t),p=pointAlong(state.route,s.distance),q=screen(p);
-  const danger=s.pastLeaveBy||s.margin<0;ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,15,0,Math.PI*2);ctx.fillStyle=danger?'#ff6b5740':'#fff1d640';ctx.fill();
-  ctx.beginPath();ctx.arc(q.x,q.y,7,0,Math.PI*2);ctx.fillStyle='#fffaf0';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=danger?'#ff6b57':'#ef9a76';ctx.stroke();ctx.restore();
-  label(t('simMarker',{t:fmt(Math.floor(s.t))}),q,t('simPhase_'+s.phase).toUpperCase(),danger?'#ffb4a6':'#fff1d6',40);
+  const danger=s.pastLeaveBy||s.margin<0;ctx.save();ctx.beginPath();ctx.arc(q.x,q.y,15,0,Math.PI*2);ctx.fillStyle=danger?'#ff5a4f55':'#5ad1e655';ctx.fill();
+  ctx.beginPath();ctx.arc(q.x,q.y,7,0,Math.PI*2);ctx.fillStyle='#fffaf0';ctx.fill();ctx.lineWidth=3.5;ctx.strokeStyle=danger?'#ff5a4f':'#5ad1e6';ctx.stroke();ctx.restore();
+  label(t('simMarker',{t:fmt(Math.floor(s.t))}),q,t('simPhase_'+s.phase).toUpperCase(),danger?'#ffb0a8':'#ffffff',44);
 }
 
 function renderDecision(){
@@ -135,7 +184,7 @@ function renderProfile(analysis){
   let penDown=false;const chunks=[],areas=[];let chunk=[];
   for(const p of analysis.profile){if(!p.known){if(chunk.length)areas.push(chunk);chunk=[];penDown=false;continue;}chunks.push((penDown?'L':'M')+x(p).toFixed(2)+' '+y(p).toFixed(2));chunk.push(p);penDown=true;}if(chunk.length)areas.push(chunk);
   const line=chunks.join(' '),area=areas.map(group=>group.map((p,i)=>(i?'L':'M')+x(p).toFixed(2)+' '+y(p).toFixed(2)).join(' ')+` L ${x(group.at(-1))} ${height-28} L ${x(group[0])} ${height-28} Z`).join(' ');
-  $('elevation-profile').innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title"><title id="profile-title">${t('profile')}</title><defs><linearGradient id="elevation-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef9a76" stop-opacity=".28"/><stop offset="1" stop-color="#ef9a76" stop-opacity=".03"/></linearGradient></defs><path d="M ${pad} 14 V ${height-28} H ${width-12}" fill="none" stroke="#48543c" stroke-width="1"/><path d="${area}" fill="url(#elevation-fill)"/><path d="${line}" stroke="#efb18b" stroke-width="2" fill="none"/><g fill="#9baa8b" font-size="9" font-family="monospace"><text x="0" y="18">${fmt(max)} m</text><text x="0" y="${height-30}">${fmt(min)} m</text><text x="${pad}" y="${height-8}">0</text><text text-anchor="end" x="${width-12}" y="${height-8}">${fmt(analysis.outboundMeters/1000,2)} km · Rochette</text></g></svg>`;
+  $('elevation-profile').innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="profile-title"><title id="profile-title">${t('profile')}</title><defs><linearGradient id="elevation-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ad1e6" stop-opacity=".28"/><stop offset="1" stop-color="#5ad1e6" stop-opacity=".03"/></linearGradient></defs><path d="M ${pad} 14 V ${height-28} H ${width-12}" fill="none" stroke="#454b53" stroke-width="1"/><path d="${area}" fill="url(#elevation-fill)"/><path d="${line}" stroke="#5ad1e6" stroke-width="2.2" fill="none"/><g fill="#aab2bd" font-size="11" font-family="monospace"><text x="0" y="18">${fmt(max)} m</text><text x="0" y="${height-30}">${fmt(min)} m</text><text x="${pad}" y="${height-8}">0</text><text text-anchor="end" x="${width-12}" y="${height-8}">${fmt(analysis.outboundMeters/1000,2)} km · Rochette</text></g></svg>`;
   $('ascent-metric').textContent=t('ascent')+': '+fmt(analysis.roundTripAscentMeters)+' m';
 }
 
@@ -156,7 +205,7 @@ function terrainImage(full){
   for(let i=0;i<g.slopes.length;i++){
     const offset=i*4;if(!g.valid[i]){if(full){image.data[offset]=75;image.data[offset+1]=80;image.data[offset+2]=70;image.data[offset+3]=180;}continue;}
     const slope=g.slopes[i],over=slope>limit;if(!full&&!over)continue;
-    const color=over?[224,105,78,full?200:90]:slope>5?[219,184,99,130]:[95,155,111,100];image.data.set(color,offset);
+    const color=over?[255,90,79,full?205:120]:slope>5?[245,184,61,125]:[61,200,120,85];image.data.set(color,offset);
   }
   context.putImageData(image,0,0);state.slopeLayers.set(key,c);return c;
 }
@@ -167,33 +216,35 @@ function nightImage(){
   context.putImageData(image,0,0);state.slopeLayers.set('night',c);return c;
 }
 function drawTerrain(){const full=state.layer==='slope',image=state.layer==='night'?nightImage():terrainImage(full);if(!image)return;const g=state.terrain,tl=screen({x:g.xMin,y:g.yMax}),br=screen({x:g.xMin+g.cols*g.step,y:g.yMax-g.rows*g.step});ctx.save();ctx.imageSmoothingEnabled=state.layer==='night';ctx.drawImage(image,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
-function drawPath(points,color,width,dash=[]){if(!points?.length)return;ctx.save();ctx.beginPath();points.forEach((p,i)=>{const q=screen(p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#102015b0';ctx.lineWidth=width+2.5;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.restore();}
-function label(title,p,subtitle,color='#eef0db',dy=0){
+function drawPath(points,color,width,dash=[]){if(!points?.length)return;ctx.save();ctx.beginPath();points.forEach((p,i)=>{const q=screen(p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#0b0d10c0';ctx.lineWidth=width+3;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.restore();}
+function label(title,p,subtitle,color='#ffffff',dy=0){
   if(p.x<0||p.x>state.width||p.y<0||p.y>state.height)return;
-  ctx.save();ctx.font='500 11px Arial';const width=Math.max(ctx.measureText(title).width,subtitle.length*4.5)+18;
-  let x=p.x+18,y=p.y-2+dy;if(x+width>state.width-50)x=p.x-width-18;if(x<10)x=10;
-  y=Math.max(135,Math.min(y,state.height-105));ctx.fillStyle='#142014ed';ctx.beginPath();ctx.roundRect(x-7,y-16,width,38,4);ctx.fill();ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(title,x,y-2);ctx.font='7px monospace';ctx.fillStyle='#b8c5a7';ctx.fillText(subtitle,x,y+12);ctx.restore();
+  const compact=state.width<520;ctx.save();ctx.font=`600 ${compact?12:13}px Arial`;const titleWidth=ctx.measureText(title).width;ctx.font=`${compact?10:11}px monospace`;const subWidth=ctx.measureText(subtitle).width;
+  const width=Math.max(titleWidth,subWidth)+20,height=compact?40:44;
+  let x=p.x+18,y=p.y-2+dy;if(x+width>state.width-56)x=p.x-width-18;if(x<10)x=10;
+  y=Math.max(70,Math.min(y,state.height-70));ctx.fillStyle='#0f1215eb';ctx.beginPath();ctx.roundRect(x-8,y-18,width,height,5);ctx.fill();
+  ctx.font=`600 ${compact?12:13}px Arial`;ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(title,x,y-1);ctx.font=`${compact?10:11}px monospace`;ctx.fillStyle='#b4bcc6';ctx.fillText(subtitle,x,y+15);ctx.restore();
 }
 function draw(){
-  const {width:w,height:h}=state;ctx.clearRect(0,0,w,h);ctx.fillStyle='#3f473a';ctx.fillRect(0,0,w,h);
+  const {width:w,height:h}=state;ctx.clearRect(0,0,w,h);ctx.fillStyle='#2b2f34';ctx.fillRect(0,0,w,h);
   const visible=drawTiles(ctx,imageLayer(),state.images,screen,w,h);
   if(localLayer()&&(state.overlays||state.layer!=='optical'))drawTerrain();
   if(state.overlays){
     if(localLayer()){
-      drawPath(state.directRoute,'#9dcee9',state.strategy==='direct'?3:1.8,[4,4]);drawPath(state.terrainRoute,'#ffc395',state.strategy==='terrain'?3:1.7,[]);
+      drawPath(state.directRoute,'#c9ced6',state.strategy==='direct'?2.6:1.6,[5,5]);drawPath(state.terrainRoute,'#5ad1e6',state.strategy==='terrain'?3.6:2,[]);
       const walk=state.comparisons?.[state.strategy]?.walkback;
       if(state.route&&walk?.status==='beyond'){
         // Past the walkback limit, a slower return would consume the reserve: draw that stretch in red.
-        const limit=pointAlong(state.route,walk.limitMeters);drawPath([limit,...state.route.slice(limit.index)],'#ff6b57',3.2,[2,5]);
-        const q=screen(limit);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(Math.PI/4);ctx.fillStyle='#ff6b57';ctx.strokeStyle='#2a0d08';ctx.lineWidth=2;ctx.fillRect(-6,-6,12,12);ctx.strokeRect(-6,-6,12,12);ctx.restore();label(t('walkbackMarker'),q,t('walkbackMarkerSub',{km:fmt(walk.limitMeters/1000,2)}),'#ffb4a6',-46);
+        const limit=pointAlong(state.route,walk.limitMeters);drawPath([limit,...state.route.slice(limit.index)],'#ff5a4f',3.6,[2,5]);
+        const q=screen(limit);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(Math.PI/4);ctx.fillStyle='#ff5a4f';ctx.strokeStyle='#2a0d08';ctx.lineWidth=2;ctx.fillRect(-6,-6,12,12);ctx.strokeRect(-6,-6,12,12);ctx.restore();label(t('walkbackMarker'),q,t('walkbackMarkerSub',{km:fmt(walk.limitMeters/1000,2)}),'#ffb0a8',-50);
       }
       const routeOk=state.analyses?.[state.strategy]?.passable;
-      const target=screen(TARGET);ctx.beginPath();ctx.arc(target.x,target.y,11,0,Math.PI*2);ctx.fillStyle='#ef9a7655';ctx.fill();ctx.strokeStyle='#ffe1bd';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(target.x,target.y,3.5,0,Math.PI*2);ctx.fillStyle='#ffe4ca';ctx.fill();
-      label('Rochette',target,routeOk&&walk&&walk.status!=='beyond'?t('leaveBySubtitle',{leave:fmt(Math.floor(walk.leaveBy))}):t('workspaceLabel'),'#ffceaa');
-      const base=screen(HABITAT);ctx.fillStyle='#e5ecd6';ctx.strokeStyle='#26351b';ctx.lineWidth=2;ctx.fillRect(base.x-6,base.y-6,12,12);ctx.strokeRect(base.x-6,base.y-6,12,12);label('ARES',base,t('hypotheticalBase'));
+      const target=screen(TARGET);ctx.beginPath();ctx.arc(target.x,target.y,11,0,Math.PI*2);ctx.fillStyle='#5ad1e640';ctx.fill();ctx.strokeStyle='#ffffff';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.arc(target.x,target.y,4,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();
+      label('Rochette',target,routeOk&&walk&&walk.status!=='beyond'?t('leaveBySubtitle',{leave:fmt(Math.floor(walk.leaveBy))}):t('workspaceLabel'),'#ffffff');
+      const base=screen(HABITAT);ctx.fillStyle='#ffffff';ctx.strokeStyle='#0b0d10';ctx.lineWidth=2;ctx.fillRect(base.x-6,base.y-6,12,12);ctx.strokeRect(base.x-6,base.y-6,12,12);label('ARES',base,t('hypotheticalBase'));
       drawSimMarker();
     }else{
-      drawPath(state.terrainRoute,'#ffd0a5',2,[]);const p=screen(MIDPOINT);ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fillStyle='#f2b184';ctx.fill();label(t('areaLabel'),p,'ARES → ROCHETTE');
+      drawPath(state.terrainRoute,'#5ad1e6',2.4,[]);const p=screen(MIDPOINT);ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fillStyle='#5ad1e6';ctx.fill();label(t('areaLabel'),p,'ARES → ROCHETTE');
     }
   }
   ctx.save();ctx.fillStyle='#f7f2e7';ctx.shadowColor='#000';ctx.shadowBlur=3;ctx.textAlign='center';ctx.font='10px monospace';ctx.fillText('N',w-28,h-102);ctx.beginPath();ctx.moveTo(w-28,h-94);ctx.lineTo(w-32,h-82);ctx.lineTo(w-28,h-86);ctx.lineTo(w-24,h-82);ctx.closePath();ctx.fill();ctx.restore();
@@ -258,6 +309,10 @@ function finishDemo(){
 $('sim-play').addEventListener('click',toggleSim);
 $('sim-time').addEventListener('input',()=>{stopSim();sim.t=Number($('sim-time').value);renderSim();draw();});
 $('sim-slow').addEventListener('change',()=>{updateSim();draw();});
+$('eva-open').addEventListener('click',openEva);$('eva-close').addEventListener('click',()=>evaDialog.close());
+$('eva-play').addEventListener('click',toggleSim);
+$('eva-time').addEventListener('input',()=>{stopSim();sim.t=Number($('eva-time').value);renderSim();draw();});
+$('eva-slow').addEventListener('change',()=>{$('sim-slow').checked=$('eva-slow').checked;updateSim();draw();});
 $('demo-start').addEventListener('click',startDemo);$('demo-previous').addEventListener('click',()=>{if(demo&&demo.step>0)setDemoStep(demo.step-1);});$('demo-next').addEventListener('click',()=>{if(!demo)return;if(demo.step===2)finishDemo();else setDemoStep(demo.step+1);});$('demo-exit').addEventListener('click',finishDemo);
 $('plan').addEventListener('click',()=>{calculate();recenter();toast(t('recalculated'));});$('export').addEventListener('click',exportPlan);
 $('locate-target').addEventListener('click',()=>{closeSettings();setLayer('optical');recenter();canvas.scrollIntoView({block:'center',behavior:'smooth'});});
@@ -281,7 +336,7 @@ canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRec
 canvas.addEventListener('pointerup',e=>{const r=canvas.getBoundingClientRect();if(state.drag&&!state.drag.moved)inspect(ground({x:e.clientX-r.left,y:e.clientY-r.top}));state.drag=null;});canvas.addEventListener('pointercancel',()=>state.drag=null);
 canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect(),p={x:e.clientX-r.left,y:e.clientY-r.top},before=ground(p);state.scale*=e.deltaY<0?1.12:1/1.12;constrain();const after=ground(p);state.center.x+=before.x-after.x;state.center.y+=before.y-after.y;constrain();draw();},{passive:false});
 canvas.addEventListener('keydown',e=>{const delta=50/state.scale;if(e.key==='ArrowLeft')state.center.x-=delta;else if(e.key==='ArrowRight')state.center.x+=delta;else if(e.key==='ArrowUp')state.center.y+=delta;else if(e.key==='ArrowDown')state.center.y-=delta;else return;e.preventDefault();constrain();draw();});
-document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='d'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!dialog.open&&!settingsDialog.open){e.preventDefault();showSources();}});
+document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='d'&&!['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)&&!dialog.open&&!settingsDialog.open&&!evaDialog.open){e.preventDefault();showSources();}});
 new ResizeObserver(resize).observe(canvas);resize();calculate();
 
 async function loadTerrain(){
@@ -301,4 +356,7 @@ async function loadImagery(){
 }
 const terrainReady=loadTerrain();
 await Promise.all([terrainReady,loadImagery(),loadNightIr()]);
-if(new URL(location.href).searchParams.get('demo')==='1'&&state.terrain)startDemo();
+{const q=new URL(location.href).searchParams;
+  if(q.get('demo')==='1'&&state.terrain)startDemo();
+  // Deep link for recording: ?view=eva[&work=minutes][&t=minutes]
+  else if(q.get('view')==='eva'&&state.terrain){const work=Number(q.get('work'));if(work>=0&&work<=120&&q.get('work')!==null){$('work').value=String(work);calculate();}openEva();const at=Number(q.get('t'));if(at>0&&sim.timeline){sim.t=Math.min(at,sim.timeline.total);renderSim();draw();}}}

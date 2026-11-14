@@ -172,6 +172,19 @@ export function evaStateAt(tl,t){
   const shelterMinutes=distance/(tl.metersPerMinute*WALKBACK_PACE_FACTOR),margin=tl.autonomy-t-shelterMinutes-tl.reserve;
   return {t,phase,distance,shelterMinutes,margin,remaining:tl.autonomy-t,pastLeaveBy:phase==='work'&&t>tl.leaveBy};
 }
+// Crew-view helpers. Local coordinates: x east, y north.
+export function bearingDeg(a,b){return (Math.atan2(b.x-a.x,b.y-a.y)*180/Math.PI+360)%360;}
+export function compassPoint(deg){return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((deg%360)+360)%360/45)%8];}
+export function routeLength(points){let d=0;for(let i=1;i<points.length;i++)d+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);return d;}
+// What lies ahead along the route, from `from` metres (measured from the habitat) in direction dir (+1 out, -1 back).
+export function lookAhead(points,from,dir,length,t,night){
+  const total=routeLength(points),end=Math.max(0,Math.min(total,from+dir*length)),span=Math.abs(end-from);
+  if(span<1)return {meters:0,maxSlope:null,coolShare:0,warmShare:0};
+  const n=Math.max(2,Math.ceil(span/(t.step/4)));let maxSlope=-Infinity,cool=0,warm=0,known=0;
+  for(let i=0;i<=n;i++){const p=pointAlong(points,from+(end-from)*i/n),id=cellId(p,t);if(id<0||!t.valid[id])continue;maxSlope=Math.max(maxSlope,t.slopes[id]);
+    if(night){const k=nightClass(night.values[id],night);if(k!=='unknown'){known++;if(k==='cool')cool++;else if(k==='warm')warm++;}}}
+  return {meters:span,maxSlope:Number.isFinite(maxSlope)?maxSlope:null,coolShare:known?cool/known:0,warmShare:known?warm/known:0};
+}
 // Galactic cosmic ray dose equivalent measured by Curiosity RAD at Gale crater, Aug 2012 - Jun 2013 (Hassler et al. 2014).
 export const RAD_GCR_MSV_PER_DAY=0.67;
 export function gcrDose(minutes){return minutes/1440*RAD_GCR_MSV_PER_DAY;}
