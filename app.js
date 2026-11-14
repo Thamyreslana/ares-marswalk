@@ -1,11 +1,12 @@
-import {BASE,TARGET,DEFAULT_POLICY,createTerrain,findTerrainRoute,analyzeRoute,sensitivity,toGeo,sampleTerrain,cellId} from './planner.js';
+import {HABITAT,TARGET,DEFAULT_POLICY,WALKBACK_PACE_FACTOR,createTerrain,findTerrainRoute,analyzeRoute,toGeo,sampleTerrain,cellId,pointAlong} from './planner.js';
 import {constrainCamera,cameraLimits,scaleBar,drawTiles,pixelSize} from './map-view.js';
 import {language,setLanguage,t,format as fmt,translatePage} from './i18n.js';
 import {renderEvidence} from './evidence.js';
-import {compareRoutes,summarizeComparison,DEMO_PARAMETERS} from './decision.js';
+import {compareRoutes,summarizeComparison,DEMO_PARAMETERS,DEMO_LONG_WORK} from './decision.js';
 
 const $=id=>document.getElementById(id),canvas=$('map'),ctx=canvas.getContext('2d'),dialog=$('sources-dialog'),settingsDialog=$('settings-dialog');
-const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:0,y:0},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
+const MIDPOINT=Object.freeze({x:(HABITAT.x+TARGET.x)/2,y:(HABITAT.y+TARGET.y)/2});
+const state={terrain:null,terrainError:false,manifest:null,images:new Map(),route:null,terrainRoute:null,directRoute:[{x:HABITAT.x,y:HABITAT.y},TARGET],analyses:null,scenarios:null,strategy:'terrain',layer:'optical',center:{x:400,y:-1000},scale:.1,width:900,height:510,drag:null,overlays:true,ready:false,views:{},routeCache:new Map(),slopeLayers:new Map()};
 let toastTimer;
 let demo=null;
 const localLayer=()=>state.layer==='optical'||state.layer==='slope';
@@ -15,12 +16,12 @@ function readNumber(id,min,max){const el=$(id),n=Number(el.value);if(el.value.tr
 function params(){return {autonomy:readNumber('autonomy',60,480),work:readNumber('work',0,120),speed:readNumber('speed',.5,6),reserve:readNumber('reserve',0,180),maxSlope:readNumber('slope-limit',3,25)};}
 function policy(){return {...DEFAULT_POLICY,maxSlope:Number($('slope-limit').value)};}
 function setStatus(key,kind=''){const el=$('result-chip');el.textContent=t(key);el.className='result-chip'+(kind?' '+kind:'');}
-function clearResults(key){for(const id of ['distance-metric','time-metric','remaining-metric'])$(id).textContent='—';for(const id of ['walking-bar','work-bar','reserve-bar'])$(id).style.width='0';$('insight').textContent=t(key);$('scenario-body').replaceChildren();$('elevation-profile').replaceChildren();$('ascent-metric').textContent='';state.scenarios=null;}
+function clearResults(key){for(const id of ['distance-metric','time-metric','leave-metric'])$(id).textContent='—';$('leave-caption').textContent=t('leaveByCaptionEmpty');$('leave-card').dataset.status='';for(const id of ['walking-bar','work-bar','reserve-bar'])$(id).style.width='0';$('insight').textContent=t(key);$('scenario-body').replaceChildren();$('elevation-profile').replaceChildren();$('ascent-metric').textContent='';state.scenarios=null;}
 
 function calculate(){
   const p=params();$('autonomy-value').textContent=p.autonomy+' min';$('work-value').textContent=p.work+' min';$('slope-value').textContent=p.maxSlope+'°';$('reserve-caption').textContent=t('reserveConfigured')+': '+p.reserve+' min';
   if(!state.terrain){renderDecision();clearResults(state.terrainError?'dataFailed':'dataLoading');setStatus(state.terrainError?'noRoute':'statusLoading',state.terrainError?'danger':'');return;}
-  if(!state.routeCache.has(p.maxSlope))state.routeCache.set(p.maxSlope,findTerrainRoute({x:0,y:0},TARGET,state.terrain,policy()));
+  if(!state.routeCache.has(p.maxSlope))state.routeCache.set(p.maxSlope,findTerrainRoute(HABITAT,TARGET,state.terrain,policy()));
   state.terrainRoute=state.routeCache.get(p.maxSlope);
   state.route=state.strategy==='terrain'?state.terrainRoute:state.directRoute;
   state.analyses={terrain:analyzeRoute(state.terrainRoute,state.terrain,policy()),direct:analyzeRoute(state.directRoute,state.terrain,policy())};
@@ -30,13 +31,18 @@ function calculate(){
   $('plan').disabled=false;$('export').disabled=!state.route;$('demo-start').disabled=!!demo;
   renderComparison(p);
   if(!state.route||!current){clearResults('noRouteText');setStatus('noRoute','danger');draw();return;}
-  const scenarios=state.comparisons[state.strategy].scenarios,base=scenarios[1],conservative=scenarios[2];state.scenarios=scenarios;
-  $('distance-metric').textContent=fmt(current.roundTripMeters/1000,2)+' km';$('time-metric').textContent=fmt(base.total)+' min';$('remaining-metric').textContent=fmt(base.remaining)+' min';
+  const scenarios=state.comparisons[state.strategy].scenarios,base=scenarios[1],conservative=scenarios[2],walk=state.comparisons[state.strategy].walkback;state.scenarios=scenarios;
+  $('distance-metric').textContent=fmt(current.roundTripMeters/1000,2)+' km';$('time-metric').textContent=fmt(base.total)+' min';
+  const leaveStatus=current.passable?walk.status:'blocked';
+  $('leave-metric').textContent=leaveStatus==='beyond'||leaveStatus==='blocked'?'—':'T+'+fmt(Math.floor(walk.leaveBy))+' min';
+  $('leave-caption').textContent=leaveStatus==='blocked'?t('leaveByCaptionBlocked'):leaveStatus==='beyond'?t('leaveByCaptionBeyond',{km:fmt(walk.limitMeters/1000,2)}):t('leaveByCaption',{max:fmt(Math.floor(walk.maxWork)),planned:fmt(p.work)});
+  $('leave-card').dataset.status=leaveStatus;
   if(!current.passable)setStatus('blocked','danger');else if(!base.feasible)setStatus('insufficient','danger');else if(!conservative.feasible)setStatus('conditional','warning');else setStatus('robust');
   const denominator=Math.max(p.autonomy,base.total+p.reserve);$('walking-bar').style.width=base.walking/denominator*100+'%';$('work-bar').style.width=base.work/denominator*100+'%';$('reserve-bar').style.width=p.reserve/denominator*100+'%';
   const note=base.feasible?(conservative.feasible?t('robustText',{margin:fmt(conservative.remaining-p.reserve)}):t('conditionalText',{short:fmt(conservative.excess)})):t('insufficientText',{short:fmt(base.excess)});
   let terrainNote='';if(current.unknownSamples)terrainNote=t('unknownText');else if(current.blockedCells)terrainNote=t('baselineWarn',{count:current.blockedCells,limit:p.maxSlope});
-  $('insight').textContent=[terrainNote,note].filter(Boolean).join(' ');
+  const walkNote=leaveStatus==='blocked'?'':t('walkback_'+walk.status,{leave:fmt(Math.floor(walk.leaveBy)),max:fmt(Math.floor(walk.maxWork)),planned:fmt(p.work),km:fmt(walk.limitMeters/1000,2)});
+  $('insight').textContent=[terrainNote,note,walkNote].filter(Boolean).join(' ');
   renderScenarios();renderProfile(current);draw();
 }
 
@@ -53,15 +59,18 @@ function renderComparison(p){
     const title=document.createElement('h4');title.textContent=t(kind==='terrain'?'terrainAware':'direct');card.append(title);
     const status=document.createElement('p');status.className='route-verdict '+(c.status==='robust'?'verdict-ok':c.status==='conditional'?'verdict-warning':'verdict-danger');status.textContent=t(c.status);card.append(status);
     const list=document.createElement('dl');
-    const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min']];
-    for(const [key,value]of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=t(key);dd.textContent=value;dd.dataset.metric=key;if(key==='reserveMargin')dd.className=c.reserveMargin>=0?'margin-positive':'margin-negative';row.append(dt,dd);list.append(row);}card.append(list);
+    const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min'],['leaveBy',!c.walkback||c.walkback.status==='beyond'||!a.passable?'—':'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min']];
+    for(const [key,value]of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=t(key);dd.textContent=value;dd.dataset.metric=key;if(key==='reserveMargin'&&a?.passable)dd.className=c.reserveMargin>=0?'margin-positive':'margin-negative';row.append(dt,dd);list.append(row);}card.append(list);
     const button=document.createElement('button');button.type='button';button.className='inspect-route';button.dataset.inspectRoute=kind;button.textContent=t(state.strategy===kind?'selectedRoute':'inspectRoute');button.disabled=!a;button.setAttribute('aria-pressed',state.strategy===kind);button.addEventListener('click',()=>{chooseRoute(kind);document.querySelector(`[data-inspect-route="${kind}"]`)?.focus({preventScroll:true});});card.append(button);body.append(card);
   }
   const a=state.analyses?.terrain,d=state.analyses?.direct;
   const direct=state.comparisons.direct,terrain=state.comparisons.terrain;
-  const comparison=!a?t('noRouteText'):a.roundTripMeters-d.roundTripMeters<1?t('sameRoute'):t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)});
-  const tradeoff=a?t('reserveTradeoff',{extraTime:fmt(terrain.conservative.total-direct.conservative.total,1),directMargin:fmt(direct.reserveMargin,1),terrainMargin:fmt(terrain.reserveMargin,1)}):'';
-  $('route-explanation').textContent=[comparison,tradeoff].filter(Boolean).join(' ');
+  let explanation;
+  if(!a)explanation=t('noRouteText');
+  else if(a.roundTripMeters-d.roundTripMeters<1)explanation=t('sameRoute');
+  else if(!d.passable&&a.passable)explanation=t('detourExplain',{cells:fmt(d.blockedCells),limit:p.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters)});
+  else explanation=[t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)}),t('reserveTradeoff',{extraTime:fmt(terrain.conservative.total-direct.conservative.total,1),directMargin:fmt(direct.reserveMargin,1),terrainMargin:fmt(terrain.reserveMargin,1)})].join(' ');
+  $('route-explanation').textContent=explanation;
   $('comparison-reserve').textContent=t('reserveConfigured')+': '+p.reserve+' min';
   $('comparison-method').textContent=['direct','terrain'].map(kind=>{const c=state.comparisons[kind];return `${t(kind==='terrain'?'terrainAware':'direct')}: ${t('aboveLimit')} = ${c.analysis?.blockedCells??'—'}; ${t('terrainCost')} = ${c.analysis?fmt(c.analysis.terrainCost):'—'}`;}).join(' · ');
 }
@@ -88,7 +97,7 @@ function recenter(){
   if(localLayer()){
     const points=state.terrainRoute??state.directRoute,xs=points.map(p=>p.x),ys=points.map(p=>p.y),minX=Math.min(...xs)-550,maxX=Math.max(...xs)+550,minY=Math.min(...ys)-500,maxY=Math.max(...ys)+500;
     state.center={x:(minX+maxX)/2,y:(minY+maxY)/2};state.scale=Math.min(Math.max(100,state.width-90)/(maxX-minX),Math.max(150,state.height-130)/(maxY-minY));
-  }else{state.center={x:0,y:0};state.scale=state.height/(state.layer==='topography'?85000:55000);}
+  }else{state.center={...MIDPOINT};state.scale=state.height/(state.layer==='topography'?85000:55000);}
   constrain();draw();
 }
 function terrainImage(full){
@@ -103,10 +112,10 @@ function terrainImage(full){
 }
 function drawTerrain(){const full=state.layer==='slope',image=terrainImage(full);if(!image)return;const g=state.terrain,tl=screen({x:g.xMin,y:g.yMax}),br=screen({x:g.xMin+g.cols*g.step,y:g.yMax-g.rows*g.step});ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,tl.x,tl.y,br.x-tl.x,br.y-tl.y);ctx.restore();}
 function drawPath(points,color,width,dash=[]){if(!points?.length)return;ctx.save();ctx.beginPath();points.forEach((p,i)=>{const q=screen(p);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle='#102015b0';ctx.lineWidth=width+2.5;ctx.stroke();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.stroke();ctx.restore();}
-function label(title,p,subtitle,color='#eef0db'){
+function label(title,p,subtitle,color='#eef0db',dy=0){
   if(p.x<0||p.x>state.width||p.y<0||p.y>state.height)return;
   ctx.save();ctx.font='500 11px Arial';const width=Math.max(ctx.measureText(title).width,subtitle.length*4.5)+18;
-  let x=p.x+18,y=p.y-2;if(x+width>state.width-50)x=p.x-width-18;if(x<10)x=10;
+  let x=p.x+18,y=p.y-2+dy;if(x+width>state.width-50)x=p.x-width-18;if(x<10)x=10;
   y=Math.max(135,Math.min(y,state.height-105));ctx.fillStyle='#142014ed';ctx.beginPath();ctx.roundRect(x-7,y-16,width,38,4);ctx.fill();ctx.fillStyle=color;ctx.textAlign='left';ctx.fillText(title,x,y-2);ctx.font='7px monospace';ctx.fillStyle='#b8c5a7';ctx.fillText(subtitle,x,y+12);ctx.restore();
 }
 function draw(){
@@ -116,10 +125,18 @@ function draw(){
   if(state.overlays){
     if(localLayer()){
       drawPath(state.directRoute,'#9dcee9',state.strategy==='direct'?3:1.8,[4,4]);drawPath(state.terrainRoute,'#ffc395',state.strategy==='terrain'?3:1.7,[]);
-      const target=screen(TARGET);ctx.beginPath();ctx.arc(target.x,target.y,11,0,Math.PI*2);ctx.fillStyle='#ef9a7655';ctx.fill();ctx.strokeStyle='#ffe1bd';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(target.x,target.y,3.5,0,Math.PI*2);ctx.fillStyle='#ffe4ca';ctx.fill();label('Rochette',target,t('workspaceLabel'),'#ffceaa');
-      const base=screen({x:0,y:0});ctx.fillStyle='#e5ecd6';ctx.strokeStyle='#26351b';ctx.lineWidth=2;ctx.fillRect(base.x-6,base.y-6,12,12);ctx.strokeRect(base.x-6,base.y-6,12,12);label('ARES',base,t('hypotheticalBase'));
+      const walk=state.comparisons?.[state.strategy]?.walkback;
+      if(state.route&&walk?.status==='beyond'){
+        // Past the walkback limit, a slower return would consume the reserve: draw that stretch in red.
+        const limit=pointAlong(state.route,walk.limitMeters);drawPath([limit,...state.route.slice(limit.index)],'#ff6b57',3.2,[2,5]);
+        const q=screen(limit);ctx.save();ctx.translate(q.x,q.y);ctx.rotate(Math.PI/4);ctx.fillStyle='#ff6b57';ctx.strokeStyle='#2a0d08';ctx.lineWidth=2;ctx.fillRect(-6,-6,12,12);ctx.strokeRect(-6,-6,12,12);ctx.restore();label(t('walkbackMarker'),q,t('walkbackMarkerSub',{km:fmt(walk.limitMeters/1000,2)}),'#ffb4a6',-46);
+      }
+      const routeOk=state.analyses?.[state.strategy]?.passable;
+      const target=screen(TARGET);ctx.beginPath();ctx.arc(target.x,target.y,11,0,Math.PI*2);ctx.fillStyle='#ef9a7655';ctx.fill();ctx.strokeStyle='#ffe1bd';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(target.x,target.y,3.5,0,Math.PI*2);ctx.fillStyle='#ffe4ca';ctx.fill();
+      label('Rochette',target,routeOk&&walk&&walk.status!=='beyond'?t('leaveBySubtitle',{leave:fmt(Math.floor(walk.leaveBy))}):t('workspaceLabel'),'#ffceaa');
+      const base=screen(HABITAT);ctx.fillStyle='#e5ecd6';ctx.strokeStyle='#26351b';ctx.lineWidth=2;ctx.fillRect(base.x-6,base.y-6,12,12);ctx.strokeRect(base.x-6,base.y-6,12,12);label('ARES',base,t('hypotheticalBase'));
     }else{
-      drawPath(state.terrainRoute,'#ffd0a5',2,[]);const p=screen({x:TARGET.x/2,y:TARGET.y/2});ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fillStyle='#f2b184';ctx.fill();label(t('areaLabel'),p,'ARES → ROCHETTE');
+      drawPath(state.terrainRoute,'#ffd0a5',2,[]);const p=screen(MIDPOINT);ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fillStyle='#f2b184';ctx.fill();label(t('areaLabel'),p,'ARES → ROCHETTE');
     }
   }
   ctx.save();ctx.fillStyle='#f7f2e7';ctx.shadowColor='#000';ctx.shadowBlur=3;ctx.textAlign='center';ctx.font='10px monospace';ctx.fillText('N',w-28,h-102);ctx.beginPath();ctx.moveTo(w-28,h-94);ctx.lineTo(w-32,h-82);ctx.lineTo(w-28,h-86);ctx.lineTo(w-24,h-82);ctx.closePath();ctx.fill();ctx.restore();
@@ -142,8 +159,8 @@ function showSources(){ $('sources-content').innerHTML=renderEvidence(state);if(
 function exportPlan(){
   if(!state.route||!state.analyses?.[state.strategy])return;
   const p=params(),coordinates=state.route.map(toGeo),tData=state.terrain,{elevations,slopes,valid,...terrainMetadata}=tData;
-  const data={schemaVersion:2,name:'ARES-02',prototype:true,exportedAt:new Date().toISOString(),humanMission:{hypothetical:true,habitat:BASE},target:TARGET,strategy:state.strategy,policy:{...policy(),assumption:true},parameters:{...p,timeUnit:'minutes',speedUnit:'km/h'},analysis:state.analyses[state.strategy],comparison:state.analyses,routeDecisions:state.comparisons,scenarios:state.scenarios,route:{type:'Feature',properties:{includesReturn:true},geometry:{type:'LineString',coordinates:[...coordinates,...coordinates.slice(0,-1).reverse()].map(p=>[p.lon,p.lat])}},sources:{terrain:terrainMetadata,imageryManifest:'assets/data-manifest.json',waypoint:'assets/rochette-waypoint.geojson',scientificPaper:TARGET.scienceSource},limitations:'Research prototype. Historical terrain; no operational safety, oxygen, radiation, current weather, fatigue, or sub-resolution obstacle assessment. Pace scenarios are assumptions, not statistical confidence intervals.'};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ares-02-mission-plan.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(t('exported'));
+  const data={schemaVersion:3,name:'ARES-03',prototype:true,exportedAt:new Date().toISOString(),humanMission:{hypothetical:true,habitat:HABITAT},target:TARGET,strategy:state.strategy,policy:{...policy(),assumption:true},parameters:{...p,timeUnit:'minutes',speedUnit:'km/h'},analysis:state.analyses[state.strategy],comparison:state.analyses,routeDecisions:state.comparisons,scenarios:state.scenarios,walkback:{...state.comparisons[state.strategy].walkback,returnPaceFactor:WALKBACK_PACE_FACTOR,timeUnit:'minutes since leaving the habitat',rule:'Walk out at the planned pace; plan the return as if pace drops to the return pace factor. Leaving the target by leaveBy preserves the reserve.'},route:{type:'Feature',properties:{includesReturn:true},geometry:{type:'LineString',coordinates:[...coordinates,...coordinates.slice(0,-1).reverse()].map(p=>[p.lon,p.lat])}},sources:{terrain:terrainMetadata,imageryManifest:'assets/data-manifest.json',waypoint:'assets/rochette-waypoint.geojson',scientificPaper:TARGET.scienceSource},limitations:'Research prototype. Historical terrain; no operational safety, oxygen, radiation, current weather, fatigue, or sub-resolution obstacle assessment. Pace scenarios are assumptions, not statistical confidence intervals.'};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ares-03-mission-plan.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);toast(t('exported'));
 }
 
 function updateTerrainStatus(){$('terrain-status').textContent=t(state.terrain?'terrainReady':state.terrainError?'dataFailed':'dataLoading');}
@@ -160,12 +177,17 @@ const demoInputs=['autonomy','work','speed','reserve','slope-limit'];
 function setParameters(p){for(const [key,id]of Object.entries({autonomy:'autonomy',work:'work',speed:'speed',reserve:'reserve',maxSlope:'slope-limit'}))$(id).value=p[key];}
 function renderDemo(){
   $('demo-panel').hidden=!demo;if(!demo)return;
-  $('demo-title').textContent=t('demoTitle'+demo.step);$('demo-text').textContent=t('demoText'+demo.step);$('demo-progress').textContent=t('demoStep',{step:demo.step+1});$('demo-previous').disabled=demo.step===0;$('demo-next').textContent=t(demo.step===2?'demoFinish':'demoNext');
+  $('demo-title').textContent=t('demoTitle'+demo.step,demoValues());$('demo-text').textContent=t('demoText'+demo.step,demoValues());$('demo-progress').textContent=t('demoStep',{step:demo.step+1});$('demo-previous').disabled=demo.step===0;$('demo-next').textContent=t(demo.step===2?'demoFinish':'demoNext');
 }
-function setDemoStep(step){demo.step=step;setParameters({...DEMO_PARAMETERS,reserve:step===0?45:50});chooseRoute(step===2?'direct':'terrain');renderDemo();}
+// Values shown in the demo text are read from the live calculation, never hard-coded.
+function demoValues(){
+  const d=state.analyses?.direct,a=state.analyses?.terrain,w=state.comparisons?.terrain?.walkback;if(!d||!a||!w)return {};
+  return {cells:fmt(d.blockedCells),limit:DEMO_PARAMETERS.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters),work:DEMO_LONG_WORK,leave:fmt(Math.floor(w.leaveBy)),max:fmt(Math.floor(w.maxWork))};
+}
+function setDemoStep(step){demo.step=step;setParameters({...DEMO_PARAMETERS,work:step===2?DEMO_LONG_WORK:DEMO_PARAMETERS.work});setLayer(step===0?'slope':'optical');chooseRoute(step===0?'direct':'terrain');renderDemo();}
 function startDemo(){
   if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
-  for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setLayer('optical');setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
+  for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
 }
 function finishDemo(){
   if(!demo)return;const snapshot=demo.snapshot;demo=null;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});

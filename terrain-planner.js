@@ -10,7 +10,13 @@ export const TARGET = Object.freeze({
   nasaSource:'https://www.jpl.nasa.gov/news/nasas-perseverance-rover-collects-puzzle-pieces-of-mars-history/'
 });
 export const TARGETS = [TARGET];
+// BASE is only the map/terrain projection origin. The habitat is a separate, hypothetical
+// site: a flat area (< 4° within 120 m) west of a ~40 m hill that the straight line to Rochette crosses.
+const HABITAT_GEO = {lon:77.3971,lat:18.4407};
+export const HABITAT = Object.freeze({...HABITAT_GEO,...fromGeo(HABITAT_GEO)});
 export const DEFAULT_POLICY = Object.freeze({maxSlope:12,slopeWeight:4});
+// Same pace factor as the conservative scenario: the return leg is planned as if walking slows by 25%.
+export const WALKBACK_PACE_FACTOR = 0.75;
 
 export function createTerrain(raw){
   const size=raw.cols*raw.rows;
@@ -118,6 +124,22 @@ export function budget(distance,speed,work,autonomy,reserve){
   if(![distance,speed,work,autonomy,reserve].every(Number.isFinite)||distance<0||speed<=0||work<0||autonomy<0||reserve<0)throw new Error('Invalid budget parameters');
   const walking=distance/(speed*1000)*60,total=walking+work,remaining=autonomy-total;
   return {walking,work,total,remaining,reserve,feasible:remaining>=reserve,excess:Math.max(0,total-(autonomy-reserve))};
+}
+// Walkback rule, inspired by the walkback constraints used to plan Apollo rover traverses:
+// walk out at the planned pace, but plan the return as if the pace drops to WALKBACK_PACE_FACTOR.
+// Times are minutes elapsed since leaving the habitat.
+export function walkback(outboundMeters,p){
+  if(![outboundMeters,p?.speed,p?.work,p?.autonomy,p?.reserve].every(Number.isFinite)||outboundMeters<0||p.speed<=0)throw new Error('Invalid walkback parameters');
+  const metersPerMinute=p.speed*1000/60,outbound=outboundMeters/metersPerMinute,slowReturn=outbound/WALKBACK_PACE_FACTOR;
+  const leaveBy=p.autonomy-p.reserve-slowReturn,maxWork=leaveBy-outbound;
+  const limitMeters=Math.max(0,(p.autonomy-p.reserve)*metersPerMinute/(1+1/WALKBACK_PACE_FACTOR));
+  const status=maxWork<0?'beyond':maxWork<p.work?'shortWork':'ok';
+  return {outbound,slowReturn,leaveBy,maxWork,plannedDeparture:outbound+p.work,workMargin:maxWork-p.work,limitMeters,status};
+}
+export function pointAlong(points,distance){
+  if(!points?.length)return null;let travelled=0;
+  for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],d=Math.hypot(b.x-a.x,b.y-a.y);if(travelled+d>=distance){const f=d?(distance-travelled)/d:0;return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,index:i};}travelled+=d;}
+  return {...points.at(-1),index:points.length-1};
 }
 export function sensitivity(distance,p){
   const scenarios=[{id:'optimistic',speedFactor:1.2,workFactor:.85},{id:'base',speedFactor:1,workFactor:1},{id:'conservative',speedFactor:.75,workFactor:1.25}];
