@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES: planeje uma caminhada em Marte com cartografia NASA Mars Trek e uma simulação de autonomia. Protótipo NASA Space Apps 2026.">
   <title>ARES — Explorador de Marte</title>
-  <link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css?v=maps-2">
 </head>
 <body>
 <header class="topbar">
@@ -43,10 +43,12 @@
       <canvas id="map" tabindex="0" role="img" aria-label="Mapa NASA de Jezero com habitat hipotético, destino e rota. Arraste para mover; use os botões de zoom. Os destinos também estão disponíveis no seletor."></canvas>
       <div class="map-top"><span class="map-caption"><span class="live-dot"></span> <span id="layer-caption">MRO · CTX / ÓPTICO</span></span><span class="map-caption light" id="tile-status">Carregando cartografia…</span></div>
       <div class="layer-picker" role="group" aria-label="Camada de dados"><button data-layer="optical" class="selected" aria-pressed="true">◉ Óptico</button><button data-layer="topography" aria-pressed="false">≋ Relevo</button><button data-layer="thermal" aria-pressed="false">◐ Infravermelho</button></div>
-      <div class="map-tools"><button id="zoom-in" aria-label="Aproximar mapa">+</button><button id="zoom-out" aria-label="Afastar mapa">−</button><button id="recenter" aria-label="Centralizar missão">⌖</button></div>
-      <div class="map-legend"><span><i class="legend-line"></i> Ida e volta pelo mesmo percurso</span><span><i class="legend-zone"></i> Exclusão simulada</span></div>
+      <div class="map-tools"><button id="zoom-in" aria-label="Aproximar mapa">+</button><button id="zoom-out" aria-label="Afastar mapa">−</button><button id="recenter" aria-label="Centralizar mapa">⌖</button><button id="fullscreen-map" aria-label="Ampliar mapa em tela cheia">⛶</button></div>
+      <div class="imagery-controls"><button id="toggle-overlays" aria-pressed="true">Ocultar marcações</button><button id="view-mission" hidden>Ver missão de perto ↗</button></div>
+      <div class="layer-description" id="layer-description">Detalhe da exploração · mosaico CTX de Jezero</div>
+      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i> Ida e volta pelo mesmo percurso</span><span><i class="legend-zone"></i> Exclusão simulada</span></div>
       <div class="scale"><div></div><span id="scale-text">1 km</span></div>
-      <div class="map-credit">NASA / JPL-Caltech · Mars Trek <span id="resolution-note"></span><span id="coverage-note"> · Viking nas lacunas CTX</span></div>
+      <div class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span><span id="coverage-note"></span></div>
       <div class="map-empty" id="map-empty" hidden>Cartografia indisponível neste momento.<br><small>A rota continua disponível no esquema de coordenadas. Consulte Dados & fontes.</small></div>
     </section>
     <section class="mission-summary" aria-label="Resumo calculado da missão" aria-live="polite">
@@ -61,5 +63,5 @@
 </div>
 <dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow">PROVENIÊNCIA & TRANSPARÊNCIA</div><h2 id="sources-title">Por trás de cada camada.</h2></div><button id="close-sources" class="close-button" aria-label="Fechar fontes">×</button></div><div id="sources-content"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=maps-2"></script>
 </body></html>
