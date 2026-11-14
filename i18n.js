@@ -1,4 +1,8 @@
 const en={
+  evaOpen:'Crew EVA view',evaKicker:'ARES · CREW EVA VIEW · SIMULATED',evaTitle:'Sortie to Rochette',evaMapLabel:'Route overview with the crew position',howChecked:'How this plan was checked',
+  evaLeaveIn:'LEAVE ROCHETTE IN',evaLeaveAt:'leave-by time T+{leave} min',evaOverdue:'PAST LEAVE-BY TIME',evaOverdueSub:'stop the science and head back now',evaHomeIn:'HABITAT IN',evaReserveAtHome:'{reserve} min left on arrival',evaHome:'BACK WITH',evaHomeSub:'reserve required: {required} min',
+  evaNext:'NEXT',evaHabitat:'Habitat',evaHeading:'heading {deg}° {pt}',evaAtSite:'At Rochette · science',evaShelter:'SHELTER · SLOW PACE',evaShelterSub:'walk back to the habitat from here',
+  evaGround:'GROUND · NEXT 200 M',evaDose:'COSMIC-RAY DOSE · SO FAR',evaDoseSub:'Curiosity RAD rate · 0.67 mSv/day',evaGroundLoose:'Likely loose',evaGroundRock:'Likely rock',evaGroundMixed:'Mixed ground',evaSlopeAhead:'max slope {max}° ahead',evaNote:'Simulated from the plan: orbital terrain and the assumptions in Plan settings. Not live telemetry.',
   night:'Night IR',nightCaption:'ODYSSEY · THEMIS / NIGHT INFRARED',nightDescription:'Night-time brightness · warm usually means rock, cool usually means loose material',nightCool:'Cool at night · likely loose material',nightWarm:'Warm at night · likely rock',
   nightSample_cool:'cool at night (likely loose)',nightSample_warm:'warm at night (likely rock)',nightSample_mid:'typical night brightness',nightSample_unknown:'no night IR data',
   surfaceInsight:'Ground: {pct}% of this route crosses terrain that is cool at night (THEMIS), usually finer, looser material; expect softer footing there.',looseShare:'Night-cool ground (likely loose)',
@@ -70,6 +74,10 @@ const en={
   validation:'Reproducible scenario',walkLabel:'Walking',workLabel:'Science',reserveLabel:'Reserve',reserveCheck:'Reserve check',terrainReady:'Real terrain driving decisions · 20 m USGS/NASA DEM · 40 m planning grid',checkResults:'Review the result',mapAccessible:'Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect.',
 };
 const pt={
+  evaOpen:'Visão da tripulação',evaKicker:'ARES · VISÃO DA TRIPULAÇÃO NA EVA · SIMULADA',evaTitle:'Saída para Rochette',evaMapLabel:'Visão geral da rota com a posição da equipe',howChecked:'Como este plano foi verificado',
+  evaLeaveIn:'DEIXE ROCHETTE EM',evaLeaveAt:'horário-limite T+{leave} min',evaOverdue:'PASSOU DO HORÁRIO-LIMITE',evaOverdueSub:'encerre a ciência e volte agora',evaHomeIn:'HABITAT EM',evaReserveAtHome:'{reserve} min restantes na chegada',evaHome:'DE VOLTA COM',evaHomeSub:'reserva exigida: {required} min',
+  evaNext:'PRÓXIMO',evaHabitat:'Habitat',evaHeading:'rumo {deg}° {pt}',evaAtSite:'Em Rochette · ciência',evaShelter:'ABRIGO · RITMO LENTO',evaShelterSub:'caminhada de volta ao habitat daqui',
+  evaGround:'SOLO · PRÓXIMOS 200 M',evaDose:'DOSE DE RAIOS CÓSMICOS · ATÉ AGORA',evaDoseSub:'taxa do RAD (Curiosity) · 0,67 mSv/dia',evaGroundLoose:'Provavelmente solto',evaGroundRock:'Provavelmente rocha',evaGroundMixed:'Solo misto',evaSlopeAhead:'declividade máx. {max}° à frente',evaNote:'Simulado a partir do plano: terreno orbital e hipóteses de Ajustar missão. Não é telemetria ao vivo.',
   night:'IV noturno',nightCaption:'ODYSSEY · THEMIS / INFRAVERMELHO NOTURNO',nightDescription:'Brilho noturno · quente costuma indicar rocha, frio costuma indicar material solto',nightCool:'Frio à noite · provável material solto',nightWarm:'Quente à noite · provável rocha',
   nightSample_cool:'frio à noite (provável material solto)',nightSample_warm:'quente à noite (provável rocha)',nightSample_mid:'brilho noturno típico',nightSample_unknown:'sem dado de IV noturno',
   surfaceInsight:'Solo: {pct}% desta rota passa por terreno frio à noite (THEMIS), em geral material mais fino e solto; espere apoio mais macio nesses trechos.',looseShare:'Solo frio à noite (provável solto)',

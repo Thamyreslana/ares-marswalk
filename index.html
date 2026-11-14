@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
   <title>ARES — Evidence-based Marswalk Planning</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=ares-03bb"><link rel="stylesheet" href="mission.css?v=ares-03bb">
+  <link rel="stylesheet" href="style.css?v=ares-04b"><link rel="stylesheet" href="mission.css?v=ares-04b">
 </head>
 <body>
 <header class="topbar">
@@ -36,22 +36,32 @@
   </aside>
   </div>
   <main>
-    <div class="page-heading"><div><div class="eyebrow" data-t="sector">NASA MARS 2020 / JEZERO</div><h2 data-t="pageTitle">A mission to Rochette</h2></div><button class="button settings-open" id="open-settings" aria-haspopup="dialog" aria-controls="settings-dialog" aria-expanded="false"><span aria-hidden="true">☷</span><span data-t="settings">Plan settings</span></button></div>
-    <div class="evidence-banner"><span class="live-dot"></span><span id="terrain-status" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</span></div>
+    <div class="page-heading"><div><div class="eyebrow" data-t="sector">NASA MARS 2020 / JEZERO</div><h2 data-t="pageTitle">A mission to Rochette</h2></div><div class="heading-actions"><button class="button eva-open" id="eva-open" type="button" aria-haspopup="dialog" aria-controls="eva-dialog"><span aria-hidden="true">◉</span><span data-t="evaOpen">Crew EVA view</span></button><button class="button settings-open" id="open-settings" aria-haspopup="dialog" aria-controls="settings-dialog" aria-expanded="false"><span aria-hidden="true">☷</span><span data-t="settings">Plan settings</span></button></div></div>
+    <section class="mission-summary decision-strip" id="mission-summary" aria-labelledby="summary-title" aria-live="polite">
+      <h2 class="sr-only" id="summary-title" data-t="summary">Your exploration plan</h2>
+      <div class="strip-status"><span class="result-chip" id="result-chip" data-t="statusLoading">LOADING TERRAIN</span><p class="selected-route" id="selected-route"></p></div>
+      <div class="metrics"><article id="leave-card" class="leave-card"><span class="metric-label" data-t="leaveByLabel">LEAVE ROCHETTE BY</span><strong id="leave-metric">—</strong><small id="leave-caption" data-t="leaveByCaptionEmpty">Walkback deadline</small></article><article><span class="metric-label" data-t="distance">ROUND-TRIP DISTANCE</span><strong id="distance-metric">—</strong><small data-t="returnIncluded">Includes return to the habitat</small></article><article><span class="metric-label" data-t="duration">BASE-CASE TIME</span><strong id="time-metric">—</strong><small data-t="walkAndWork">Walking + science work</small></article></div>
+      <details class="strip-details"><summary data-t="howChecked">How this plan was checked</summary>
+        <p class="walkback-note"><span id="reserve-caption">Configured reserve: 45 min</span> · <span data-t="walkbackNote">Walkback rule: if your pace drops 25% on the way back, leaving Rochette by this time still preserves the reserve. Inspired by the walkback limits used to plan Apollo rover traverses.</span></p>
+        <div class="budget-track" aria-label="Time allocation"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i><span data-t="walkLabel">Walking</span></span><span><i class="research"></i><span data-t="workLabel">Science</span></span><span><i class="reserve"></i><span data-t="reserveLabel">Reserve</span></span></div>
+        <div class="insight" id="insight" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</div>
+      </details>
+    </section>
+    <section class="demo-panel" id="demo-panel" tabindex="-1" aria-live="polite" hidden><div class="demo-kicker"><span data-t="demoLabel">A DECISION IN THREE STEPS</span><span id="demo-progress"></span></div><h4 id="demo-title"></h4><p id="demo-text"></p><div class="demo-buttons"><button id="demo-previous" data-t="demoPrevious">Previous</button><button id="demo-next" data-t="demoNext">Next step</button><button id="demo-exit" data-t="demoReset">Exit & restore my plan</button></div></section>
     <section class="map-card" aria-label="Jezero mission map">
       <canvas id="map" tabindex="0" role="img" data-aria="mapAccessible" aria-label="Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect."></canvas>
-      <div class="map-top"><span class="map-caption"><span class="live-dot"></span><span id="layer-caption" data-t="opticalCaption">MRO · CTX / OPTICAL</span></span><span class="map-caption light" id="tile-status" data-t="loading">Loading evidence…</span></div>
       <div class="layer-picker" role="group" aria-label="Map layer"><button data-layer="optical" class="selected" aria-pressed="true" data-t="optical">Optical</button><button data-layer="slope" aria-pressed="false" data-t="slope">Slope</button><button data-layer="night" aria-pressed="false" data-t="night">Night IR</button><button data-layer="topography" aria-pressed="false" data-t="topography">Regional relief</button></div>
-      <div class="layer-description" id="layer-description" data-t="opticalDescription">Local CTX imagery · route driven by a separate numerical terrain grid</div>
       <div class="map-tools"><button id="zoom-in" data-aria="zoomIn" aria-label="Zoom in">+</button><button id="zoom-out" data-aria="zoomOut" aria-label="Zoom out">−</button><button id="recenter" data-aria="centerMap" aria-label="Center map">⌖</button><button id="fullscreen-map" data-aria="expandMap" aria-label="Expand map">⛶</button></div>
-      <div class="imagery-controls"><button id="toggle-overlays" aria-pressed="true" data-t="hideMarks">Hide markings</button><button id="view-mission" data-t="missionClose" hidden>Back to mission detail ↗</button></div>
-      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i><span data-t="routeLegend">Terrain-aware route</span></span><span><i class="legend-direct"></i><span data-t="directLegend">Direct baseline</span></span><span><i class="legend-terrain"></i><span data-t="thresholdLegend">Above assumed slope limit</span></span></div>
-      <div id="slope-legend" class="slope-legend" hidden><span data-t="slopeLow">Lower slope</span><i></i><span data-t="slopeHigh">Higher slope</span></div>
-      <div id="night-legend" class="night-legend" hidden><span><i class="night-cool"></i><span data-t="nightCool">Cool at night · likely loose material</span></span><span><i class="night-warm"></i><span data-t="nightWarm">Warm at night · likely rock</span></span></div>
+      <div class="map-legend" id="map-legend"><span><i class="legend-line"></i><span data-t="routeLegend">Terrain-aware route</span></span><span><i class="legend-direct"></i><span data-t="directLegend">Direct baseline</span></span><span class="legend-hazard"><i class="legend-terrain"></i><span data-t="thresholdLegend">Above assumed slope limit</span></span>
+        <div id="slope-legend" class="slope-legend" hidden><span data-t="slopeLow">Lower slope</span><i></i><span data-t="slopeHigh">Higher slope</span></div>
+        <div id="night-legend" class="night-legend" hidden><span><i class="night-cool"></i><span data-t="nightCool">Cool at night · likely loose material</span></span><span><i class="night-warm"></i><span data-t="nightWarm">Warm at night · likely rock</span></span></div></div>
       <div class="scale"><div></div><span id="scale-text">500 m</span></div>
-      <div class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span></div>
       <div class="map-empty" id="map-empty" hidden><span data-t="mapError">Map imagery is unavailable.</span><br><small data-t="mapErrorHint">The numerical terrain model and plan can still be inspected in the evidence panel.</small></div>
     </section>
+    <div class="map-footnote">
+      <p class="map-footnote-text"><span class="evidence-banner"><span class="live-dot"></span><span id="terrain-status" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</span></span><span><strong id="layer-caption" data-t="opticalCaption">MRO · CTX / OPTICAL</strong> · <span id="layer-description" data-t="opticalDescription">Local CTX imagery · route driven by a separate numerical terrain grid</span></span><span class="map-credit"><span id="map-source-credit">NASA / MSSS / Caltech · CTX</span><span id="resolution-note"></span> · <span id="tile-status" data-t="loading">Loading evidence…</span></span></p>
+      <div class="map-footnote-actions"><button id="toggle-overlays" aria-pressed="true" data-t="hideMarks">Hide markings</button><button id="view-mission" data-t="missionClose" hidden>Back to mission detail ↗</button></div>
+    </div>
     <div class="terrain-inspector"><span aria-hidden="true">⌖</span><span id="terrain-sample" data-t="inspectSample">Hover or tap the map to inspect the terrain cell.</span></div>
     <section class="sim-card" id="sim-card" aria-labelledby="sim-title">
       <div class="sim-head"><div><span class="eyebrow" data-t="simEyebrow">EVA PLAYBACK</span><h3 id="sim-title" data-t="simTitle">Walk the plan, minute by minute</h3></div><span class="sim-status" id="sim-status" role="status"></span></div>
@@ -70,17 +80,8 @@
       <button id="quick-compare"><span aria-hidden="true">02</span><span data-t="stepCompare">Compare routes</span></button>
       <button id="quick-evidence" aria-haspopup="dialog" aria-controls="sources-dialog"><span aria-hidden="true">03</span><span data-t="stepEvidence">Review evidence</span></button>
     </nav>
-    <section class="mission-summary" id="mission-summary" aria-label="Calculated mission plan" aria-live="polite">
-      <div class="summary-heading"><h2 data-t="summary">Your exploration plan</h2><span class="result-chip" id="result-chip" data-t="statusLoading">LOADING TERRAIN</span></div>
-      <p class="selected-route" id="selected-route"></p>
-      <div class="metrics"><article><span class="metric-label" data-t="distance">ROUND-TRIP DISTANCE</span><strong id="distance-metric">—</strong><small data-t="returnIncluded">Includes return to the habitat</small></article><article><span class="metric-label" data-t="duration">BASE-CASE TIME</span><strong id="time-metric">—</strong><small data-t="walkAndWork">Walking + science work</small></article><article id="leave-card" class="leave-card"><span class="metric-label" data-t="leaveByLabel">LEAVE ROCHETTE BY</span><strong id="leave-metric">—</strong><small id="leave-caption" data-t="leaveByCaptionEmpty">Walkback deadline</small></article></div>
-      <p class="walkback-note"><span id="reserve-caption">Configured reserve: 45 min</span> · <span data-t="walkbackNote">Walkback rule: if your pace drops 25% on the way back, leaving Rochette by this time still preserves the reserve. Inspired by the walkback limits used to plan Apollo rover traverses.</span></p>
-      <div class="budget-track" aria-label="Time allocation"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i><span data-t="walkLabel">Walking</span></span><span><i class="research"></i><span data-t="workLabel">Science</span></span><span><i class="reserve"></i><span data-t="reserveLabel">Reserve</span></span></div>
-      <div class="insight" id="insight" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</div>
-    </section>
     <section class="comparison-card" id="comparison-section" tabindex="-1">
       <div class="card-heading"><div><span class="eyebrow" data-t="choice">WHY THIS ROUTE</span><h3 data-t="comparison">What changes when terrain matters?</h3></div><button class="button demo-start" id="demo-start" disabled data-t="walkthrough">Guided demo</button></div>
-      <section class="demo-panel" id="demo-panel" tabindex="-1" aria-live="polite" hidden><div class="demo-kicker"><span data-t="demoLabel">A DECISION IN THREE STEPS</span><span id="demo-progress"></span></div><h4 id="demo-title"></h4><p id="demo-text"></p><div class="demo-buttons"><button id="demo-previous" data-t="demoPrevious">Previous</button><button id="demo-next" data-t="demoNext">Next step</button><button id="demo-exit" data-t="demoReset">Exit & restore my plan</button></div></section>
       <p class="section-description" data-t="comparisonBasis">Same assumptions for both routes. Time and reserve use the conservative scenario.</p><p class="comparison-reserve" id="comparison-reserve"></p>
       <p class="decision-summary" id="decision-summary" role="status"></p>
       <div class="comparison-grid" id="comparison-body" aria-label="Route comparison"></div>
@@ -116,6 +117,24 @@
 </div>
 <dialog id="settings-dialog" class="settings-dialog" data-aria="settings" aria-label="Mission settings"></dialog>
 <dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow" data-t="evidenceEyebrow">PROVENANCE & REPRODUCIBILITY</div><h2 id="sources-title" data-t="evidenceTitle">From observation to decision.</h2></div><button id="close-sources" class="close-button" data-aria="close" aria-label="Close">×</button></div><div id="sources-content"></div></dialog>
+<dialog id="eva-dialog" class="eva-dialog" aria-labelledby="eva-title">
+  <div class="eva-hud" id="eva-hud" data-level="ok">
+    <header class="eva-top"><div><span class="eva-kicker" data-t="evaKicker">ARES · CREW EVA VIEW · SIMULATED</span><h2 id="eva-title" data-t="evaTitle">Sortie to Rochette</h2></div><output class="eva-clock" id="eva-clock">T+0</output><button class="eva-close" id="eva-close" type="button" data-aria="close" aria-label="Close">×</button></header>
+    <div class="eva-status" role="status"><strong id="eva-status-text">ON PLAN</strong><span id="eva-status-sub"></span></div>
+    <div class="eva-body">
+      <svg id="eva-map" class="eva-map" role="img" data-aria="evaMapLabel" aria-label="Route overview with the crew position"></svg>
+      <div class="eva-cards">
+        <div class="eva-card eva-primary"><span id="eva-count-label" data-t="evaLeaveIn">LEAVE ROCHETTE IN</span><strong id="eva-count">—</strong><small id="eva-count-sub"></small></div>
+        <div class="eva-card"><span data-t="evaNext">NEXT</span><strong id="eva-next">—</strong><small id="eva-bearing"></small></div>
+        <div class="eva-card"><span data-t="evaShelter">SHELTER · SLOW PACE</span><strong id="eva-shelter">—</strong><small data-t="evaShelterSub">walk back to the habitat from here</small></div>
+        <div class="eva-card"><span data-t="evaGround">GROUND · NEXT 200 M</span><strong id="eva-ground">—</strong><small id="eva-slope"></small></div>
+        <div class="eva-card"><span data-t="evaDose">COSMIC-RAY DOSE · SO FAR</span><strong id="eva-dose">—</strong><small data-t="evaDoseSub">Curiosity RAD rate · 0.67 mSv/day</small></div>
+      </div>
+    </div>
+    <footer class="eva-controls"><button class="eva-play" id="eva-play" type="button" aria-pressed="false"><span aria-hidden="true" id="eva-play-icon">▶</span><span id="eva-play-label" data-t="simPlay">Play EVA</span></button><input id="eva-time" type="range" min="0" max="200" step="1" value="0" data-aria="simTimeline" aria-label="EVA timeline (minutes)"><label class="eva-slow"><input type="checkbox" id="eva-slow"><span data-t="simSlow">Simulate a 25% slower walk home</span></label></footer>
+    <p class="eva-note" data-t="evaNote">Simulated from the plan: orbital terrain and the assumptions in Plan settings. Not live telemetry.</p>
+  </div>
+</dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=ares-03bb"></script>
+<script type="module" src="app.js?v=ares-04b"></script>
 </body></html>
