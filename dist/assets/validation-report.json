@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "title": "ARES-03 reproducible reference scenario",
-  "generatedAt": "2026-11-14T22:03:02.169Z",
+  "generatedAt": "2026-11-14T22:26:21.801Z",
   "humanMission": {
     "hypothetical": true,
     "habitat": {
@@ -2198,7 +2198,7 @@
       "median": 82,
       "method": "Quartiles of brightness within this terrain subset: cool = lowest 25%, warm = highest 25%."
     },
-    "interpretation": "Relative night-time brightness only. Warmer at night usually indicates rock or consolidated material; cooler usually indicates finer, looser material (sand, dust). Not calibrated temperature or thermal inertia, and not used in route cost.",
+    "interpretation": "Relative night-brightness quartiles within this subset, not calibrated temperature, thermal inertia or ground strength. Context for B; experimental doubled cell cost in the lowest quartile for C. No walking-safety benefit has been validated.",
     "direct": {
       "outboundMeters": 2722.2028059785976,
       "meters": {
@@ -2230,7 +2230,7 @@
       }
     },
     "plausibility": {
-      "description": "Share of warm-at-night cells by mapped slope band; rocky slopes are expected to be warmer at night.",
+      "description": "Observed share of high-brightness cells by mapped slope band in this subset; descriptive association, not independent validation of a ground-material class.",
       "bands": [
         {
           "slopeBand": "<3",
@@ -2294,8 +2294,10 @@
   },
   "routeC": {
     "experimental": true,
+    "groundStrengthValidated": false,
+    "walkingSafetyBenefitValidated": false,
     "loosePenaltyWeight": 1,
-    "description": "Terrain-aware cost multiplied by (1 + weight) on cells in the coolest night-IR quartile. Uncalibrated brightness; advisory route.",
+    "description": "Terrain-aware cost multiplied by (1 + weight) on cells in the coolest night-IR quartile. Uncalibrated relative brightness; no ground-strength classification or walking-safety benefit has been validated.",
     "analysis": {
       "outboundMeters": 2932.2221460210662,
       "roundTripMeters": 5864.4442920421325,
@@ -3216,7 +3218,7 @@
   },
   "checks": {
     "nightIrCoversRoute": true,
-    "routeCAvoidsMostLooseGround": true,
+    "routeCReducesLowBrightnessShare": true,
     "warmNightShareRisesWithSlope": true,
     "playbackFlagsLateDeparture": true,
     "playbackReturnsWithReserveByDefault": true,

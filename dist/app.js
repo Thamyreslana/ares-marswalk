@@ -167,7 +167,7 @@ function renderDecision(){
   $('selected-route').textContent=t('inspectingRoute',{route:routeName(state.strategy)});
 }
 function renderComparison(p){
-  const body=$('comparison-body');body.replaceChildren();
+  const body=$('comparison-body'),experimentalBody=$('experimental-body');body.replaceChildren();experimentalBody.replaceChildren();$('experimental-routes').hidden=!state.analyses?.loose;
   for(const kind of ROUTE_KINDS){
     const c=state.comparisons[kind],a=c.analysis;if(kind==='loose'&&!a)continue;const card=document.createElement('article');card.className='route-option '+kind+'-option'+(state.strategy===kind?' is-selected':'');card.dataset.route=kind;
     const title=document.createElement('h4');title.textContent=routeName(kind);if(kind==='loose'){const tag=document.createElement('span');tag.className='route-tag';tag.textContent=t('experimental');title.append(' ',tag);}card.append(title);
@@ -175,7 +175,7 @@ function renderComparison(p){
     const list=document.createElement('dl');
     const rows=[['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['maxSlope',a?.maxSlope!=null?fmt(a.maxSlope,1)+'°':'—'],['conservativeTime',c.conservative?fmt(c.conservative.total)+' min':'—'],['conservativeLeft',c.conservative?fmt(c.conservative.remaining)+' min':'—'],['reserveMargin',c.reserveMargin==null?'—':(c.reserveMargin>=0?'+':'')+fmt(c.reserveMargin,1)+' min'],['leaveBy',!c.walkback||c.walkback.status==='beyond'||!a.passable?'—':'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min'],['looseShare',state.surface?.[kind]?fmt(state.surface[kind].share.cool*100)+'%':'—']];
     for(const [key,value]of rows){const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=t(key);dd.textContent=value;dd.dataset.metric=key;if(key==='reserveMargin'&&a?.passable)dd.className=c.reserveMargin>=0?'margin-positive':'margin-negative';row.append(dt,dd);list.append(row);}card.append(list);
-    const button=document.createElement('button');button.type='button';button.className='inspect-route';button.dataset.inspectRoute=kind;button.textContent=t(state.strategy===kind?'selectedRoute':'inspectRoute');button.disabled=!a;button.setAttribute('aria-pressed',state.strategy===kind);button.addEventListener('click',()=>{chooseRoute(kind);document.querySelector(`[data-inspect-route="${kind}"]`)?.focus({preventScroll:true});});card.append(button);body.append(card);
+    const button=document.createElement('button');button.type='button';button.className='inspect-route';button.dataset.inspectRoute=kind;button.textContent=t(state.strategy===kind?'selectedRoute':'inspectRoute');button.disabled=!a;button.setAttribute('aria-pressed',state.strategy===kind);button.addEventListener('click',()=>{chooseRoute(kind);document.querySelector(`[data-inspect-route="${kind}"]`)?.focus({preventScroll:true});});card.append(button);(kind==='loose'?experimentalBody:body).append(card);
   }
   const a=state.analyses?.terrain,d=state.analyses?.direct;
   const direct=state.comparisons.direct,terrain=state.comparisons.terrain;
@@ -185,7 +185,7 @@ function renderComparison(p){
   else if(!d.passable&&a.passable)explanation=t('detourExplain',{cells:fmt(d.blockedCells),limit:p.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters)});
   else explanation=[t('decision',{extra:fmt(a.roundTripMeters-d.roundTripMeters),before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1)}),t('reserveTradeoff',{extraTime:fmt(terrain.conservative.total-direct.conservative.total,1),directMargin:fmt(direct.reserveMargin,1),terrainMargin:fmt(terrain.reserveMargin,1)})].join(' ');
   const l=state.analyses?.loose,ls=state.surface?.loose,ts=state.surface?.terrain;
-  if(a&&l&&ls&&ts)explanation+=' '+t('looseExplain',{extra:fmt(l.roundTripMeters-a.roundTripMeters),before:fmt(ts.share.cool*100),after:fmt(ls.share.cool*100,1)});
+  $('experimental-explanation').textContent=a&&l&&ls&&ts?t('looseExplain',{extra:fmt(l.roundTripMeters-a.roundTripMeters),before:fmt(ts.share.cool*100),after:fmt(ls.share.cool*100,1)}):'';
   $('route-explanation').textContent=explanation;
   $('comparison-reserve').textContent=t('reserveConfigured')+': '+p.reserve+' min';
   $('comparison-method').textContent=ROUTE_KINDS.filter(kind=>state.comparisons[kind].analysis).map(kind=>{const c=state.comparisons[kind];return `${routeName(kind)}: ${t('aboveLimit')} = ${c.analysis?.blockedCells??'—'}; ${t('terrainCost')} = ${c.analysis?fmt(c.analysis.terrainCost):'—'}`;}).join(' · ');
@@ -314,7 +314,7 @@ $('language').addEventListener('change',()=>applyLanguage($('language').value));
 for(const id of ['sources-top','sources-bottom','nav-data','quick-evidence'])$(id).addEventListener('click',showSources);$('close-sources').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 for(const id of ['autonomy','work','slope-limit'])$(id).addEventListener('input',calculate);for(const id of ['speed','reserve'])$(id).addEventListener('change',calculate);
-function chooseRoute(strategy){state.strategy=strategy;for(const kind of ['terrain','direct','loose']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
+function chooseRoute(strategy){state.strategy=strategy;if(strategy==='loose')$('experimental-routes').open=true;for(const kind of ['terrain','direct','loose']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
 for(const strategy of ['terrain','direct','loose'])$('route-'+strategy).addEventListener('click',()=>chooseRoute(strategy));
 const demoInputs=['autonomy','work','speed','reserve','slope-limit'];
 function setParameters(p){for(const [key,id]of Object.entries({autonomy:'autonomy',work:'work',speed:'speed',reserve:'reserve',maxSlope:'slope-limit'}))$(id).value=p[key];}
@@ -328,17 +328,18 @@ function demoValues(){
   return {cells:fmt(d.blockedCells),limit:DEMO_PARAMETERS.maxSlope,before:fmt(d.maxSlope,1),after:fmt(a.maxSlope,1),extra:fmt(a.roundTripMeters-d.roundTripMeters),pct:fmt((a.roundTripMeters/d.roundTripMeters-1)*100,1),climbBefore:fmt(d.roundTripAscentMeters),climbAfter:fmt(a.roundTripAscentMeters),work:DEMO_LONG_WORK,leave:fmt(Math.floor(w.leaveBy)),max:fmt(Math.floor(w.maxWork))};
 }
 function setDemoStep(step){
+  $('advanced-simulations').open=step===2;
   demo.step=step;stopSim();sim.t=0;setParameters({...DEMO_PARAMETERS,work:step===2?DEMO_LONG_WORK:DEMO_PARAMETERS.work});setLayer(step===0?'slope':'optical');chooseRoute(step===0?'direct':'terrain');
   // Step 3 freezes the playback one minute past the leave-by time, while the crew is still at Rochette.
   if(step===2&&sim.timeline){sim.t=Math.floor(sim.timeline.leaveBy)+1;renderSim();draw();}
   renderDemo();
 }
 function startDemo(){
-  if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
-  for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setDemoStep(0);$('comparison-section').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
+  if(!state.terrain||demo)return;closeSettings();demo={step:0,snapshot:{advancedOpen:$('advanced-simulations').open,experimentalOpen:$('experimental-routes').open,parameters:params(),strategy:state.strategy,layer:state.layer,center:{...state.center},scale:state.scale}};
+  for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=true;setDemoStep(0);$('demo-panel').scrollIntoView({block:'start',behavior:'smooth'});$('demo-panel').focus({preventScroll:true});
 }
 function finishDemo(){
-  if(!demo)return;const snapshot=demo.snapshot;demo=null;stopSim();sim.t=0;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();renderDemo();$('demo-start').focus({preventScroll:true});
+  if(!demo)return;const snapshot=demo.snapshot;demo=null;stopSim();sim.t=0;for(const id of [...demoInputs,'open-settings','quick-settings'])$(id).disabled=false;setParameters(snapshot.parameters);chooseRoute(snapshot.strategy);setLayer(snapshot.layer);state.center=snapshot.center;state.scale=snapshot.scale;constrain();draw();$('advanced-simulations').open=snapshot.advancedOpen;$('experimental-routes').open=snapshot.experimentalOpen;renderDemo();$('demo-start').focus({preventScroll:true});
 }
 $('sim-play').addEventListener('click',toggleSim);
 $('sim-time').addEventListener('input',()=>{stopSim();sim.t=Number($('sim-time').value);renderSim();draw();});

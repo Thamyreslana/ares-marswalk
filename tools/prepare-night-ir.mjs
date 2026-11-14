@@ -56,7 +56,7 @@ const out={id:'THEMIS_NightIR_on_ARES_40m_grid',title:'THEMIS Night IR brightnes
   sourceResolutionMeters:100,preparedAt:new Date().toISOString(),grid:{cols:terrain.cols,rows:terrain.rows,step:terrain.step,xMin:terrain.xMin,yMax:terrain.yMax},origin:terrain.origin,
   resampling:'Bilinear sample of the 8-bit tile brightness at each 40 m terrain cell centre. This adds no detail below the ~80 m tile pixel or the 100 m source resolution.',
   classes:{coolMax:q(.25),warmMin:q(.75),median:q(.5),method:'Quartiles of brightness within this terrain subset: cool = lowest 25%, warm = highest 25%.'},
-  interpretation:'Relative night-time brightness only. Warmer at night usually indicates rock or consolidated material; cooler usually indicates finer, looser material (sand, dust). Not calibrated temperature or thermal inertia, and not used in route cost.',
+  interpretation:'Relative night-brightness quartiles, not calibrated temperature, thermal inertia or ground strength. Context for B; experimental doubled cell cost in the lowest quartile for C. No walking-safety benefit has been validated.',
   values};
 fs.writeFileSync(new URL('dist/assets/jezero-night-ir.json',root),JSON.stringify(out));
 console.log(JSON.stringify({type:img.type,size,known:known.length,missing:values.length-known.length,min:known[0],p25:out.classes.coolMax,p50:out.classes.median,p75:out.classes.warmMin,max:known.at(-1),url:URL_}));
