@@ -169,13 +169,14 @@ export function evaTimeline(outboundMeters,p,{slowReturn=false}={}){
 // State at minute t. "margin" = time left after a slow (75%) walk home from here, minus the reserve; negative means the reserve is at risk.
 // Abort the plan at minute `at`: head straight back along the checked route from the current position.
 // mode 'return' walks at the planned pace; 'emergency' assumes the slower (75%) pace.
-export function abortPlan(tl,at,mode='return'){
-  const from=evaStateAt(tl,at),speed=tl.metersPerMinute*(mode==='emergency'?WALKBACK_PACE_FACTOR:1),arrival=from.t+from.distance/speed;
+// Pass the current abort (if any) so a second call, e.g. Return then Emergency, starts from where the crew actually is.
+export function abortPlan(tl,at,mode='return',current=null){
+  const from=evaStateAt(tl,at,current),speed=tl.metersPerMinute*(mode==='emergency'?WALKBACK_PACE_FACTOR:1),arrival=from.t+from.distance/speed;
   return {t:from.t,distance:from.distance,mode,speed,arrival,reserveAtArrival:tl.autonomy-arrival};
 }
 export function evaStateAt(tl,t,abort=null){
   if(abort&&t>=abort.t){
-    t=Math.max(abort.t,Math.min(t,abort.arrival));const distance=Math.max(0,abort.distance-(t-abort.t)*abort.speed),shelterMinutes=distance/(tl.metersPerMinute*WALKBACK_PACE_FACTOR);
+    t=Math.max(abort.t,Math.min(t,abort.arrival));const left=abort.distance-(t-abort.t)*abort.speed,distance=t>=abort.arrival||left<1e-6?0:left,shelterMinutes=distance/(tl.metersPerMinute*WALKBACK_PACE_FACTOR);
     return {t,phase:distance>0?'abort':'home',distance,shelterMinutes,margin:tl.autonomy-t-shelterMinutes-tl.reserve,remaining:tl.autonomy-t,pastLeaveBy:false,aborted:true,mode:abort.mode,eta:abort.arrival,reserveAtArrival:abort.reserveAtArrival};
   }
   t=Math.max(0,Math.min(t,tl.total));let phase,distance;
