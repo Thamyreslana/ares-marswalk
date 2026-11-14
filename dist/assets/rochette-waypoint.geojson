@@ -1,0 +1,55 @@
+{
+  "type": "FeatureCollection",
+  "source": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "RMC": "7_0",
+        "site": 7,
+        "drive": 0,
+        "sol": 180,
+        "easting": 4354127.515,
+        "northing": 1092476.503,
+        "elev_geoid": -2574.524,
+        "elev_radii": -4255.513184,
+        "radius": 3391934.487,
+        "lon": 77.44436574,
+        "lat": 18.4307394,
+        "roll": 1.597101167,
+        "pitch": 1.165496804,
+        "yaw": -91.66928811,
+        "yaw_rad": -1.5999309,
+        "tilt": 1.977059203,
+        "dist_m": 10.963,
+        "dist_total_m": 2170.398,
+        "dist_km": 2.17,
+        "dist_mi": 1.35,
+        "final": "y",
+        "Note": "End-of-drive localization",
+        "images": [
+          {
+            "name": "Panorama",
+            "isPanoramic": true,
+            "url": "Layers/mosaics/N_LRGB_0180_RAS_0070000_CYL_S_AUTOGENJ01.jpg",
+            "rows": "2390",
+            "columns": "9292",
+            "azmin": "0.0",
+            "azmax": "360.0",
+            "elmin": "-79.7707",
+            "elmax": "12.8357",
+            "elzero": "332.327"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          77.44436574,
+          18.4307394,
+          -2574.524
+        ]
+      }
+    }
+  ]
+}

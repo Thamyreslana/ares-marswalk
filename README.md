@@ -1,79 +1,131 @@
-# ARES — Explorador de Marte
+# ARES — Evidence-based Marswalk Planning
 
-Protótipo para o desafio **Interplanetary Survival Guide: Martian Map**, NASA Space Apps 2026. Interface em português para comparar percursos em Jezero e planejar uma caminhada com pesquisa, retorno e reserva de autonomia.
+NASA Space Apps 2026 · **Interplanetary Survival Guide: Martian Map**
 
-## Executar no Windows
+ARES is a pre-EVA planning prototype for a round trip from a hypothetical habitat to **Rochette**, a NASA-documented Perseverance sampling workspace in Jezero. It connects numerical orbital terrain to route decisions and shows how a change in walking pace affects the return reserve.
 
-Na pasta `ares-marswalk`, execute:
+The interface defaults to English and includes a Portuguese language selector. The mobile layout shows the map and result before opening mission settings in a dialog.
+
+## Run locally
+
+From this directory:
 
 ```powershell
 .\node.exe server.mjs
 ```
 
-Abra **http://127.0.0.1:4173** no navegador. O runtime Node foi baixado na pasta do projeto e está ignorado pelo Git. Em outra máquina com Node instalado, use `node server.mjs`. Não há dependências npm nem etapa de compilação.
+Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installed, `node server.mjs` works. Double-clicking `iniciar.cmd` is another Windows option. Stop the server with Ctrl+C.
 
-Também é possível dar dois cliques em `iniciar.cmd`. Mantenha o terminal aberto enquanto estiver usando o protótipo. Ctrl+C encerra o servidor.
+Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
 
-## O que funciona
+## What changed in ARES-02
 
-- Mapa com deslocamento limitado à cobertura disponível, zoom compatível com a resolução, destinos selecionáveis, tela cheia e controle para ocultar marcações.
-- Três camadas reais: CTX óptico do projeto NASA Mars 2020 / Caltech, MOLA relevo e THEMIS infravermelho diurno do NASA/JPL Mars Trek.
-- Mosaico óptico local com 49 tiles de Jezero, substituindo a cobertura incompleta do mosaico global beta. As camadas regionais têm 25 tiles cada, para permitir visualização em tela cheia. URLs de origem e datas de download em `dist/assets/data-manifest.json`.
-- Enquadramento regional para relevo e infravermelho, com retorno ao detalhe da missão na camada óptica; imagens sem filtros de cor ou escurecimento.
-- A* com desvio de zonas de exclusão de demonstração e comparação com linha direta.
-- Distância de ida e volta, pesquisa, velocidade ajustável, autonomia disponível e reserva.
-- Avisos de reserva insuficiente e de passagem por zona simulada.
-- Exportação JSON com parâmetros, percurso em coordenadas marcianas, resultado e proveniência.
-- Layout responsivo, controles por teclado e diálogo de fontes.
+- Replaced three fictional destinations and circular exclusions with one traceable scientific workspace and a real numerical terrain model.
+- Route cost now depends on slope derived from a **20 m USGS/NASA CTX DEM**, sampled on a **40 m planning grid**.
+- Unknown terrain and cells above the assumed slope threshold are excluded. Diagonal corner cutting is blocked; simplified segments are checked against every crossed cell.
+- Compares the direct baseline with a terrain-aware route, including round-trip distance, maximum mapped cell slope, and a relative terrain-cost index.
+- Shows a numerical slope map, an elevation profile, and a terrain-cell inspector.
+- Calculates faster, base-case, and conservative time scenarios, each including science work, return, and an explicit reserve.
+- Exports round-trip GeoJSON geometry, parameters, scenarios, source references, and limitations.
+- Provides English/Portuguese UI, mobile settings, a [seven-slide English mission brief](dist/mission-brief.html), and a machine-readable [reference scenario](dist/assets/validation-report.json).
 
-Os dados do mapa funcionam sem internet depois de baixar/copiar o projeto. As fontes tipográficas externas são opcionais e têm alternativas locais do sistema.
+## Scientific target
 
-## Origem dos dados
+Rochette / Artuby ridge / Citadelle is associated with the Montdenier and Montagnac samples. The proposed observation asks what textures and mineral context can reveal about alteration of basalt by water; it does not claim evidence of life.
 
-Desafio informado pela equipe:
-https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources
+- Workspace: **77.44436574° E, 18.43073940° N**.
+- NASA waypoint: **RMC 7_0, sol 180**. Original record preserved in `dist/assets/rochette-waypoint.geojson`.
+- [NASA/JPL waypoint GeoJSON](https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json).
+- [Simon et al. (2023), Table 2](https://doi.org/10.1029/2022JE007474), linking the rounded coordinates and sample names.
+- [NASA/JPL science context](https://www.jpl.nasa.gov/news/nasas-perseverance-rover-collects-puzzle-pieces-of-mars-history/).
 
-A aba oficial foi acessada no navegador em 14/11/2026. O **NASA/JPL Mars Trek está explicitamente listado em NASA DATA & RESOURCES** e é a origem das camadas de relevo e infravermelho. O mosaico óptico local foi preparado pelo Murray Lab / Caltech com financiamento do projeto NASA Mars 2020. O registro das referências está em `dist/assets/challenge-resources.json`.
+The waypoint locates a rover workspace, not the exact center of a drill hole. Decimal precision is not a statement of geodetic accuracy. The habitat is hypothetical at **77.4298° E, 18.4663° N**.
 
-Os outros recursos oficiais são os mapas geológicos USGS–NASA, a visualização de uma rota proposta do Curiosity, o NASA Worldview (dados da Terra, inspiração de interface) e a galeria de imagens brutas do Perseverance. São links complementares no diálogo de fontes, não fontes de camadas desta versão. Não foram usados projetos de outras equipes como código ou dados.
+## Sources and their distinct roles
 
-Produtos oficiais:
+| Data | Role | Source |
+|---|---|---|
+| Local CTX optical mosaic | Surface context; no automatic boulder detection | [NASA Mars 2020 / Caltech Murray Lab](https://murray-lab.caltech.edu/Mars2020/index.html) |
+| CTX numerical DEM | Slope, exclusion policy, route cost, profile | [USGS Mars 2020 Science Investigation CTX DEM](https://astrogeology.usgs.gov/search/map/mars_2020_science_investigation_ctx_dem_mosaic) |
+| MOLA color hillshade | Regional relief context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
+| THEMIS daytime infrared | Historical regional context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
 
-- `Mars2020CTX_E76_N16`: https://murray-lab.caltech.edu/Mars2020/index.html (mosaico CTX local; georreferência em KML preservada no manifesto)
-- `Mars_MGS_MOLA_ClrShade_merge_global_463m`: https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/WMTSCapabilities.xml
-- `Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly`: https://trek.nasa.gov/tiles/Mars/EQ/Mars_MO_THEMIS-IR-Day_mosaic_global_100m_v12_clon0_ly/1.0.0/WMTSCapabilities.xml
+Mars Trek is listed in the [official 2026 challenge Resources](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources). The other official resources and their use are recorded in `dist/assets/challenge-resources.json`. Not every listed resource is integrated.
 
-Os níveis de visualização estão nos metadados; o tamanho nominal do produto não é a resolução final de cada tile. MOLA e THEMIS usam suas matrizes WMTS nativas; CTX usa os limites geográficos fornecidos no KML. O mapa projeta as coordenadas em um plano equiretangular local, usando o raio equatorial de Marte (3.396.190 m).
+Per-tile URLs, bounds, resolutions, and download dates are recorded in `dist/assets/data-manifest.json`. The DEM subset records the original URL, source file SHA-256, CRS definitions, resampling procedure, and limitations in `dist/assets/jezero-terrain.json`.
 
-Para repetir o download em PowerShell, leia e execute `fetch-data.ps1`, que também chama `fetch-optical.ps1` para baixar o mosaico local. As políticas de execução do Windows podem exigir autorização. Os scripts não pedem chaves de API.
+The 49 local CTX tiles replaced an incomplete global beta mosaic. Their display resolution is approximately 10 m/pixel. MOLA and THEMIS keep their own matrix geometry and regional framing. Original imagery remains unfiltered; slope colors are a separate derived overlay.
 
-## Limites científicos do protótipo
+## Terrain method
 
-- Habitat, destinos e zonas de exclusão são hipóteses de demonstração. Não são locais de uma missão humana nem obstáculos medidos.
-- O roteamento evita apenas as zonas simuladas; não calcula a declividade nem detecta pedras ou dunas.
-- MOLA é apresentado como relevo regional, não como modelo numérico para navegação local.
-- THEMIS é um mosaico infravermelho histórico; o brilho não é convertido em temperatura ou previsão meteorológica.
-- A velocidade é constante. Não há modelo de gasto de oxigênio, esforço fisiológico, fadiga, radiação, comunicação ou duração real de traje.
-- “Dentro da autonomia” significa apenas que a soma do tempo estimado e da reserva cabe no orçamento definido.
-- O zoom e o deslocamento são limitados para manter a área visível dentro do recorte local. Se as imagens falharem ao carregar, o mapa informa indisponibilidade.
+The source DEM has 20 m pixels. `tools/prepare-terrain.py` reprojects a subset to a local equirectangular CRS that matches the JavaScript origin, latitude scale, and Mars radius of **3,396,190 m**. It samples elevations bilinearly on a 40 m grid and calculates slope with central differences in metres. Those derivatives span neighboring grid centers separated by 80 m; the result cannot resolve smaller landforms reliably. Unknown neighbors and the derivative perimeter are excluded.
 
-## Validação
+A* searches an eight-connected grid with this prototype cost:
 
-```powershell
-.\node.exe --test tests/planner.test.mjs tests/map-view.test.mjs
-.\node.exe --check dist/app.js
+```text
+edge cost = horizontal distance × [1 + 4 × (mapped slope / selected limit)²]
 ```
 
-`qa-browser.mjs` verifica a interface em Chrome instalado no caminho padrão do Windows, com o servidor local em execução. As capturas e o download de teste ficam em `.local/`, fora do Git.
+The default **12° limit** and the weight of **4** are assumptions, not NASA EVA limits or calibrated metabolic coefficients. The route is terrain-aware; it is not claimed to be a globally optimal solution to the continuously integrated post-analysis cost. Path simplification preserves traversability and checks segment cost. Supercover traversal checks all crossed cells, including corner contacts.
 
-## Demonstração em dois minutos
+Distances are planimetric. The return retraces the outbound route. Total ascent includes both outbound and return. The elevation profile shows the outbound leg, and unknown data must not be drawn as a continuous measured profile.
 
-1. Selecione “Margem do delta” e compare o desvio com a linha direta.
-2. Alterne Óptico, Relevo e Infravermelho e explique suas resoluções e limites.
-3. Reduza a autonomia para 60 minutos e mostre o aviso de reserva insuficiente.
-4. Aumente a autonomia, selecione outro alvo e recalcule a missão.
-5. Abra Dados & fontes e exporte o plano JSON.
+## Reference scenario
 
-## Próxima evolução
+Generated from the checked-in terrain by `node tools/build-validation.mjs`:
 
-Integrar um modelo digital de terreno local de Jezero com referência espacial compatível com a imagem óptica, calcular declividade real e substituir as zonas hipotéticas por anotações rastreáveis. Essa etapa deve validar alinhamento, resolução e regiões sem dados antes de oferecer qualquer estimativa de dificuldade do terreno.
+| Result | Direct baseline | Terrain-aware |
+|---|---:|---:|
+| Round trip | 4.52 km | 4.83 km |
+| Maximum mapped cell slope | 6.5° | 4.1° |
+| Relative terrain cost | 2,771 | 2,639 |
+
+The terrain route adds approximately **303 m** round trip. The direct baseline is not automatically blocked at the default 12° threshold; the difference also comes from weighting the lower slopes. At an assumed 5° threshold, the direct baseline crosses cells above the limit.
+
+With 240 min available, 2.5 km/h pace, 30 min fieldwork, and 45 min reserve:
+
+- Faster: pace ×1.20, fieldwork ×0.85.
+- Base case: approximately **146 min** total.
+- Conservative: pace ×0.75, fieldwork ×1.25, approximately **192 min** total; approximately **48 min** remain, only **3 min beyond the required reserve**.
+
+Reducing available time to 210 min preserves the base-case reserve but fails it in the conservative case. Scenarios are what-if assumptions, not statistical confidence intervals or predictions of suit performance.
+
+## Tests and verification
+
+```powershell
+.\node.exe --test tests/terrain-planner.test.mjs tests/map-view.test.mjs
+.\node.exe tools/build-validation.mjs
+.\node.exe qa-browser.mjs
+```
+
+The browser script requires Chrome at its standard Windows path and a running local server. It verifies desktop/mobile, both languages, four map views, reserve sensitivity, a strict-slope baseline warning, settings dialogs, expanded maps, export with return geometry/provenance, the seven-slide brief, and handling of unavailable terrain data. Screenshots stay in `.local/` and are not published.
+
+The reference report explicitly distinguishes automated checks from validations that remain incomplete: human usability testing, independent absolute image/DEM alignment, and operational safety validation. No human study or astronaut endorsement is claimed.
+
+## Reproduce the terrain subset
+
+The application itself needs no Python. To reproduce the data preparation:
+
+1. Read and run `tools/download-terrain.ps1` (90 MB DEM plus NASA waypoints).
+2. Install preparation dependencies locally: `python -m pip install --target .local/terrain-python -r tools/requirements-terrain.txt`.
+3. Run `python tools/prepare-terrain.py`.
+4. Run `node tools/build-validation.mjs` and the tests.
+
+Windows execution policies and network access may require permission. Raw data, Python packages, browser profiles, and screenshots remain in ignored `.local/`; they are not uploaded with the site. To reproduce imagery, use `fetch-data.ps1` and `fetch-optical.ps1`.
+
+## Limits
+
+Historical orbital data do not capture every obstacle or current surface condition. Absolute alignment between the local CTX mosaic and DEM has not been independently validated. MOLA color is not elevation input, and THEMIS brightness is not a temperature forecast. The app does not estimate oxygen, radiation dose, current weather, fatigue, carrying-load effects, communication, or emergency rescue. The green status means the configured time reserve holds under the displayed scenarios; it does not certify an EVA as safe.
+
+## A short demonstration
+
+1. Open the prototype in English; identify Rochette and the hypothetical habitat.
+2. Compare the blue direct baseline and orange terrain route; show the slope map and the numerical comparison.
+3. Reduce available time to 210 min to expose dependence on walking pace.
+4. Open Data & evidence and export the plan.
+
+Use `dist/mission-brief.html` as a seven-slide submission demo. Additional public resources include `dist/assets/validation-report.json`, the preserved waypoint, and numerical terrain metadata. List NASA imagery/data, the primary paper, and external software in the submission References field. Follow the official event submission instructions for the final project page.
+
+## Português
+
+Abra o site e escolha **PT** no seletor. No celular, o mapa aparece primeiro; **Ajustar missão** abre os parâmetros. O terreno é real, mas o habitat, o limite de declividade e os cenários de tempo são hipóteses explícitas de um protótipo de planejamento.
