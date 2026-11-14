@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#121514"><meta name="description" content="ARES plans a science walk to Rochette in Jezero using NASA imagery, a USGS numerical terrain model, and explicit return-time scenarios.">
   <title>ARES — Evidence-based Marswalk Planning</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css?v=settings-5"><link rel="stylesheet" href="mission.css?v=settings-5">
+  <link rel="stylesheet" href="style.css?v=clarity-6"><link rel="stylesheet" href="mission.css?v=clarity-6">
 </head>
 <body>
 <header class="topbar">
@@ -25,7 +25,8 @@
     <section class="control-section"><h2><span class="section-number">02</span><span data-t="parameters">Time assumptions</span></h2>
       <div class="range-label"><label for="autonomy" data-t="autonomy">Available EVA time</label><output id="autonomy-value" for="autonomy">240 min</output></div><input id="autonomy" type="range" min="60" max="480" step="15" value="240">
       <div class="range-label"><label for="work" data-t="work">Science work</label><output id="work-value" for="work">30 min</output></div><input id="work" type="range" min="0" max="120" step="5" value="30">
-      <div class="parameter-pair"><div><label for="speed" data-t="speed">Walking pace (km/h)</label><input id="speed" type="number" min="0.5" max="6" step="0.1" value="2.5"></div><div><label for="reserve" data-t="reserve">Reserve (min)</label><input id="reserve" type="number" min="0" max="180" step="5" value="45"></div></div>
+      <div class="parameter-pair"><div><label for="speed" data-t="speed">Walking pace (km/h)</label><input id="speed" type="number" min="0.5" max="6" step="0.1" value="2.5"></div><div><label for="reserve" data-t="reserve">Reserve (min)</label><input id="reserve" type="number" min="0" max="180" step="5" value="45" aria-describedby="reserve-help"></div></div>
+      <p class="parameter-note" id="reserve-help" data-t="reserveHelp">Reserve is the minimum unused time required after returning to the habitat.</p>
       <p class="parameter-note" data-t="assumption">Pace and EVA time are user assumptions, not predictions of suit oxygen or physiological performance.</p>
     </section>
     <section class="control-section"><h2><span class="section-number">03</span><span data-t="policy">Terrain policy</span></h2><div class="range-label"><label for="slope-limit" data-t="slopeLimit">Maximum mapped slope</label><output id="slope-value" for="slope-limit">12°</output></div><input id="slope-limit" type="range" min="3" max="25" step="1" value="12"><p class="parameter-note" data-t="slopeNote">An editable planning assumption, not a NASA EVA limit. Unknown terrain is excluded.</p></section>
@@ -51,19 +52,31 @@
       <div class="map-empty" id="map-empty" hidden><span data-t="mapError">Map imagery is unavailable.</span><br><small data-t="mapErrorHint">The numerical terrain model and plan can still be inspected in the evidence panel.</small></div>
     </section>
     <div class="terrain-inspector"><span aria-hidden="true">⌖</span><span id="terrain-sample" data-t="inspectSample">Hover or tap the map to inspect the terrain cell.</span></div>
+    <nav class="mission-steps" data-aria="planningSteps" aria-label="Planning steps">
+      <button id="quick-settings" aria-haspopup="dialog" aria-controls="settings-dialog"><span aria-hidden="true">01</span><span data-t="stepAdjust">Adjust mission</span></button>
+      <button id="quick-compare"><span aria-hidden="true">02</span><span data-t="stepCompare">Compare routes</span></button>
+      <button id="quick-evidence" aria-haspopup="dialog" aria-controls="sources-dialog"><span aria-hidden="true">03</span><span data-t="stepEvidence">Review evidence</span></button>
+    </nav>
     <section class="mission-summary" id="mission-summary" aria-label="Calculated mission plan" aria-live="polite">
       <div class="summary-heading"><h2 data-t="summary">Your exploration plan</h2><span class="result-chip" id="result-chip" data-t="statusLoading">LOADING TERRAIN</span></div>
+      <p class="selected-route" id="selected-route"></p><p class="result-meaning" data-t="resultMeaning">The label checks the assumed terrain limit and time reserve in the displayed scenarios. It is not a safety clearance.</p>
       <div class="metrics"><article><span class="metric-label" data-t="distance">ROUND-TRIP DISTANCE</span><strong id="distance-metric">—</strong><small data-t="returnIncluded">Includes return to the habitat</small></article><article><span class="metric-label" data-t="duration">BASE-CASE TIME</span><strong id="time-metric">—</strong><small data-t="walkAndWork">Walking + science work</small></article><article><span class="metric-label" data-t="remaining">BASE-CASE TIME LEFT</span><strong id="remaining-metric">—</strong><small id="reserve-caption">Configured reserve: 45 min</small></article></div>
       <div class="budget-track" aria-label="Time allocation"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i><span data-t="walkLabel">Walking</span></span><span><i class="research"></i><span data-t="workLabel">Science</span></span><span><i class="reserve"></i><span data-t="reserveLabel">Reserve</span></span></div>
       <div class="insight" id="insight" data-t="dataLoading">Numerical terrain is loading. A route will be calculated only after its coordinates and grid have been validated.</div>
     </section>
-    <section class="comparison-card" id="comparison-section">
+    <section class="comparison-card" id="comparison-section" tabindex="-1">
       <div class="card-heading"><div><span class="eyebrow" data-t="choice">WHY THIS ROUTE</span><h3 data-t="comparison">What changes when terrain matters?</h3></div><button class="button demo-start" id="demo-start" disabled data-t="walkthrough">Guided demo</button></div>
       <section class="demo-panel" id="demo-panel" tabindex="-1" aria-live="polite" hidden><div class="demo-kicker"><span data-t="demoLabel">A DECISION IN THREE STEPS</span><span id="demo-progress"></span></div><h4 id="demo-title"></h4><p id="demo-text"></p><div class="demo-buttons"><button id="demo-previous" data-t="demoPrevious">Previous</button><button id="demo-next" data-t="demoNext">Next step</button><button id="demo-exit" data-t="demoReset">Exit & restore my plan</button></div></section>
       <p class="section-description" data-t="comparisonBasis">Same assumptions for both routes. Time and reserve use the conservative scenario.</p><p class="comparison-reserve" id="comparison-reserve"></p>
+      <p class="decision-summary" id="decision-summary" role="status"></p>
       <div class="comparison-grid" id="comparison-body" aria-label="Route comparison"></div>
       <p class="decision-text" id="route-explanation"></p><p class="comparison-note" data-t="noUniversalWinner">Lower mapped slope and more time reserve are different priorities. The cost index does not establish which route is safer.</p>
       <details class="method-details"><summary data-t="methodDetails">Method details</summary><p class="parameter-note" id="comparison-method"></p><p class="parameter-note" data-t="terrainCostNote">Relative cost = distance × [1 + 4 × (slope / limit)²]. A prototype weighting, not metabolic energy.</p></details>
+      <details class="decision-evidence"><summary data-t="evidenceMeaning">What comes from data, and what is assumed?</summary><dl>
+        <div><dt data-t="measuredLabel">Source data</dt><dd data-t="measuredMeaning">NASA rover waypoint, orbital imagery and USGS elevation data. Mapped slope is derived from elevation.</dd></div>
+        <div><dt data-t="assumedLabel">Planning assumptions</dt><dd data-t="assumedMeaning">A hypothetical habitat location; editable time, walking pace, science duration, reserve and slope limit. Route and time are model outputs.</dd></div>
+        <div><dt data-t="unverifiedLabel">Still unverified</dt><dd data-t="unverifiedMeaning">Independent verification of image/terrain alignment and comprehension by real users. These validations are still pending.</dd></div>
+      </dl></details>
       <div class="comparison-links"><a href="assets/validation-report.json" target="_blank" rel="noopener noreferrer" data-t="validation">Reproducible scenario</a><a id="comprehension-test-link" href="comprehension-test.html" data-t="testLink">Run a 5-minute comprehension test ↗</a></div>
     </section>
     <section class="profile-card"><div class="card-heading"><h3 data-t="profile">Elevation along the outbound route</h3><span id="ascent-metric"></span></div><div id="elevation-profile" class="elevation-profile"></div><p class="parameter-note" data-t="profileNote">Elevations sampled from the USGS model. The return retraces this path.</p></section>
@@ -76,5 +89,5 @@
 <dialog id="settings-dialog" class="settings-dialog" data-aria="settings" aria-label="Mission settings"></dialog>
 <dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow" data-t="evidenceEyebrow">PROVENANCE & REPRODUCIBILITY</div><h2 id="sources-title" data-t="evidenceTitle">From observation to decision.</h2></div><button id="close-sources" class="close-button" data-aria="close" aria-label="Close">×</button></div><div id="sources-content"></div></dialog>
 <div class="toast" id="toast" role="status" hidden></div>
-<script type="module" src="app.js?v=settings-5"></script>
+<script type="module" src="app.js?v=clarity-6"></script>
 </body></html>

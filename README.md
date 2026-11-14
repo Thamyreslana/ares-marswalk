@@ -128,7 +128,11 @@ Historical orbital data do not capture every obstacle or current surface conditi
 
 ### A small comprehension test
 
+The main interface offers three shortcuts below the map: adjust the mission, compare routes, and inspect the evidence. The comparison summary updates with the terrain and reserve checks; it does not choose a route for the user. A nearby disclosure separates source data, planning assumptions, and pending validation.
+
 Open `dist/comprehension-test.html` (or the site's **5-minute comprehension test** link). The protocol is available in English and Portuguese. Ask someone outside the project to compare the routes, change the reserve to 50 min, and explain what the green status establishes. Keep the guided demo closed until the tasks are complete.
+
+The facilitator can also record the first observed issue to fix and the proposed change/retest. These optional fields are exported in `followUp` with the observation notes. They do not change any project validation claim.
 
 The facilitator may export anonymous observations only after selecting outcomes and confirming that an actual person was observed. The form sends nothing to a server and does not change `humanUsabilityStudyCompleted:false` in the project's reference report. Three small sessions can reveal wording or layout problems; they do not establish operational safety or representative scientific validity.
 
