@@ -1,0 +1,14 @@
+{
+  "challenge": "Interplanetary Survival Guide: Martian Map",
+  "year": 2026,
+  "url": "https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources",
+  "verifiedDate": "2026-11-14",
+  "verification": "Read directly from the official challenge Resources tab in Chrome.",
+  "resources": [
+    { "name": "Jet Propulsion Laboratory’s (JPL) Mars Trek", "url": "https://trek.nasa.gov/mars/", "usage": "Integrated: optical CTX, MOLA hillshade, THEMIS daytime infrared, and Viking context tiles." },
+    { "name": "USGS-NASA Planetary Geologic Mapping Program", "url": "https://astrogeology-usgs.hub.arcgis.com/pages/interactive-maps-mars", "usage": "Additional reference link." },
+    { "name": "Example of a route map visual for the Curiosity example mentioned above", "url": "https://science.nasa.gov/resource/curiositys-proposed-path-up-mount-sharp/", "usage": "Additional reference link." },
+    { "name": "NASA Worldview", "url": "https://worldview.earthdata.nasa.gov/", "usage": "Interface reference for Earth datasets; not used as Mars data." },
+    { "name": "Mars Perseverance Raw Images Gallery", "url": "https://mars.nasa.gov/mars2020/multimedia/raw-images/", "usage": "Additional reference link." }
+  ]
+}

@@ -1,0 +1,6 @@
+node.exe
+*.tar.gz
+node_modules/
+.local/
+challenge-resources.html
+*-capabilities.xml

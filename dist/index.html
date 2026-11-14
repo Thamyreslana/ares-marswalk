@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#121514"><meta name="description" content="ARES: planeje uma caminhada em Marte com cartografia NASA Mars Trek e uma simulação de autonomia. Protótipo NASA Space Apps 2026.">
+  <title>ARES — Explorador de Marte</title>
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="./" aria-label="ARES início"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 32 20 6l15 26H5Zm9-5h12L20 16l-6 11Z" fill="currentColor"/></svg><span>ARES<span class="brand-sub">MARS EXPLORATION SYSTEM</span></span></a>
+  <div class="top-middle"><span class="live-dot"></span> PLANEJAMENTO DE MISSÃO <span class="divider">/</span> JEZERO, MARTE</div>
+  <button class="button subtle" id="sources-top"><span aria-hidden="true">◈</span> Dados & fontes <span class="key">D</span></button>
+</header>
+<div class="shell">
+  <nav class="rail" aria-label="Ferramentas"><button class="rail-item active" id="nav-map" aria-label="Mapa da missão" title="Mapa da missão">⌖</button><button class="rail-item" id="nav-targets" aria-label="Objetivos científicos" title="Objetivos científicos">⚑</button><button class="rail-item" id="nav-data" aria-label="Dados e fontes" title="Dados e fontes">▱</button><div class="rail-bottom">M<br>26</div></nav>
+  <aside class="mission-panel">
+    <div class="eyebrow"><span class="small-line"></span> EXPLORAÇÃO EXTRAVEICULAR</div>
+    <h1>O próximo passo.<br><span>Com um plano.</span></h1>
+    <p class="intro">Explore Jezero. Escolha um objetivo e planeje o caminho de volta.</p>
+    <div class="mission-id"><span>MISSÃO ARES–01</span><span class="chip">SIMULAÇÃO</span></div>
+    <section class="control-section" aria-labelledby="destination-heading">
+      <h2 id="destination-heading"><span class="section-number">01</span> Objetivo científico</h2>
+      <label for="destination">Destino da exploração</label>
+      <select id="destination"><option value="delta">Margem do delta</option><option value="rochas">Afloramento rochoso</option><option value="cratera">Transecto de superfície</option></select>
+      <p class="target-description" id="target-description"></p>
+    </section>
+    <section class="control-section" aria-labelledby="parameters-heading">
+      <h2 id="parameters-heading"><span class="section-number">02</span> Parâmetros da missão</h2>
+      <div class="range-label"><label for="autonomy">Autonomia disponível</label><output id="autonomy-value" for="autonomy">240 min</output></div><input id="autonomy" type="range" min="60" max="480" step="15" value="240">
+      <div class="range-label"><label for="work">Tempo de pesquisa</label><output id="work-value" for="work">30 min</output></div><input id="work" type="range" min="0" max="120" step="5" value="30">
+      <div class="parameter-pair"><div><label for="speed">Caminhada (km/h)</label><input id="speed" type="number" min="0.5" max="6" step="0.1" value="2.5"></div><div><label for="reserve">Reserva (min)</label><input id="reserve" type="number" min="0" max="180" step="5" value="45"></div></div>
+      <p class="parameter-note">Velocidade constante e autonomia são hipóteses ajustáveis do cenário.</p>
+    </section>
+    <section class="control-section route-section"><h2><span class="section-number">03</span> Estratégia de percurso</h2><div class="segmented" role="group" aria-label="Estratégia de percurso"><button class="selected" id="route-avoid" aria-pressed="true">Desviar das zonas</button><button id="route-direct" aria-pressed="false">Linha direta</button></div><p class="parameter-note">Zonas hipotéticas de exclusão para demonstrar desvios. Não derivadas de obstáculos NASA.</p></section>
+    <button class="button primary" id="plan">Calcular missão <span aria-hidden="true">↗</span></button>
+    <button class="button export" id="export">↓ Exportar plano da missão</button>
+    <div class="panel-footer"><span class="live-dot"></span> NASA SPACE APPS <span>2026</span></div>
+  </aside>
+  <main>
+    <div class="page-heading"><div><div class="eyebrow">SETOR DE EXPLORAÇÃO / 001</div><h2>Cratera Jezero<span class="location-tag">MARTE</span></h2></div><div class="coordinates"><span>BASE HIPOTÉTICA</span><strong>18,4663° N &nbsp; 77,4298° E</strong></div></div>
+    <section class="map-card" aria-label="Mapa interativo da cratera Jezero">
+      <canvas id="map" tabindex="0" role="img" aria-label="Mapa NASA de Jezero com habitat hipotético, destino e rota. Arraste para mover; use os botões de zoom. Os destinos também estão disponíveis no seletor."></canvas>
+      <div class="map-top"><span class="map-caption"><span class="live-dot"></span> <span id="layer-caption">MRO · CTX / ÓPTICO</span></span><span class="map-caption light" id="tile-status">Carregando cartografia…</span></div>
+      <div class="layer-picker" role="group" aria-label="Camada de dados"><button data-layer="optical" class="selected" aria-pressed="true">◉ Óptico</button><button data-layer="topography" aria-pressed="false">≋ Relevo</button><button data-layer="thermal" aria-pressed="false">◐ Infravermelho</button></div>
+      <div class="map-tools"><button id="zoom-in" aria-label="Aproximar mapa">+</button><button id="zoom-out" aria-label="Afastar mapa">−</button><button id="recenter" aria-label="Centralizar missão">⌖</button></div>
+      <div class="map-legend"><span><i class="legend-line"></i> Ida e volta pelo mesmo percurso</span><span><i class="legend-zone"></i> Exclusão simulada</span></div>
+      <div class="scale"><div></div><span id="scale-text">1 km</span></div>
+      <div class="map-credit">NASA / JPL-Caltech · Mars Trek <span id="resolution-note"></span><span id="coverage-note"> · Viking nas lacunas CTX</span></div>
+      <div class="map-empty" id="map-empty" hidden>Cartografia indisponível neste momento.<br><small>A rota continua disponível no esquema de coordenadas. Consulte Dados & fontes.</small></div>
+    </section>
+    <section class="mission-summary" aria-label="Resumo calculado da missão" aria-live="polite">
+      <div class="summary-heading"><h2>Seu plano de exploração</h2><span class="result-chip" id="result-chip">CALCULANDO</span></div>
+      <div class="metrics"><article><span class="metric-label">↔ DISTÂNCIA TOTAL</span><strong id="distance-metric">—</strong><small>Inclui ida e volta</small></article><article><span class="metric-label">◷ TEMPO DE MISSÃO</span><strong id="time-metric">—</strong><small>Caminhada + pesquisa</small></article><article><span class="metric-label">◴ AUTONOMIA RESTANTE</span><strong id="remaining-metric">—</strong><small id="reserve-caption">Reserva configurada: 45 min</small></article></div>
+      <div class="budget-track" aria-label="Distribuição do tempo disponível"><span id="walking-bar"></span><span id="work-bar"></span><span id="reserve-bar"></span></div><div class="budget-legend"><span><i class="walking"></i> Caminhada</span><span><i class="research"></i> Pesquisa</span><span><i class="reserve"></i> Reserva</span></div>
+      <div class="insight" id="insight"></div>
+    </section>
+    <section class="science-row"><article class="science-card"><span class="eyebrow">A PERGUNTA CIENTÍFICA</span><h3>O que a água deixou para trás?</h3><p>O antigo delta de Jezero preserva registros da história de um lago marciano. O cenário propõe observar e coletar amostras desses materiais.</p><a href="https://www.jpl.nasa.gov/news/nasas-perseverance-rover-deciphers-ancient-history-of-martian-lake/" target="_blank" rel="noopener noreferrer">Conhecer a ciência da missão ↗</a></article><article class="science-card data-card"><span class="eyebrow">DADOS QUE DÃO CONTEXTO</span><h3>Três olhares sobre Marte.</h3><div class="data-types"><span>01 <b>Óptico</b> MRO · CTX</span><span>02 <b>Topográfico</b> MGS · MOLA</span><span>03 <b>Térmico</b> Odyssey · THEMIS</span></div><button id="sources-bottom">Explorar fontes e limitações ↗</button></article></section>
+    <footer class="main-footer"><span>ARES / PROTÓTIPO DE EXPLORAÇÃO</span><span>Cartografia real. Missão e zonas de exclusão simuladas.</span></footer>
+  </main>
+</div>
+<dialog id="sources-dialog" aria-labelledby="sources-title"><div class="dialog-heading"><div><div class="eyebrow">PROVENIÊNCIA & TRANSPARÊNCIA</div><h2 id="sources-title">Por trás de cada camada.</h2></div><button id="close-sources" class="close-button" aria-label="Fechar fontes">×</button></div><div id="sources-content"></div></dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="app.js"></script>
+</body></html>
