@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "title": "Perseverance raw images at the Rochette workspace (site 7, drive 0)",
+  "selection": "Chosen from the NASA Mars 2020 raw-image feed for sols 180-182, filtered to full frames at site 7 / drive 0, the same position as NASA waypoint RMC 7_0 used as the ARES target.",
+  "feed": "https://mars.nasa.gov/rss/api/?feed=raw_images&category=mars2020&feedtype=json",
+  "downloadedAt": "2026-11-14",
+  "limitations": "Raw browse JPEGs (800 px), not radiometrically calibrated; colors are approximate. Images show the rover's view in August 2021, not current conditions.",
+  "images": [
+    {
+      "file": "rochette-hazcam-sol182.jpg",
+      "imageId": "FLF_0182_0683107207_927ECM_N0070000FHAZ00206_01_295J",
+      "camera": "FRONT_HAZCAM_LEFT_A",
+      "sol": 182,
+      "site": 7,
+      "drive": 0,
+      "dateTakenUtc": "2021-08-24T20:03:46.220",
+      "credit": "NASA/JPL-Caltech",
+      "sourcePage": "https://mars.nasa.gov/mars2020/multimedia/raw-images/FLF_0182_0683107207_927ECM_N0070000FHAZ00206_01_295J",
+      "sourceFile": "https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00182/ids/edr/browse/fcam/FLF_0182_0683107207_927ECM_N0070000FHAZ00206_01_295J01_800.jpg",
+      "sha256": "196a50c829d6080a89e09201ddd211a480b524bbc69a9e8255eea30e38c1d0ab"
+    },
+    {
+      "file": "rochette-navcam-sol180.jpg",
+      "imageId": "NLF_0180_0682930843_867EBY_N0070000NCAM00315_06_0LLJ",
+      "camera": "NAVCAM_LEFT",
+      "sol": 180,
+      "site": 7,
+      "drive": 0,
+      "dateTakenUtc": "2021-08-22T19:04:20.852",
+      "credit": "NASA/JPL-Caltech",
+      "sourcePage": "https://mars.nasa.gov/mars2020/multimedia/raw-images/NLF_0180_0682930843_867EBY_N0070000NCAM00315_06_0LLJ",
+      "sourceFile": "https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00180/ids/edr/browse/ncam/NLF_0180_0682930843_867EBY_N0070000NCAM00315_06_0LLJ01_800.jpg",
+      "sha256": "b8f05b0a12de700d89cf443033db9d3de6e784a8b7717ffbc20e3e3e9bab56e4"
+    },
+    {
+      "file": "rochette-watson-sol182.jpg",
+      "imageId": "SIF_0182_0683107308_082EBY_N0070000SRLC00701_0000LMJ",
+      "camera": "SHERLOC_WATSON",
+      "sol": 182,
+      "site": 7,
+      "drive": 0,
+      "dateTakenUtc": "2021-08-24T20:05:29.620",
+      "credit": "NASA/JPL-Caltech",
+      "sourcePage": "https://mars.nasa.gov/mars2020/multimedia/raw-images/SIF_0182_0683107308_082EBY_N0070000SRLC00701_0000LMJ",
+      "sourceFile": "https://mars.nasa.gov/mars2020-raw-images/pub/ods/surface/sol/00182/ids/edr/browse/shrlc/SIF_0182_0683107308_082EBY_N0070000SRLC00701_0000LMJ01_800.jpg",
+      "sha256": "ed60db165f2af3f01d7d3104377016215bde1a68ec487f614eab23507efb23a1"
+    }
+  ]
+}

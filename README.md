@@ -2,7 +2,7 @@
 
 NASA Space Apps 2026 · **Interplanetary Survival Guide: Martian Map**
 
-ARES is a pre-EVA planning prototype for a round trip from a hypothetical habitat to **Rochette**, a NASA-documented Perseverance sampling workspace in Jezero. It connects numerical orbital terrain to route decisions and shows how a change in walking pace affects the return reserve.
+ARES is a pre-EVA planning prototype for a round trip from a hypothetical habitat to **Rochette**, a NASA-documented Perseverance sampling workspace in Jezero. The straight line from the habitat climbs a ~40 m hill with mapped slopes up to 23°; ARES uses numerical orbital terrain to route around it, then turns the time budget into one rule for the crew: **when to leave the target** (a walkback deadline).
 
 The interface defaults to English and includes a Portuguese language selector. The mobile layout shows the map and result before opening mission settings in a dialog.
 
@@ -17,6 +17,14 @@ From this directory:
 Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installed, `node server.mjs` works. Double-clicking `iniciar.cmd` is another Windows option. Stop the server with Ctrl+C.
 
 Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
+
+## What changed in ARES-03
+
+- **A scenario with a real hazard.** In ARES-02 the direct line reached only 6.5°, so the detour avoided nothing important. The hypothetical habitat moved to **77.3971° E, 18.4407° N**, a flat site (under 4° within 120 m) chosen with `tools/find-habitat.mjs`. The straight line to Rochette now crosses **10 cells above the 12° limit, up to 23.2°**, over a hill about 40 m high that is also visible in the CTX image. `BASE` remains only the map projection origin.
+- **Walkback deadline.** Walk out at the planned pace; plan the return as if pace drops to 75% (the conservative pace factor). The plan shows the latest time to leave Rochette and how much science time fits. If the target lies beyond the walkback limit, the map marks where to turn back and draws the rest of the route in red. Inspired by the walkback limits used to plan Apollo lunar rover traverses; not a NASA rule for Mars.
+- **Perseverance surface images.** Three raw images (front Hazcam, Navcam, SHERLOC WATSON) from sols 180–182 at site 7 / drive 0, the same position as waypoint 7_0, show what the crew would see on arrival. Provenance, IDs and hashes are in `dist/assets/surface/surface-images.json`.
+- **New guided demo:** (1) the straight line climbs a 23° hill, (2) ARES walks around it, (3) fieldwork stretches to 90 min and the walkback rule says when to turn back.
+- Default available EVA time is 270 min (ARES-02: 240), so the default plan holds the reserve in all three scenarios.
 
 ## What changed in ARES-02
 
@@ -41,7 +49,7 @@ Rochette / Artuby ridge / Citadelle is associated with the Montdenier and Montag
 - [Simon et al. (2023), Table 2](https://doi.org/10.1029/2022JE007474), linking the rounded coordinates and sample names.
 - [NASA/JPL science context](https://www.jpl.nasa.gov/news/nasas-perseverance-rover-collects-puzzle-pieces-of-mars-history/).
 
-The waypoint locates a rover workspace, not the exact center of a drill hole. Decimal precision is not a statement of geodetic accuracy. The habitat is hypothetical at **77.4298° E, 18.4663° N**.
+The waypoint locates a rover workspace, not the exact center of a drill hole. Decimal precision is not a statement of geodetic accuracy. The habitat is hypothetical at **77.3971° E, 18.4407° N**; 77.4298° E, 18.4663° N is the local map/terrain projection origin.
 
 ## Sources and their distinct roles
 
@@ -51,6 +59,7 @@ The waypoint locates a rover workspace, not the exact center of a drill hole. De
 | CTX numerical DEM | Slope, exclusion policy, route cost, profile | [USGS Mars 2020 Science Investigation CTX DEM](https://astrogeology.usgs.gov/search/map/mars_2020_science_investigation_ctx_dem_mosaic) |
 | MOLA color hillshade | Regional relief context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
 | THEMIS daytime infrared | Historical regional context only | [NASA/JPL Mars Trek](https://trek.nasa.gov/mars/) |
+| Perseverance raw images | What the workspace looks like (not used in routing) | [NASA Mars 2020 raw images](https://mars.nasa.gov/mars2020/multimedia/raw-images/) |
 
 Mars Trek is listed in the [official 2026 challenge Resources](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/?tab=resources). The other official resources and their use are recorded in `dist/assets/challenge-resources.json`. Not every listed resource is integrated.
 
@@ -76,21 +85,24 @@ Distances are planimetric. The return retraces the outbound route. Total ascent 
 
 Generated from the checked-in terrain by `node tools/build-validation.mjs`:
 
-| Result | Direct baseline | Terrain-aware |
+| Result | Direct line | Terrain-aware |
 |---|---:|---:|
-| Round trip | 4.52 km | 4.83 km |
-| Maximum mapped cell slope | 6.5° | 4.1° |
-| Relative terrain cost | 2,771 | 2,639 |
+| Round trip | 5.44 km | 5.62 km |
+| Cells above the 12° limit | 10 | 0 |
+| Maximum mapped cell slope | 23.2° | 5.8° |
+| Total climbing, round trip | 207 m | 119 m |
+| Relative terrain cost | 6,683 | 3,531 |
 
-The terrain route adds approximately **303 m** round trip. The direct baseline is not automatically blocked at the default 12° threshold; the difference also comes from weighting the lower slopes. At an assumed 5° threshold, the direct baseline crosses cells above the limit.
+The detour adds approximately **178 m** round trip (+3.3%). The direct line is blocked at the default 12° threshold; it becomes passable only if the limit is raised above 23.2°.
 
-With 240 min available, 2.5 km/h pace, 30 min fieldwork, and 45 min reserve:
+With 270 min available, 2.5 km/h pace, 30 min fieldwork, and 45 min reserve:
 
 - Faster: pace ×1.20, fieldwork ×0.85.
-- Base case: approximately **146 min** total.
-- Conservative: pace ×0.75, fieldwork ×1.25, approximately **192 min** total; approximately **48 min** remain, only **3 min beyond the required reserve**.
+- Base case: approximately **165 min** total.
+- Conservative: pace ×0.75, fieldwork ×1.25, approximately **217 min** total; approximately **53 min** remain, **7.6 min beyond the required reserve**.
+- Walkback: leave Rochette by **T+135 min**, allowing up to **67 min** of science.
 
-Reducing available time to 210 min preserves the base-case reserve but fails it in the conservative case. Scenarios are what-if assumptions, not statistical confidence intervals or predictions of suit performance.
+With 90 min of fieldwork, the base case still fits (45.1 min left), the conservative scenario does not, and the walkback rule allows only 67 of the 90 minutes. Scenarios are what-if assumptions, not statistical confidence intervals or predictions of suit performance.
 
 ## Tests and verification
 
@@ -122,15 +134,15 @@ Historical orbital data do not capture every obstacle or current surface conditi
 ## A short demonstration
 
 1. Open the prototype in English with `?lang=en&demo=1`, or select **Guided demo** in the route comparison.
-2. Compare the two routes with a 45 min reserve: the direct baseline has about 12.8 min conservative margin, and the terrain route about 3.1 min.
-3. Advance to a 50 min reserve: the direct baseline still meets the conservative budget, while the terrain route falls about 1.9 min below the requirement.
-4. Explain the tradeoff between lower mapped slope and more time reserve. Finish to restore the plan that was open before the demo.
+2. Step 1, slope map: the direct line crosses 10 cells above 12°, up to 23.2°, over a hill about 40 m high.
+3. Step 2, optical map: the terrain-aware route walks around it for 178 m extra (+3.3%), maximum 5.8°, climbing cut from 207 m to 119 m.
+4. Step 3: fieldwork stretches to 90 min. The base case still fits, but the walkback rule says leave Rochette by T+135 min, which allows 67 of the 90 minutes. Finish to restore the plan that was open before the demo.
 
 ### A small comprehension test
 
 The main interface offers three shortcuts below the map: adjust the mission, compare routes, and inspect the evidence. The comparison summary updates with the terrain and reserve checks; it does not choose a route for the user. A nearby disclosure separates source data, planning assumptions, and pending validation.
 
-Open `dist/comprehension-test.html` (or the site's **5-minute comprehension test** link). The protocol is available in English and Portuguese. Ask someone outside the project to compare the routes, change the reserve to 50 min, and explain what the green status establishes. Keep the guided demo closed until the tasks are complete.
+Open `dist/comprehension-test.html` (or the site's **5-minute comprehension test** link). The protocol is available in English and Portuguese. Ask someone outside the project to explain why the direct line is not acceptable, change science work to 90 min and read the walkback deadline, and explain what the green status establishes. Keep the guided demo closed until the tasks are complete.
 
 The facilitator can also record the first observed issue to fix and the proposed change/retest. These optional fields are exported in `followUp` with the observation notes. They do not change any project validation claim.
 
