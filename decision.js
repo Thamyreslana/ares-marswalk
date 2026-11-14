@@ -1,6 +1,6 @@
 import {sensitivity,walkback} from './planner.js';
 
-// A = direct line, B = terrain-aware, C = terrain-aware that also avoids likely loose ground (experimental).
+// A = direct line, B = terrain-aware, C = terrain-aware with a low night-brightness penalty (experimental).
 export const ROUTE_KINDS=Object.freeze(['direct','terrain','loose']);
 
 export function compareRoutes(analyses,parameters){

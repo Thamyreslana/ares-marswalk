@@ -126,14 +126,14 @@ export function budget(distance,speed,work,autonomy,reserve){
   const walking=distance/(speed*1000)*60,total=walking+work,remaining=autonomy-total;
   return {walking,work,total,remaining,reserve,feasible:remaining>=reserve,excess:Math.max(0,total-(autonomy-reserve))};
 }
-// THEMIS Night IR brightness on the same grid as the terrain. Advisory only: never used in route cost.
+// THEMIS Night IR brightness on the terrain grid. Context for B; optional experimental penalty for C.
 export function createNightIr(raw,t){
   if(!raw||!t)throw new Error('Missing night IR or terrain');
   const g=raw.grid;if(g.cols!==t.cols||g.rows!==t.rows||g.step!==t.step||g.xMin!==t.xMin||g.yMax!==t.yMax||raw.values?.length!==t.cols*t.rows)throw new Error('Night IR grid mismatch');
   if(!(raw.classes.coolMax<raw.classes.warmMin))throw new Error('Invalid night IR classes');
   return {...raw,values:Int16Array.from(raw.values,v=>v==null?-1:v)};
 }
-// Experimental route C: extra relative cost on cells that are cool at night (likely loose material).
+// Experimental route C: extra relative cost on cells in the lowest night-brightness quartile; not a validated ground-strength class.
 export const LOOSE_GROUND_PENALTY=1;
 export function loosePenalty(night,weight=LOOSE_GROUND_PENALTY){return Float32Array.from(night.values,v=>nightClass(v,night)==='cool'?weight:0);}
 export function nightClass(value,night){return value<0?'unknown':value<=night.classes.coolMax?'cool':value>=night.classes.warmMin?'warm':'mid';}
