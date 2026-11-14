@@ -2,5 +2,5 @@
   "name": "ares-marswalk",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server.mjs", "test": "node --test tests/terrain-planner.test.mjs tests/map-view.test.mjs", "evidence": "node tools/build-validation.mjs" }
+  "scripts": { "start": "node server.mjs", "test": "node --test tests/terrain-planner.test.mjs tests/map-view.test.mjs tests/decision.test.mjs", "evidence": "node tools/build-validation.mjs" }
 }

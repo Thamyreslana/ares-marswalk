@@ -24,6 +24,8 @@ Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, 
 - Route cost now depends on slope derived from a **20 m USGS/NASA CTX DEM**, sampled on a **40 m planning grid**.
 - Unknown terrain and cells above the assumed slope threshold are excluded. Diagonal corner cutting is blocked; simplified segments are checked against every crossed cell.
 - Compares the direct baseline with a terrain-aware route, including round-trip distance, maximum mapped cell slope, and a relative terrain-cost index.
+- Shows both routes' conservative mission time, time remaining, and margin beyond the required reserve side by side. Neither route is presented as a universally safer choice.
+- Includes a three-step guided demonstration (`?demo=1`) that changes the reserve from 45 to 50 minutes and restores the prior plan on exit.
 - Shows a numerical slope map, an elevation profile, and a terrain-cell inspector.
 - Calculates faster, base-case, and conservative time scenarios, each including science work, return, and an explicit reserve.
 - Exports round-trip GeoJSON geometry, parameters, scenarios, source references, and limitations.
@@ -93,7 +95,7 @@ Reducing available time to 210 min preserves the base-case reserve but fails it 
 ## Tests and verification
 
 ```powershell
-.\node.exe --test tests/terrain-planner.test.mjs tests/map-view.test.mjs
+.\node.exe --test tests/terrain-planner.test.mjs tests/map-view.test.mjs tests/decision.test.mjs
 .\node.exe tools/build-validation.mjs
 .\node.exe qa-browser.mjs
 ```
@@ -119,10 +121,16 @@ Historical orbital data do not capture every obstacle or current surface conditi
 
 ## A short demonstration
 
-1. Open the prototype in English; identify Rochette and the hypothetical habitat.
-2. Compare the blue direct baseline and orange terrain route; show the slope map and the numerical comparison.
-3. Reduce available time to 210 min to expose dependence on walking pace.
-4. Open Data & evidence and export the plan.
+1. Open the prototype in English with `?lang=en&demo=1`, or select **Guided demo** in the route comparison.
+2. Compare the two routes with a 45 min reserve: the direct baseline has about 12.8 min conservative margin, and the terrain route about 3.1 min.
+3. Advance to a 50 min reserve: the direct baseline still meets the conservative budget, while the terrain route falls about 1.9 min below the requirement.
+4. Explain the tradeoff between lower mapped slope and more time reserve. Finish to restore the plan that was open before the demo.
+
+### A small comprehension test
+
+Open `dist/comprehension-test.html` (or the site's **5-minute comprehension test** link). The protocol is available in English and Portuguese. Ask someone outside the project to compare the routes, change the reserve to 50 min, and explain what the green status establishes. Keep the guided demo closed until the tasks are complete.
+
+The facilitator may export anonymous observations only after selecting outcomes and confirming that an actual person was observed. The form sends nothing to a server and does not change `humanUsabilityStudyCompleted:false` in the project's reference report. Three small sessions can reveal wording or layout problems; they do not establish operational safety or representative scientific validity.
 
 Use `dist/mission-brief.html` as a seven-slide submission demo. Additional public resources include `dist/assets/validation-report.json`, the preserved waypoint, and numerical terrain metadata. List NASA imagery/data, the primary paper, and external software in the submission References field. Follow the official event submission instructions for the final project page.
 
