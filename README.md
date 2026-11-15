@@ -198,3 +198,7 @@ The facilitator may export anonymous observations only after selecting outcomes 
 
 Use `dist/mission-brief.html` as a seven-slide submission demo. Additional public resources include `dist/assets/validation-report.json`, the preserved waypoint, and numerical terrain metadata. List NASA imagery/data, the primary paper, and external software in the submission References field. Follow the official event submission instructions for the final project page.
 
+## License
+
+The ARES source code is available under the MIT License. Read [LICENSE.md](LICENSE.md) for the full terms.
+
