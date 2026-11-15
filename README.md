@@ -6,6 +6,8 @@ ARES is a pre-EVA planning prototype for a round trip from a hypothetical habita
 
 The interface is in English by default; an optional Portuguese translation is available from the language selector (`?lang=pt`). The mobile layout shows the map and result before opening mission settings in a dialog.
 
+Route selection sits beside the map on desktop and above it on mobile. Compact A/B/C cards show the current terrain/time status, round-trip distance and leave-by time; selecting one updates the map and playback plan. Route B is labelled recommended only when it is the sole route meeting all displayed checks, and C remains experimental. The full comparison and evidence expand below the map, before the walk simulation.
+
 **Live:** https://thamyreslana.github.io/ares-marswalk/ · [Portuguese](https://thamyreslana.github.io/ares-marswalk/?lang=pt) · [guided demo](https://thamyreslana.github.io/ares-marswalk/?lang=en&demo=1) · [7-slide brief](https://thamyreslana.github.io/ares-marswalk/mission-brief.html)
 
 ## Publish to GitHub Pages

@@ -1,4 +1,5 @@
 const en={
+  routePickerEyebrow:'COMPARE & SELECT',routePickerTitle:'Choose a route',routePickerIntro:'Select a route to inspect it on the map, then simulate the walk.',fullComparison:'Full route comparison & evidence',routeRecommended:'RECOMMENDED',
   experimentalTitle:"Explore route C · experimental",
   experimentalIntro:"B uses distance and slope. C adds a relative night-IR brightness penalty. Compare the hypothesis separately; no ground-strength or safety benefit has been validated.",
   advancedTitle:"Simulate the walk · crew view and radiation",
@@ -90,6 +91,7 @@ const en={
   validation:'Reproducible scenario',walkLabel:'Walking',workLabel:'Science',reserveLabel:'Reserve',reserveCheck:'Reserve check',terrainReady:'Real terrain driving decisions · 20 m USGS/NASA DEM · 40 m planning grid',checkResults:'Review the result',mapAccessible:'Jezero map with a hypothetical habitat, the NASA Rochette workspace, and routes derived from numerical terrain. Use arrow keys to pan and the zoom controls to inspect.',
 };
 const pt={
+  routePickerEyebrow:'COMPARE E SELECIONE',routePickerTitle:'Escolha uma rota',routePickerIntro:'Selecione uma rota para inspecioná-la no mapa e depois simule a caminhada.',fullComparison:'Comparação completa e evidências',routeRecommended:'RECOMENDADA',
   experimentalTitle:"Explorar rota C · experimental",
   experimentalIntro:"A B usa distância e declividade. A C adiciona uma penalidade de brilho relativo no IV noturno. Compare essa hipótese separadamente; nenhum benefício de resistência do solo ou segurança foi validado.",
   advancedTitle:"Simular a caminhada · visão da tripulação e radiação",

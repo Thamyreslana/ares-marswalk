@@ -81,7 +81,7 @@ main{grid-column:3;grid-row:1;align-self:start;margin-top:0;padding-top:25px}.pa
 /* ARES-04 layout: decision first, settings in a dialog, cleaner map, crew EVA view */
 #sidebar-home{display:none!important}
 .shell{grid-template-columns:52px minmax(0,1fr)!important}
-main{max-width:1180px;margin:0 auto;width:100%}
+main{grid-column:2;max-width:1460px;margin:0 auto;width:100%;min-width:0}
 .heading-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .button.eva-open{background:var(--plan)!important;color:#06181c!important;border-color:var(--plan)!important;font-weight:600}
 .button.eva-open:hover{filter:brightness(1.08)}
