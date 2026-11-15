@@ -168,12 +168,14 @@ function drawSimMarker(){
 }
 
 function renderDecision(){
+  if(!state.terrain){$('route-choices').textContent=t(state.terrainError?'dataFailed':'dataLoading');}
   const summary=summarizeComparison(state.comparisons);
   $('decision-summary').textContent=t(summary.key,{route:summary.kind?routeName(summary.kind):'',routes:summary.kinds.map(routeName).join(t('andJoin'))});
   $('decision-summary').dataset.outcome=summary.key;
   $('selected-route').textContent=t('inspectingRoute',{route:routeName(state.strategy)});
 }
 function renderComparison(p){
+  renderRouteChoices();
   const body=$('comparison-body'),experimentalBody=$('experimental-body');body.replaceChildren();experimentalBody.replaceChildren();$('experimental-routes').hidden=!state.analyses?.loose;
   for(const kind of ROUTE_KINDS){
     const c=state.comparisons[kind],a=c.analysis;if(kind==='loose'&&!a)continue;const card=document.createElement('article');card.className='route-option '+kind+'-option'+(state.strategy===kind?' is-selected':'');card.dataset.route=kind;
@@ -322,6 +324,21 @@ for(const id of ['sources-top','sources-bottom','nav-data','quick-evidence'])$(i
 dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
 for(const id of ['autonomy','work','slope-limit'])$(id).addEventListener('input',calculate);for(const id of ['speed','reserve'])$(id).addEventListener('change',calculate);
 function chooseRoute(strategy){state.strategy=strategy;if(strategy==='loose')$('experimental-routes').open=true;for(const kind of ['terrain','direct','loose']){$('route-'+kind).classList.toggle('selected',kind===strategy);$('route-'+kind).setAttribute('aria-pressed',kind===strategy);}calculate();}
+function renderRouteChoices(){
+  const choices=$('route-choices');choices.replaceChildren();
+  const summary=summarizeComparison(state.comparisons);
+  for(const kind of ROUTE_KINDS){
+    const c=state.comparisons[kind],a=c?.analysis,selected=state.strategy===kind;
+    const button=document.createElement('button');button.type='button';button.className='route-choice'+(selected?' is-selected':'');button.dataset.chooseRoute=kind;button.dataset.status=c?.status??'noRoute';button.setAttribute('aria-pressed',String(selected));button.disabled=!a||!!demo;
+    const title=document.createElement('strong');title.className='route-choice-title';title.textContent=routeName(kind);button.append(title);
+    if(kind==='loose'||(kind==='terrain'&&summary.key==='decisionOne'&&summary.kind==='terrain')){const tag=document.createElement('span');tag.className='route-choice-tag';tag.textContent=t(kind==='loose'?'experimental':'routeRecommended');button.append(tag);}
+    const status=document.createElement('span');status.className='route-choice-status';status.textContent=t(a?c.status:'noRoute');button.append(status);
+    const metrics=document.createElement('span');metrics.className='route-choice-metrics';
+    const leave=a?.passable&&c.walkback&&c.walkback.status!=='beyond'?'T+'+fmt(Math.floor(c.walkback.leaveBy))+' min':'—';
+    for(const [key,value]of [['roundTrip',a?fmt(a.roundTripMeters/1000,2)+' km':'—'],['leaveBy',leave]]){const row=document.createElement('span'),label=document.createElement('span'),metric=document.createElement('b');label.textContent=t(key);metric.textContent=value;metric.dataset.choiceMetric=key;row.append(label,metric);metrics.append(row);}button.append(metrics);
+    button.addEventListener('click',()=>{stopSim();sim.t=0;chooseRoute(kind);choices.querySelector(`[data-choose-route="${kind}"]`)?.focus({preventScroll:true});});choices.append(button);
+  }
+}
 for(const strategy of ['terrain','direct','loose'])$('route-'+strategy).addEventListener('click',()=>chooseRoute(strategy));
 const demoInputs=['autonomy','work','speed','reserve','slope-limit'];
 function setParameters(p){for(const [key,id]of Object.entries({autonomy:'autonomy',work:'work',speed:'speed',reserve:'reserve',maxSlope:'slope-limit'}))$(id).value=p[key];}
@@ -372,7 +389,9 @@ function syncSettings(){const home=settingsDialog.open||mobile.matches?settingsD
 function openSettings(){if(settingsDialog.open||demo)return;settingsDialog.append(sidebar);settingsDialog.showModal();syncSettings();$('autonomy').focus({preventScroll:true});}
 function closeSettings(){if(settingsDialog.open)settingsDialog.close();syncSettings();}
 $('open-settings').addEventListener('click',openSettings);$('close-settings').addEventListener('click',closeSettings);$('settings-done').addEventListener('click',()=>{calculate();closeSettings();$('mission-summary').scrollIntoView({block:'center',behavior:'smooth'});});settingsDialog.addEventListener('close',syncSettings);mobile.addEventListener('change',syncSettings);syncSettings();
-$('quick-settings').addEventListener('click',openSettings);$('quick-compare').addEventListener('click',()=>{const section=$('comparison-section');section.scrollIntoView({block:'start',behavior:'smooth'});section.focus({preventScroll:true});});
+$('quick-settings').addEventListener('click',openSettings);
+function openRouteComparison(){$('route-comparison-details').open=true;const section=$('comparison-section');section.scrollIntoView({block:'start',behavior:'smooth'});section.focus({preventScroll:true});}
+$('quick-compare').addEventListener('click',openRouteComparison);$('route-details-open').addEventListener('click',openRouteComparison);
 $('nav-map').addEventListener('click',()=>{canvas.scrollIntoView({block:'center',behavior:'smooth'});canvas.focus({preventScroll:true});});
 canvas.addEventListener('pointerdown',e=>{state.drag={x:e.clientX,y:e.clientY,start:{...state.center},moved:false};canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener('pointermove',e=>{const rect=canvas.getBoundingClientRect();if(state.drag){const dx=e.clientX-state.drag.x,dy=e.clientY-state.drag.y;if(Math.hypot(dx,dy)>5)state.drag.moved=true;state.center={x:state.drag.start.x-dx/state.scale,y:state.drag.start.y+dy/state.scale};constrain();draw();}else inspect(ground({x:e.clientX-rect.left,y:e.clientY-rect.top}));});
