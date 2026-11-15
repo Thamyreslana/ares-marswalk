@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "title": "ARES-03 reproducible reference scenario",
-  "generatedAt": "2026-11-14T22:26:21.801Z",
+  "title": "ARES reproducible reference scenario",
+  "generatedAt": "2026-11-15T13:27:53.768Z",
   "humanMission": {
     "hypothetical": true,
     "habitat": {
@@ -3238,6 +3238,8 @@
     "automatedReferenceScenario": true,
     "humanUsabilityStudyCompleted": false,
     "independentAbsoluteImageDemAlignmentValidated": false,
+    "relativeImageDemRegistrationMeasured": true,
+    "imageRegistrationReport": "assets/alignment-measurement.json",
     "operationalSafetyValidated": false
   },
   "limitations": "Prototype terrain cost, slope threshold and walkback pace factor are assumptions, not NASA EVA policy. The habitat location is hypothetical. Orbital terrain cannot resolve every hazard. Time scenarios are what-if assumptions, not statistical confidence intervals or suit-performance predictions."

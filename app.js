@@ -127,10 +127,16 @@ function renderEva(s,status){
     const next=homeward?route[Math.max(0,p.index-1)]:route[Math.min(p.index,route.length-1)],to=homeward?HABITAT:TARGET,remaining=homeward?s.distance:tl.outboundMeters-s.distance,heading=bearingDeg(p,Math.hypot(next.x-p.x,next.y-p.y)<5?to:next);
     $('eva-next').textContent=(homeward?t('evaHabitat'):'Rochette')+' · '+fmt(remaining/1000,2)+' km';$('eva-bearing').textContent=t('evaHeading',{deg:fmt(Math.round(heading)),pt:compassPoint(heading)});
     arrow.hidden=false;arrow.style.transform=`rotate(${heading}deg)`;
-    const ahead=lookAhead(route,s.distance,homeward?-1:1,200,state.terrain,state.night);
+  }else{arrow.hidden=true;$('eva-next').textContent=s.phase==='work'?t('evaAtSite'):t('evaHabitat');$('eva-bearing').textContent='';}
+  // At Rochette the next 200 m are the first stretch of the walk home.
+  if(moving||s.phase==='work'){
+    const ahead=lookAhead(route,s.distance,homeward||s.phase==='work'?-1:1,200,state.terrain,state.night);
     $('eva-ground').textContent=t(ahead.coolShare>=.4?'evaGroundLoose':ahead.warmShare>=.4?'evaGroundRock':'evaGroundMixed');$('eva-slope').textContent=ahead.maxSlope==null?'':t('evaSlopeAhead',{max:fmt(ahead.maxSlope,1)});
-  }else{arrow.hidden=true;$('eva-next').textContent=s.phase==='work'?t('evaAtSite'):t('evaHabitat');$('eva-bearing').textContent='';$('eva-ground').textContent='—';$('eva-slope').textContent='';}
-  $('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-shelter-sub').textContent=t(s.aborted?'evaShelterNearest':'evaShelterSub',{km:fmt(s.distance/1000,2)});$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
+  }else{$('eva-ground').textContent='—';$('eva-slope').textContent='';}
+  // Once returning, the countdown already shows time to base; show the margin over the required reserve instead.
+  const shelterLabel=$('eva-shelter-label');shelterLabel.dataset.t=s.aborted?'evaMargin':'evaShelter';shelterLabel.textContent=t(shelterLabel.dataset.t);
+  if(s.aborted){const margin=Math.floor(s.reserveAtArrival-tl.reserve);$('eva-shelter').textContent=(margin>=0?'+':'−')+fmt(Math.abs(margin))+' min';$('eva-shelter-sub').textContent=t('evaMarginSub',{required:fmt(tl.reserve)});}
+  else{$('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-shelter-sub').textContent=t('evaShelterSub');}$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
   const dot=$('eva-dot'),halo=$('eva-dot-halo');if(dot){for(const el of [dot,halo]){el.setAttribute('cx',p.x);el.setAttribute('cy',-p.y);}}
   const back=$('eva-return-path');if(back)back.setAttribute('points',homeward?[p,...route.slice(0,p.index).reverse()].map(q=>`${q.x},${-q.y}`).join(' '):'');
   const active=s.phase!=='home';$('eva-return').hidden=s.aborted||!active;$('eva-emergency').hidden=(s.aborted&&s.mode==='emergency')||!active;$('eva-resume').hidden=!s.aborted;
