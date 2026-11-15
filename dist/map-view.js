@@ -1,5 +1,13 @@
 import {fromGeo,RADIUS} from './planner.js';
 
+// Display registration measured against the USGS Mars 2020 TRN CTX orthomosaic (JEZ_ctx_B_soc_008, 6 m),
+// the frame the DEM and NASA waypoints agree with. Six landmarks, image-to-image correlation r 0.85-0.91,
+// spread +/-10 m: the Caltech tiles sit ~55 m east and ~105 m south of it. tools/check-alignment.py reproduces it.
+// Only where the imagery is drawn moves; routes, slopes and coordinates are untouched.
+export const IMAGE_REGISTRATION=Object.freeze({Mars2020CTX_E76_N16:Object.freeze({east:-55,north:105})});
+export function registration(layer){return IMAGE_REGISTRATION[layer?.product]||{east:0,north:0};}
+function corner(lon,lat,layer){const p=fromGeo({lon,lat}),r=registration(layer);return {x:p.x+r.east,y:p.y+r.north};}
+
 export function tileBounds(tile,layer){
   return tile.bounds || {west:-180+tile.col*360/layer.matrixWidth,east:-180+(tile.col+1)*360/layer.matrixWidth,north:90-tile.row*180/layer.matrixHeight,south:90-(tile.row+1)*180/layer.matrixHeight};
 }
@@ -7,8 +15,8 @@ export function tileBounds(tile,layer){
 export function coverageBounds(layer){
   if(!layer?.tiles?.length)return null;
   const boxes=layer.tiles.map(tile=>tileBounds(tile,layer));
-  const sw=fromGeo({lon:Math.min(...boxes.map(b=>b.west)),lat:Math.min(...boxes.map(b=>b.south))});
-  const ne=fromGeo({lon:Math.max(...boxes.map(b=>b.east)),lat:Math.max(...boxes.map(b=>b.north))});
+  const sw=corner(Math.min(...boxes.map(b=>b.west)),Math.min(...boxes.map(b=>b.south)),layer);
+  const ne=corner(Math.max(...boxes.map(b=>b.east)),Math.max(...boxes.map(b=>b.north)),layer);
   return {minX:sw.x,maxX:ne.x,minY:sw.y,maxY:ne.y};
 }
 
@@ -40,7 +48,7 @@ export function drawTiles(ctx,layer,images,screen,width,height){
   ctx.save();ctx.filter='none';ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   for(const tile of layer.tiles){
     const img=images.get(tile.path);if(!img?.complete||!img.naturalWidth)continue;
-    const b=tileBounds(tile,layer),tl=screen(fromGeo({lon:b.west,lat:b.north})),br=screen(fromGeo({lon:b.east,lat:b.south}));
+    const b=tileBounds(tile,layer),tl=screen(corner(b.west,b.north,layer)),br=screen(corner(b.east,b.south,layer));
     if(br.x<=0||tl.x>=width||br.y<=0||tl.y>=height)continue;
     ctx.drawImage(img,tl.x,tl.y,br.x-tl.x+.25,br.y-tl.y+.25);visible++;
   }

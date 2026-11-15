@@ -1,0 +1,185 @@
+{
+ "method": "Normalized cross-correlation over planar shifts (10 m steps, +/-300 m) in 2.4 km windows on a local equirectangular grid. CTX tiles are compared image-to-image with the reference; DEMs as a west-lit hillshade (sun azimuth chosen per landmark), which can bias the result along the illumination direction by tens of metres.",
+ "reference": {
+  "product": "JEZ_ctx_B_soc_008_orthoMosaic_6m_Eqc_latTs0_lon0.tif",
+  "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/mars2020_trn/CTX/JEZ_ctx_B_soc_008_orthoMosaic_6m_Eqc_latTs0_lon0.tif",
+  "resampling": "GDAL average via rasterio"
+ },
+ "offsetConvention": "east/north = where the feature appears in the reference relative to the compared layer, metres",
+ "displayRegistration": {
+  "product": "Mars2020CTX_E76_N16",
+  "east": -55,
+  "north": 105
+ },
+ "landmarks": [
+  {
+   "id": "A",
+   "note": "crater with dune field, ~960 m",
+   "lon": 77.37893,
+   "lat": 18.48283,
+   "aresCtx": {
+    "r": 0.895,
+    "east": -60,
+    "north": 100
+   },
+   "aresCtxRegistered": {
+    "r": 0.903,
+    "east": 0,
+    "north": -10
+   },
+   "aresDem": {
+    "r": 0.623,
+    "east": 30,
+    "north": 10,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.616,
+    "east": 20,
+    "north": 10,
+    "sunAz": 270
+   }
+  },
+  {
+   "id": "B",
+   "note": "delta-front scarp",
+   "lon": 77.42873,
+   "lat": 18.49363,
+   "aresCtx": {
+    "r": 0.913,
+    "east": -50,
+    "north": 100
+   },
+   "aresCtxRegistered": {
+    "r": 0.916,
+    "east": 10,
+    "north": 0
+   },
+   "aresDem": {
+    "r": 0.607,
+    "east": 40,
+    "north": 10,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.59,
+    "east": 40,
+    "north": 10,
+    "sunAz": 270
+   }
+  },
+  {
+   "id": "C",
+   "note": "hill on the direct line",
+   "lon": 77.40881,
+   "lat": 18.43964,
+   "aresCtx": {
+    "r": 0.882,
+    "east": -60,
+    "north": 100
+   },
+   "aresCtxRegistered": {
+    "r": 0.882,
+    "east": 0,
+    "north": -10
+   },
+   "aresDem": {
+    "r": 0.485,
+    "east": 30,
+    "north": 20,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.485,
+    "east": 30,
+    "north": 20,
+    "sunAz": 270
+   }
+  },
+  {
+   "id": "D",
+   "note": "mound, east of the route",
+   "lon": 77.49703,
+   "lat": 18.46934,
+   "aresCtx": {
+    "r": 0.846,
+    "east": -60,
+    "north": 110
+   },
+   "aresCtxRegistered": {
+    "r": 0.847,
+    "east": 0,
+    "north": 0
+   },
+   "aresDem": {
+    "r": 0.576,
+    "east": 30,
+    "north": 10,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.551,
+    "east": 30,
+    "north": 10,
+    "sunAz": 270
+   }
+  },
+  {
+   "id": "E",
+   "note": "scarp, north edge of the subset",
+   "lon": 77.41593,
+   "lat": 18.53682,
+   "aresCtx": {
+    "r": 0.894,
+    "east": -50,
+    "north": 110
+   },
+   "aresCtxRegistered": {
+    "r": 0.884,
+    "east": 10,
+    "north": 0
+   },
+   "aresDem": {
+    "r": 0.548,
+    "east": 40,
+    "north": 0,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.585,
+    "east": 30,
+    "north": 0,
+    "sunAz": 270
+   }
+  },
+  {
+   "id": "F",
+   "note": "mound north of the route",
+   "lon": 77.43229,
+   "lat": 18.5132,
+   "aresCtx": {
+    "r": 0.886,
+    "east": -50,
+    "north": 110
+   },
+   "aresCtxRegistered": {
+    "r": 0.891,
+    "east": 10,
+    "north": 0
+   },
+   "aresDem": {
+    "r": 0.622,
+    "east": 40,
+    "north": 0,
+    "sunAz": 270
+   },
+   "rawDem": {
+    "r": 0.605,
+    "east": 40,
+    "north": 0,
+    "sunAz": 270
+   }
+  }
+ ],
+ "limits": "Relative registration between products; not geodetic accuracy. Resolution 10 m; DEM shading bias of a few tens of metres is possible."
+}

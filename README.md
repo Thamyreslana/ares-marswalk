@@ -4,7 +4,7 @@ NASA Space Apps 2026 · **Interplanetary Survival Guide: Martian Map**
 
 ARES is a pre-EVA planning prototype for a round trip from a hypothetical habitat to **Rochette**, a NASA-documented Perseverance sampling workspace in Jezero. The straight line from the habitat climbs a ~40 m hill with mapped slopes up to 23°; ARES uses numerical orbital terrain to route around it, then turns the time budget into one rule for the crew: **when to leave the target** (a walkback deadline).
 
-The interface defaults to English and includes a Portuguese language selector. The mobile layout shows the map and result before opening mission settings in a dialog.
+The interface is in English by default; an optional Portuguese translation is available from the language selector (`?lang=pt`). The mobile layout shows the map and result before opening mission settings in a dialog.
 
 **Live:** https://thamyreslana.github.io/ares-marswalk/ · [Portuguese](https://thamyreslana.github.io/ares-marswalk/?lang=pt) · [guided demo](https://thamyreslana.github.io/ares-marswalk/?lang=en&demo=1) · [7-slide brief](https://thamyreslana.github.io/ares-marswalk/mission-brief.html)
 
@@ -25,7 +25,7 @@ From this directory:
 .\node.exe server.mjs
 ```
 
-Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installed, `node server.mjs` works. Double-clicking `iniciar.cmd` is another Windows option. Stop the server with Ctrl+C.
+Open **http://127.0.0.1:4173/?lang=en**. On a machine with Node already installed, `node server.mjs` works. Double-clicking `start.cmd` is another Windows option. Stop the server with Ctrl+C.
 
 Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, backend, or runtime Python requirement. Imagery and numerical terrain are stored with the app, so the core experience works offline when served locally. Optional web fonts fall back to system fonts.
 
@@ -35,7 +35,11 @@ The primary presentation is the blocked direct line A, the terrain detour B, and
 
 Night IR is reported as relative brightness quartiles, not confirmed loose ground or calibrated ground strength. B uses distance and slope; C doubles that cost on cells in the lowest brightness quartile. The evidence panel, map legend, crew labels and brief use the same distinction. Route geometry and time calculations are unchanged. Slopes describe a 40 m planning grid with central differences spanning 80 m.
 
-[Image/terrain check protocol](dist/alignment-check.md) provides a blank record for at least three distributed landmarks, independent reference products, screenshots and discrepancies. A visual check can reveal inconsistencies without establishing geodetic accuracy. Actual human comprehension observations remain separate in the existing test protocol. No validation is marked complete by these changes.
+### Image/terrain registration
+
+`tools/check-alignment.py` compares the displayed CTX tiles, the ARES DEM grid and the raw USGS DEM with an independent reference, the USGS Mars 2020 TRN CTX orthomosaic (`JEZ_ctx_B_soc_008`, 6 m), at six landmarks spread across the subset, using normalized cross-correlation after GDAL resampling. The Caltech CTX mosaic was **~120 m off** (≈55 m E, ≈105 m S) at every landmark; the DEM used for routing agrees with the reference within one 40 m cell. The display is now registered (`IMAGE_REGISTRATION` in `dist/map-view.js`: 55 m W, 105 m N), leaving a residual of ≤10 m. Routes, slopes and all numbers are unchanged, because they only use the DEM.
+
+The filled record is in the [image/terrain check protocol](dist/alignment-check.md) and the data in `dist/assets/alignment-measurement.json`. This is relative registration between products, not geodetic accuracy, so `independentAbsoluteImageDemAlignmentValidated` stays `false`. To reproduce: download the reference ortho (URL in the protocol) to `.local/reference/` and run `python tools/check-alignment.py` with the terrain preparation packages.
 
 ## What changed in ARES-05
 
@@ -171,7 +175,7 @@ Windows execution policies and network access may require permission. Raw data, 
 
 ## Limits
 
-Historical orbital data do not capture every obstacle or current surface condition. Absolute alignment between the local CTX mosaic and DEM has not been independently validated. MOLA color is not elevation input, and THEMIS brightness is not a temperature forecast. The app does not estimate oxygen, radiation dose, current weather, fatigue, carrying-load effects, communication, or emergency rescue. The green status means the configured time reserve holds under the displayed scenarios; it does not certify an EVA as safe.
+Historical orbital data do not capture every obstacle or current surface condition. The local CTX mosaic is registered for display to the USGS Mars 2020 CTX orthomosaic (see the image/terrain check protocol); absolute geodetic accuracy is not established. MOLA color is not elevation input, and THEMIS brightness is not a temperature forecast. The app does not estimate oxygen, radiation dose, current weather, fatigue, carrying-load effects, communication, or emergency rescue. The green status means the configured time reserve holds under the displayed scenarios; it does not certify an EVA as safe.
 
 ## A short demonstration
 
@@ -192,6 +196,3 @@ The facilitator may export anonymous observations only after selecting outcomes 
 
 Use `dist/mission-brief.html` as a seven-slide submission demo. Additional public resources include `dist/assets/validation-report.json`, the preserved waypoint, and numerical terrain metadata. List NASA imagery/data, the primary paper, and external software in the submission References field. Follow the official event submission instructions for the final project page.
 
-## Português
-
-Abra o site e escolha **PT** no seletor. No celular, o mapa aparece primeiro; **Ajustar missão** abre os parâmetros. O terreno é real, mas o habitat, o limite de declividade e os cenários de tempo são hipóteses explícitas de um protótipo de planejamento.

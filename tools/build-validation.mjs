@@ -27,7 +27,7 @@ const checks={
   longFieldworkTriggersWalkbackRule:longWorkComparison.terrain.status==='conditional'&&longWorkComparison.terrain.walkback.status==='shortWork'
 };
 for(const [name,value]of Object.entries(checks))assert.equal(value,true,name);
-const report={schemaVersion:2,title:'ARES-03 reproducible reference scenario',generatedAt:new Date().toISOString(),
+const report={schemaVersion:2,title:'ARES reproducible reference scenario',generatedAt:new Date().toISOString(),
   humanMission:{hypothetical:true,habitat:HABITAT,habitatSelection:'Flat site (under 4° within 120 m) chosen with tools/find-habitat.mjs so that the straight line to Rochette crosses steep mapped terrain.',projectionOrigin:BASE},
   target:TARGET,policy:{...DEFAULT_POLICY,assumption:true},parameters,
   source:{id:terrain.id,url:terrain.sourceUrl,sourceSha256:terrain.sourceSha256,gridSha256:crypto.createHash('sha256').update(raw).digest('hex'),sourceResolutionMeters:terrain.sourceResolutionMeters,planningGridMeters:terrain.step},
@@ -41,7 +41,7 @@ const report={schemaVersion:2,title:'ARES-03 reproducible reference scenario',ge
   playback:{default:baseTimeline,longFieldwork:longTimeline},
   routeC:{experimental:true,groundStrengthValidated:false,walkingSafetyBenefitValidated:false,loosePenaltyWeight:LOOSE_GROUND_PENALTY,description:'Terrain-aware cost multiplied by (1 + weight) on cells in the coolest night-IR quartile. Uncalibrated relative brightness; no ground-strength classification or walking-safety benefit has been validated.',analysis:looseRoute,additionalRoundTripMetersVsB:looseRoute.roundTripMeters-recommended.roundTripMeters,nightCoolShareB:surface.terrain.share.cool,nightCoolShareC:surface.loose.share.cool},
   checks,
-  validationScope:{automatedReferenceScenario:true,humanUsabilityStudyCompleted:false,independentAbsoluteImageDemAlignmentValidated:false,operationalSafetyValidated:false},
+  validationScope:{automatedReferenceScenario:true,humanUsabilityStudyCompleted:false,independentAbsoluteImageDemAlignmentValidated:false,relativeImageDemRegistrationMeasured:true,imageRegistrationReport:'assets/alignment-measurement.json',operationalSafetyValidated:false},
   limitations:'Prototype terrain cost, slope threshold and walkback pace factor are assumptions, not NASA EVA policy. The habitat location is hypothetical. Orbital terrain cannot resolve every hazard. Time scenarios are what-if assumptions, not statistical confidence intervals or suit-performance predictions.'};
 const output=new URL('../dist/assets/validation-report.json',import.meta.url);
 fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
