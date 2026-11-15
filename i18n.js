@@ -1,7 +1,7 @@
 const en={
   experimentalTitle:"Explore route C · experimental",
   experimentalIntro:"B uses distance and slope. C adds a relative night-IR brightness penalty. Compare the hypothesis separately; no ground-strength or safety benefit has been validated.",
-  advancedTitle:"Additional simulations · crew view and radiation",
+  advancedTitle:"Simulate the walk · crew view and radiation",
   advancedIntro:"Optional demonstrations derived from the plan. The main decision remains the terrain detour and leave-by time. Emergency and radiation displays are simulated, with no live alert service.",
   alignmentProtocol:"Image/terrain check protocol ↗",
   pendingValidation:"Next validation: a comprehension test with someone outside the project. The image/terrain registration check is recorded in the protocol.",
@@ -92,7 +92,7 @@ const en={
 const pt={
   experimentalTitle:"Explorar rota C · experimental",
   experimentalIntro:"A B usa distância e declividade. A C adiciona uma penalidade de brilho relativo no IV noturno. Compare essa hipótese separadamente; nenhum benefício de resistência do solo ou segurança foi validado.",
-  advancedTitle:"Simulações adicionais · visão da tripulação e radiação",
+  advancedTitle:"Simular a caminhada · visão da tripulação e radiação",
   advancedIntro:"Demonstrações opcionais derivadas do plano. A decisão principal continua sendo o desvio pelo relevo e o horário de saída. Emergência e radiação são simulações, sem serviço de alerta ao vivo.",
   alignmentProtocol:"Roteiro de conferência entre imagem e terreno ↗",
   pendingValidation:"Próxima validação: um teste de compreensão com alguém de fora do projeto. A conferência de registro entre imagem e terreno está registrada no roteiro.",
