@@ -134,7 +134,8 @@ function renderEva(s,status){
     $('eva-ground').textContent=t(ahead.coolShare>=.4?'evaGroundLoose':ahead.warmShare>=.4?'evaGroundRock':'evaGroundMixed');$('eva-slope').textContent=ahead.maxSlope==null?'':t('evaSlopeAhead',{max:fmt(ahead.maxSlope,1)});
   }else{$('eva-ground').textContent='—';$('eva-slope').textContent='';}
   // Once returning, the countdown already shows time to base; show the margin over the required reserve instead.
-  const shelterLabel=$('eva-shelter-label');shelterLabel.dataset.t=s.aborted?'evaMargin':'evaShelter';shelterLabel.textContent=t(shelterLabel.dataset.t);
+  // Guarded: a browser may briefly pair this script with a cached older page that lacks the label id.
+  const shelterLabel=$('eva-shelter-label');if(shelterLabel){shelterLabel.dataset.t=s.aborted?'evaMargin':'evaShelter';shelterLabel.textContent=t(shelterLabel.dataset.t);}
   if(s.aborted){const margin=Math.floor(s.reserveAtArrival-tl.reserve);$('eva-shelter').textContent=(margin>=0?'+':'−')+fmt(Math.abs(margin))+' min';$('eva-shelter-sub').textContent=t('evaMarginSub',{required:fmt(tl.reserve)});}
   else{$('eva-shelter').textContent=fmt(Math.ceil(s.shelterMinutes))+' min';$('eva-shelter-sub').textContent=t('evaShelterSub');}$('eva-dose').textContent=fmt(gcrDose(s.t),3)+' mSv';
   const dot=$('eva-dot'),halo=$('eva-dot-halo');if(dot){for(const el of [dot,halo]){el.setAttribute('cx',p.x);el.setAttribute('cy',-p.y);}}
