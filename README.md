@@ -31,7 +31,7 @@ Production is buildless HTML/CSS/JavaScript with no npm dependencies, API keys, 
 
 ## Review refinements
 
-The primary presentation is the blocked direct line A, the terrain detour B, and the leave-by deadline. Route C remains available under **Explore route C · experimental**; crew playback and radiation context are under **Additional simulations**. Selecting C opens its comparison automatically. The guided demo restores the previous disclosure state when finished.
+The primary presentation is the blocked direct line A, the terrain detour B, and the leave-by deadline. Route C remains available under **Explore route C · experimental**; crew playback and radiation context sit directly below the map under **Simulate the walk** (open by default), followed by the what-if pace scenarios. Selecting C opens its comparison automatically. The guided demo restores the previous disclosure state when finished.
 
 Night IR is reported as relative brightness quartiles, not confirmed loose ground or calibrated ground strength. B uses distance and slope; C doubles that cost on cells in the lowest brightness quartile. The evidence panel, map legend, crew labels and brief use the same distinction. Route geometry and time calculations are unchanged. Slopes describe a 40 m planning grid with central differences spanning 80 m.
 
